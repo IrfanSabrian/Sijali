@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model JalanLingkunganKubuRaya {
+  id          Int      @id @default(autoincrement())
+  geom        String?  @db.Text // PostGIS geometry as text
+  fid         Int?
+  noRuas      String?  @map("no_ruas")
+  noProv      Int?     @map("no_prov")
+  noKab       Int?     @map("no_kab")
+  noKec       Int?     @map("no_kec")
+  noDesa      Int?     @map("no_desa")
+  noJalan     String?  @map("no_jalan")
+  nama        String?
+  namaJalan   String?  @map("nama_jalan")
+  panjangM    Float?   @map("panjang_m")
+  lebarM      Float?   @map("lebar_m_")
+  tahun       String?
+  kondisi     String?
+  nilai       Float?
+  bobot       Int?
+  keterangan  String?
+  kecamatan   String?
+  desa        String?
+  utmXAwal    Float?   @map("utm_x_awal")
+  utmYAwal    Float?   @map("utm_y_awal")
+  pngnlAwal   String?  @map("pngnl_awal")
+  utmXAkhi    Float?   @map("utm_x_akhi")
+  utmYAkhi    Float?   @map("utm_y_akhi")
+  pngnlAkhi   String?  @map("pngnl_akhi")
+  shapeLeng   Float?   @map("shape_leng")
+  shapeLe1    Float?   @map("shape_le_1")
+  shapeLe2    Float?   @map("shape_le_2")
+  shapeLe3    Float?   @map("shape_le_3")
+  shapeLe4    Float?   @map("shape_le_4")
+  shapeLe5    Float?   @map("shape_le_5")
+
+  @@map("jalan_lingkungan_kubu_raya")
+}

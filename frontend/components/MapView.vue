@@ -2,35 +2,37 @@
   <div
     class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-colors duration-300"
   >
-    <div class="flex h-[calc(100vh-8rem)] min-h-[600px]">
+    <div class="relative h-[calc(100vh-8rem)] min-h-[600px]">
       <!-- Mobile Overlay -->
-      <div
-        v-if="showMainSidebar"
-        class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-        @click="showMainSidebar = false"
-      ></div>
+      <transition name="fade">
+        <div
+          v-if="showMainSidebar"
+          class="absolute inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          @click="showMainSidebar = false"
+        ></div>
+      </transition>
 
-      <!-- Main Sidebar Panel -->
-      <div
-        :class="[
-          'sidebar-container transition-all duration-300 ease-in-out relative z-50',
-          showMainSidebar ? 'w-full md:w-80' : 'w-0',
-        ]"
-      >
-        <div v-if="showMainSidebar" class="h-full">
+      <!-- Main Sidebar Panel - Inside Canvas -->
+      <transition name="slide-sidebar">
+        <div
+          v-if="showMainSidebar"
+          :class="[
+            'absolute top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out',
+            'w-full md:w-80',
+          ]"
+        >
           <SidebarPanel
-            @hide="showMainSidebar = false"
             @apply-layer="handleApplyLayer"
             @basemap-change="handleBasemapChange"
             @tool-change="handleToolChange"
           />
         </div>
-      </div>
+      </transition>
 
-      <!-- Legacy Left Sidebar (for backward compatibility) -->
+      <!-- Legacy Left Sidebar - Inside Canvas -->
       <div
         v-if="showLeftSidebar && !showMainSidebar"
-        class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700"
+        class="absolute top-0 left-0 h-full w-full md:w-80 z-50 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700"
       >
         <SearchPanel
           v-if="leftSidebarType === 'search'"
@@ -63,8 +65,8 @@
         />
       </div>
 
-      <!-- Map Container -->
-      <div class="flex-1 relative">
+      <!-- Map Container - Full Width -->
+      <div class="w-full h-full relative">
         <!-- Loading Indicator -->
         <div
           v-if="loading"
@@ -78,228 +80,143 @@
           </div>
         </div>
 
+        <!-- Roads Loading Indicator -->
+        <div
+          v-if="roadsLoading"
+          class="absolute top-4 left-4 z-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 px-3 py-2"
+        >
+          <div class="flex items-center">
+            <div
+              class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"
+            ></div>
+            <span class="text-sm text-gray-600 dark:text-gray-400"
+              >Memuat data jalan...</span
+            >
+          </div>
+        </div>
+
+        <!-- Roads Error Indicator -->
+        <div
+          v-if="roadsError"
+          class="absolute top-4 left-4 z-40 bg-red-100 dark:bg-red-900 rounded-lg shadow-lg border border-red-200 dark:border-red-700 px-3 py-2"
+        >
+          <div class="flex items-center">
+            <svg
+              class="w-4 h-4 text-red-600 mr-2"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            <span class="text-sm text-red-600 dark:text-red-400"
+              >Error: {{ roadsError }}</span
+            >
+          </div>
+        </div>
+
         <!-- Map Canvas -->
         <div ref="mapDiv" class="w-full h-full min-h-[500px] bg-gray-100"></div>
 
         <!-- Left Control Panel -->
-        <div class="absolute top-4 left-4 z-40 space-y-2">
+        <div
+          :class="[
+            'controls-container absolute top-4 space-y-2 transition-all duration-300 ease-in-out',
+            showMainSidebar || showLeftSidebar
+              ? 'controls-container--sidebar-open'
+              : 'controls-container--sidebar-closed',
+          ]"
+        >
           <!-- Main Sidebar Toggle Button -->
           <button
             @click="toggleMainSidebar"
-            :class="[
-              'p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700',
-              showMainSidebar
-                ? 'bg-blue-500 text-white'
-                : 'text-gray-600 dark:text-gray-400',
-            ]"
-            title="Toggle Sidebar"
+            class="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-blue-500"
+            :title="showMainSidebar ? 'Tutup Sidebar' : 'Buka Sidebar'"
           >
             <svg
               v-if="showMainSidebar"
               width="20"
               height="20"
               viewBox="0 0 24 24"
-              fill="currentColor"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
-              <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+              <path d="M15 18l-6-6 6-6" />
             </svg>
             <svg
               v-else
               width="20"
               height="20"
               viewBox="0 0 24 24"
-              fill="currentColor"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
-              <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Vertical Control Panel (Left Edge) -->
-        <div
-          class="absolute left-4 top-1/2 transform -translate-y-1/2 z-40 space-y-2"
-        >
-          <!-- Zoom In -->
-          <button
-            @click="zoomIn"
-            class="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
-            title="Zoom In"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+              <path d="M9 18l6-6-6-6" />
             </svg>
           </button>
 
-          <!-- Zoom Out -->
-          <button
-            @click="zoomOut"
-            class="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
-            title="Zoom Out"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 13H5v-2h14v2z" />
-            </svg>
-          </button>
-
-          <!-- Search -->
-          <button
-            @click="toggleLeftSidebar('search')"
-            :class="[
-              'p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700',
-              leftSidebarType === 'search' &&
-              showLeftSidebar &&
-              !showMainSidebar
-                ? 'bg-primary-500 text-white'
-                : 'text-gray-600 dark:text-gray-400',
-            ]"
-            title="Pencarian"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </button>
-
-          <!-- Print -->
-          <button
-            @click="printMap"
-            class="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
-            title="Print"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"
-              />
-            </svg>
-          </button>
-
-          <!-- Grid/Layers -->
-          <button
-            @click="toggleLeftSidebar('layers')"
-            :class="[
-              'p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700',
-              leftSidebarType === 'layers' &&
-              showLeftSidebar &&
-              !showMainSidebar
-                ? 'bg-primary-500 text-white'
-                : 'text-gray-600 dark:text-gray-400',
-            ]"
-            title="Layer"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Right Control Panel -->
-        <div class="absolute top-4 right-4 z-40 space-y-2">
-          <!-- Legend Button -->
-          <button
-            @click="showRightSidebar = !showRightSidebar"
-            :class="[
-              'p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700',
-              showRightSidebar
-                ? 'bg-primary-500 text-white'
-                : 'text-gray-600 dark:text-gray-400',
-            ]"
-            title="Legend / Keterangan"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-              />
-            </svg>
-          </button>
-
-          <!-- Print Button -->
-          <button
-            @click="printMap"
-            class="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
-            title="Print Map"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"
-              />
-            </svg>
-          </button>
-
-          <!-- Export Button -->
-          <button
-            @click="exportMap"
-            class="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
-            title="Export Map"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"
-              />
-              <path d="M14 2v6h6" />
-              <path d="M12 12v6" />
-              <path d="M15 15l-3-3-3 3" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Bottom Coordinate Display -->
-        <div
-          class="absolute bottom-4 left-4 z-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 px-3 py-2"
-        >
-          <div class="text-xs font-mono text-gray-600 dark:text-gray-400">
-            <span class="mr-4">Lng: {{ mouseCoordinates.longitude }}</span>
-            <span>Lat: {{ mouseCoordinates.latitude }}</span>
+          <!-- Custom Zoom Controls -->
+          <div class="zoom-controls">
+            <button
+              @click="zoomIn"
+              class="p-2 bg-white dark:bg-gray-800 rounded-t-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 border-b-0 text-gray-600 dark:text-gray-400 hover:text-blue-500"
+              title="Zoom In"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <button
+              @click="zoomOut"
+              class="p-2 bg-white dark:bg-gray-800 rounded-b-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-blue-500"
+              title="Zoom Out"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
           </div>
         </div>
-
-        <!-- Bottom Scale Display -->
-        <div
-          class="absolute bottom-16 right-4 z-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 px-3 py-2"
-        >
-          <div class="text-xs text-gray-600 dark:text-gray-400">
-            <span class="mr-4">Zoom: {{ currentZoom }}</span>
-            <span>Scale: 1:{{ currentScale.toLocaleString() }}</span>
-          </div>
-        </div>
-
-        <!-- Help Button -->
-        <div class="absolute bottom-4 right-4 z-40">
-          <button
-            @click="showHelp = !showHelp"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-            title="Butuh Bantuan?"
-          >
-            Butuh Bantuan?
-          </button>
-        </div>
-      </div>
-
-      <!-- Right Sidebar (Legend) -->
-      <div
-        v-if="showRightSidebar"
-        class="flex-shrink-0 border-l border-gray-200 dark:border-gray-700"
-      >
-        <LegendPanel
-          @close="showRightSidebar = false"
-          :current-scale="currentScale"
-          :current-zoom="currentZoom"
-          :map-center="mapCenter"
-          :mouse-coordinates="mouseCoordinates"
-        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from "vue";
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from "vue";
 import DrawingSidebar from "./DrawingSidebar.vue";
 import LayerPanel from "./LayerPanel.vue";
 import LegendPanel from "./LegendPanel.vue";
 import MeasurementTools from "./MeasurementTools.vue";
 import SearchPanel from "./SearchPanel.vue";
 import SidebarPanel from "./SidebarPanel.vue";
+
+// API Service
+const { fetchRoads, convertRoadsToGeoJSON } = useApiService();
 
 // Refs
 const mapDiv = ref(null);
@@ -317,6 +234,17 @@ let view = null;
 let sketch = null;
 let graphicsLayer = null;
 let measurementLayer = null;
+let roadsLayer = null;
+
+// Widget variables
+let searchWidget = null;
+let basemapToggle = null;
+let scaleBar = null;
+
+// Road data
+const roadsData = ref([]);
+const roadsLoading = ref(false);
+const roadsError = ref(null);
 
 // Map state
 const currentZoom = ref(10);
@@ -335,6 +263,123 @@ const currentStyle = ref({
   strokeWidth: 2,
 });
 
+// Load roads data from API
+const loadRoadsData = async (params = {}) => {
+  try {
+    roadsLoading.value = true;
+    roadsError.value = null;
+
+    const result = await fetchRoads({
+      limit: params.limit || 100, // Load first 100 roads for performance
+      ...params,
+    });
+
+    if (result.success) {
+      roadsData.value = result.data;
+      console.log(`Loaded ${result.data.length} roads from API`);
+
+      // Convert to GeoJSON and add to map
+      if (roadsLayer) {
+        const geoJSON = convertRoadsToGeoJSON(result.data);
+        await addRoadsToMap(geoJSON);
+      }
+    } else {
+      roadsError.value = result.error;
+      console.error("Failed to load roads:", result.error);
+    }
+  } catch (error) {
+    roadsError.value = error.message;
+    console.error("Error loading roads:", error);
+  } finally {
+    roadsLoading.value = false;
+  }
+};
+
+// Add roads to map as graphics
+const addRoadsToMap = async (geoJSON) => {
+  try {
+    // Clear existing roads
+    if (roadsLayer) {
+      roadsLayer.removeAll();
+    }
+
+    // Import required modules
+    const [Graphic, Polyline, SimpleLineSymbol] = await Promise.all([
+      import("@arcgis/core/Graphic"),
+      import("@arcgis/core/geometry/Polyline"),
+      import("@arcgis/core/symbols/SimpleLineSymbol"),
+    ]);
+
+    // Create graphics from GeoJSON features
+    const graphics = geoJSON.features.map((feature) => {
+      const polyline = new Polyline.default({
+        paths: [feature.geometry.coordinates],
+        spatialReference: { wkid: 4326 },
+      });
+
+      // Style based on road condition
+      let color = "#666666"; // Default color
+      let width = 2;
+
+      switch (feature.properties.kondisi) {
+        case "Beton":
+          color = "#2E8B57"; // Sea Green
+          width = 3;
+          break;
+        case "Aspal":
+          color = "#696969"; // Dim Gray
+          width = 3;
+          break;
+        case "Kayu":
+          color = "#8B4513"; // Saddle Brown
+          width = 2;
+          break;
+        case "Tanah":
+          color = "#D2691E"; // Chocolate
+          width = 2;
+          break;
+        default:
+          color = "#666666";
+          width = 2;
+      }
+
+      const symbol = new SimpleLineSymbol.default({
+        color: color,
+        width: width,
+        style: "solid",
+      });
+
+      return new Graphic.default({
+        geometry: polyline,
+        symbol: symbol,
+        attributes: feature.properties,
+        popupTemplate: {
+          title: feature.properties.nama,
+          content: `
+            <div class="p-2">
+              <p><strong>Nama Jalan:</strong> ${feature.properties.nama}</p>
+              <p><strong>Kecamatan:</strong> ${feature.properties.kecamatan}</p>
+              <p><strong>Desa:</strong> ${feature.properties.desa}</p>
+              <p><strong>Kondisi:</strong> ${feature.properties.kondisi}</p>
+              <p><strong>Panjang:</strong> ${feature.properties.panjangM?.toFixed(
+                2
+              )} m</p>
+              <p><strong>Lebar:</strong> ${feature.properties.lebarM} m</p>
+              <p><strong>Tahun:</strong> ${feature.properties.tahun}</p>
+            </div>
+          `,
+        },
+      });
+    });
+
+    // Add graphics to roads layer
+    roadsLayer.addMany(graphics);
+    console.log(`Added ${graphics.length} road graphics to map`);
+  } catch (error) {
+    console.error("Error adding roads to map:", error);
+  }
+};
+
 onMounted(async () => {
   try {
     // Configure ArcGIS API
@@ -351,10 +396,6 @@ onMounted(async () => {
       BasemapToggle,
       ScaleBar,
       Search,
-      LayerList,
-      Expand,
-      Fullscreen,
-      Locate,
       Graphic,
     ] = await Promise.all([
       import("@arcgis/core/Map"),
@@ -364,10 +405,6 @@ onMounted(async () => {
       import("@arcgis/core/widgets/BasemapToggle"),
       import("@arcgis/core/widgets/ScaleBar"),
       import("@arcgis/core/widgets/Search"),
-      import("@arcgis/core/widgets/LayerList"),
-      import("@arcgis/core/widgets/Expand"),
-      import("@arcgis/core/widgets/Fullscreen"),
-      import("@arcgis/core/widgets/Locate"),
       import("@arcgis/core/Graphic"),
     ]);
 
@@ -380,10 +417,16 @@ onMounted(async () => {
       title: "Measurement Layer",
     });
 
+    // Create roads layer
+    roadsLayer = new GraphicsLayer.default({
+      title: "Jalan Lingkungan",
+      visible: true,
+    });
+
     // Create map with basic basemap that doesn't require API key
     map = new Map.default({
       basemap: "streets", // Basic basemap that works without API key
-      layers: [graphicsLayer, measurementLayer],
+      layers: [roadsLayer, graphicsLayer, measurementLayer],
     });
 
     // Create map view
@@ -393,7 +436,7 @@ onMounted(async () => {
       center: [109.3425, -0.0263], // Koordinat Pontianak, Kalimantan Barat
       zoom: 12,
       ui: {
-        components: ["attribution"],
+        components: ["attribution"], // Remove default zoom widget, only keep attribution
       },
       constraints: {
         snapToZoom: false,
@@ -423,69 +466,32 @@ onMounted(async () => {
     });
 
     // Add widgets
-    const basemapToggle = new BasemapToggle.default({
+    basemapToggle = new BasemapToggle.default({
       view: view,
       nextBasemap: "satellite",
     });
 
-    const scaleBar = new ScaleBar.default({
+    scaleBar = new ScaleBar.default({
       view: view,
       unit: "metric",
     });
 
-    const search = new Search.default({
+    searchWidget = new Search.default({
       view: view,
       placeholder: "Cari lokasi...",
       includeDefaultSources: true,
     });
 
-    const layerList = new LayerList.default({
-      view: view,
-      listItemCreatedFunction: function (event) {
-        const item = event.item;
-        if (item.layer.type !== "group") {
-          item.panel = {
-            content: "legend",
-            open: false,
-          };
-        }
-      },
-    });
-
-    const layerListExpand = new Expand.default({
-      view: view,
-      content: layerList,
-      expandIconClass: "esri-icon-layers",
-      expandTooltip: "Layer List",
-    });
-
-    const fullscreen = new Fullscreen.default({
-      view: view,
-    });
-
-    const locate = new Locate.default({
-      view: view,
-      useHeadingEnabled: false,
-      goToOverride: function (view, options) {
-        options.target.scale = 1500;
-        return view.goTo(options.target);
-      },
-    });
-
-    // Add widgets to view
-    view.ui.add(search, "top-right");
-    view.ui.add(locate, "top-left");
-    view.ui.add(fullscreen, "top-left");
+    // Add widgets to view (initial positioning, will be adjusted later)
+    view.ui.add(searchWidget, "top-right");
     view.ui.add(basemapToggle, "bottom-right");
-    view.ui.add(layerListExpand, "bottom-right");
-    view.ui.add(scaleBar, "bottom-left");
+    view.ui.add(scaleBar, {
+      position: "manual",
+    });
 
     // Add sketch widget (hidden by default)
     view.ui.add(sketch, "top-right");
     sketch.container.style.display = "none";
-
-    // Custom zoom controls
-    view.ui.add("zoom", "top-left");
 
     // Wait for view to load
     await view.when();
@@ -523,23 +529,56 @@ onMounted(async () => {
     loading.value = false;
 
     console.log("Map loaded successfully");
+
+    // Load roads data from API
+    await loadRoadsData();
+
+    // Set initial widget positioning after view is created
+    adjustWidgetPositioning();
+
+    // Add window resize listener for responsive scale bar
+    window.addEventListener("resize", adjustWidgetPositioning);
   } catch (error) {
     console.error("Error loading map:", error);
     console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
     loading.value = false;
 
-    // Show error message to user
-    alert(
-      "Gagal memuat peta. Silakan refresh halaman atau periksa koneksi internet."
-    );
+    // Show detailed error message to user
+    let errorMessage = "Gagal memuat peta. ";
+
+    if (error.message.includes("Failed to fetch")) {
+      errorMessage +=
+        "Tidak dapat terhubung ke server backend. Pastikan server backend berjalan di port 3001.";
+    } else if (error.message.includes("CORS")) {
+      errorMessage += "Error CORS. Periksa konfigurasi CORS di backend.";
+    } else if (error.message.includes("ArcGIS")) {
+      errorMessage += "Error memuat library ArcGIS. Periksa koneksi internet.";
+    } else {
+      errorMessage += `Detail error: ${error.message}`;
+    }
+
+    alert(errorMessage);
   }
 });
 
 onUnmounted(() => {
+  // Remove window resize listener
+  window.removeEventListener("resize", adjustWidgetPositioning);
+
   if (view) {
     view.destroy();
   }
 });
+
+// Watch for sidebar state changes and adjust widget positioning
+watch(
+  [showMainSidebar, showLeftSidebar],
+  () => {
+    adjustWidgetPositioning();
+  },
+  { deep: true }
+);
 
 // Sidebar management
 const toggleMainSidebar = () => {
@@ -547,6 +586,32 @@ const toggleMainSidebar = () => {
   // Hide legacy sidebar when main sidebar is shown
   if (showMainSidebar.value) {
     showLeftSidebar.value = false;
+  }
+  // Adjust widget positioning when sidebar state changes
+  adjustWidgetPositioning();
+};
+
+// Function to adjust ESRI widget positioning based on sidebar state
+const adjustWidgetPositioning = () => {
+  if (!view || !searchWidget || !scaleBar) return;
+
+  // Determine positioning based on sidebar state
+  const isSidebarOpen = showMainSidebar.value || showLeftSidebar.value;
+
+  // Position scale bar based on sidebar state
+  const scaleBarContainer = scaleBar.container;
+  if (scaleBarContainer) {
+    if (isSidebarOpen) {
+      // When sidebar is open on desktop, shift scale bar right
+      scaleBarContainer.style.left =
+        window.innerWidth >= 768 ? "21rem" : "1rem";
+    } else {
+      // When sidebar is closed, position at left
+      scaleBarContainer.style.left = "1rem";
+    }
+    scaleBarContainer.style.bottom = "1rem";
+    scaleBarContainer.style.position = "absolute";
+    scaleBarContainer.style.transition = "left 0.3s ease-in-out";
   }
 };
 
@@ -559,6 +624,8 @@ const toggleLeftSidebar = (type) => {
     // Hide main sidebar when legacy sidebar is shown
     showMainSidebar.value = false;
   }
+  // Adjust widget positioning when sidebar state changes
+  adjustWidgetPositioning();
 };
 
 // Basemap and layer handlers
@@ -985,5 +1052,121 @@ const handleLayerLoaded = async (layerData) => {
 // Expose methods to parent component
 defineExpose({
   toggleMainSidebar,
+  handleApplyLayer,
+  handleBasemapChange,
+  handleToolChange,
+  handleLocationSelected,
+  handleCoordinatesSelected,
+  handleLayerChange,
+  handleLayerLoaded,
+  handleStyleChange,
+  handleImportGeoJSON,
+  handleExportGeoJSON,
+  handleClearAll,
+  handleMeasurementStart,
+  handleMeasurementClear,
 });
 </script>
+
+<style scoped>
+/* Fade Animation for Overlay */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+}
+
+/* Sidebar Slide Animation */
+.slide-sidebar-enter-active,
+.slide-sidebar-leave-active {
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.slide-sidebar-enter-from {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-sidebar-enter-to {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.slide-sidebar-leave-from {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.slide-sidebar-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+/* Controls Container - holds both toggle button and zoom controls */
+.controls-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* When sidebar is closed - normal position at left */
+.controls-container--sidebar-closed {
+  left: 1rem; /* left-4 */
+}
+
+/* When sidebar is open - shift right on desktop */
+.controls-container--sidebar-open {
+  left: 1rem; /* left-4 */
+}
+
+/* Desktop styles - shift controls when sidebar is open */
+@media (min-width: 768px) {
+  .controls-container--sidebar-open {
+    left: 21rem; /* 320px (w-80) + 16px (left-4) */
+  }
+
+  .controls-container--sidebar-closed {
+    left: 1rem; /* left-4 */
+  }
+}
+
+/* Mobile styles - keep controls in place */
+@media (max-width: 767px) {
+  .controls-container--sidebar-open,
+  .controls-container--sidebar-closed {
+    left: 1rem; /* left-4 - stay at left on mobile */
+  }
+}
+
+/* Zoom Controls Styling */
+.zoom-controls {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Button group styling */
+.zoom-controls button,
+.controls-container > button {
+  display: block;
+  width: 100%;
+}
+
+.zoom-controls button:hover,
+.controls-container > button:hover {
+  z-index: 10;
+}
+
+.zoom-controls button:focus,
+.controls-container > button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+</style>

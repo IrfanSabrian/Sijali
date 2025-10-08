@@ -30,6 +30,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       arcgisApiKey: "your-api-key-here",
+      apiBaseUrl: "http://localhost:3001",
+      apiUrl: "http://localhost:3001/api",
     },
   },
 });

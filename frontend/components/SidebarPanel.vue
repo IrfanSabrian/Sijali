@@ -34,11 +34,6 @@
           </div>
         </div>
       </div>
-      <button @click="$emit('hide')" class="hide-button">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-        </svg>
-      </button>
     </div>
 
     <!-- Navigation Tabs -->
@@ -247,7 +242,12 @@ defineProps({
 });
 
 // Emits
-defineEmits(["hide", "apply-layer", "basemap-change", "tool-change"]);
+const emit = defineEmits([
+  "hide",
+  "apply-layer",
+  "basemap-change",
+  "tool-change",
+]);
 
 // Reactive data
 const activeTab = ref("layer");
@@ -321,12 +321,12 @@ const ToolsIcon = {
 
 <style scoped>
 .sidebar-panel {
-  @apply w-80 h-full bg-white border-r border-gray-200 flex flex-col;
+  @apply w-full h-full bg-white border-r border-gray-200 flex flex-col shadow-lg;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .sidebar-panel {
-    @apply w-full;
+    @apply w-80;
   }
 }
 
@@ -377,10 +377,6 @@ const ToolsIcon = {
 .user-icon,
 .lock-icon {
   @apply w-6 h-6 text-gray-500;
-}
-
-.hide-button {
-  @apply w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors;
 }
 
 .navigation-tabs {
