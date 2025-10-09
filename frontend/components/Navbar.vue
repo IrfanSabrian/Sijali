@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="bg-primary-500 text-white shadow-lg sticky top-0 z-[9999] transition-colors duration-300"
+    class="bg-gradient-to-r from-slate-800 to-blue-900 text-white shadow-lg sticky top-0 z-[9999] transition-colors duration-300"
   >
     <div class="flex items-center justify-between max-w-full px-8 h-16">
       <!-- Brand -->

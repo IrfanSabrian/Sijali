@@ -659,7 +659,7 @@ useHead({
 
 /* Hero Section */
 .hero-section {
-  @apply min-h-screen bg-gradient-to-br from-blue-900 via-indigo-800 to-purple-900 text-white flex flex-col justify-center relative overflow-hidden;
+  @apply min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 text-white flex flex-col justify-center relative overflow-hidden;
 }
 
 .hero-bg-elements {
@@ -671,16 +671,16 @@ useHead({
 }
 
 .hero-bg-circle-1 {
-  @apply w-96 h-96 bg-blue-400 -top-48 -right-48 animate-pulse;
+  @apply w-96 h-96 bg-blue-400/20 -top-48 -right-48 animate-pulse;
 }
 
 .hero-bg-circle-2 {
-  @apply w-64 h-64 bg-indigo-400 top-1/4 -left-32 animate-pulse;
+  @apply w-64 h-64 bg-indigo-400/20 top-1/4 -left-32 animate-pulse;
   animation-delay: 1s;
 }
 
 .hero-bg-circle-3 {
-  @apply w-80 h-80 bg-purple-400 bottom-0 right-1/4 animate-pulse;
+  @apply w-80 h-80 bg-slate-400/20 bottom-0 right-1/4 animate-pulse;
   animation-delay: 2s;
 }
 
@@ -727,7 +727,7 @@ useHead({
 }
 
 .title-highlight {
-  @apply block text-3xl font-semibold text-blue-300 mt-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent;
+  @apply block text-3xl font-semibold text-blue-300 mt-4 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent;
 }
 
 .hero-description {
@@ -803,7 +803,7 @@ useHead({
 }
 
 .map-preview {
-  @apply relative h-64 bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg overflow-hidden;
+  @apply relative h-64 bg-gradient-to-br from-slate-900 to-blue-900 rounded-lg overflow-hidden;
 }
 
 .map-grid {
@@ -821,7 +821,7 @@ useHead({
 }
 
 .map-road {
-  @apply absolute bg-blue-400 rounded-full opacity-60;
+  @apply absolute bg-blue-500 rounded-full opacity-70;
 }
 
 .road-1 {
@@ -837,7 +837,7 @@ useHead({
 }
 
 .map-point {
-  @apply absolute w-3 h-3 bg-indigo-400 rounded-full shadow-lg;
+  @apply absolute w-3 h-3 bg-indigo-500 rounded-full shadow-lg;
 }
 
 .point-1 {
@@ -865,11 +865,11 @@ useHead({
 }
 
 .stat-value {
-  @apply block text-lg font-bold text-white drop-shadow-sm;
+  @apply block text-lg font-bold text-white drop-shadow-lg;
 }
 
 .stat-label {
-  @apply text-xs text-blue-300 font-medium;
+  @apply text-xs text-white font-medium drop-shadow-md;
 }
 
 .hero-stats {
@@ -881,7 +881,7 @@ useHead({
 }
 
 .stat-icon {
-  @apply bg-blue-500/20 p-3 rounded-lg;
+  @apply bg-blue-600/20 p-3 rounded-lg;
 }
 
 .stat-content {
@@ -889,11 +889,11 @@ useHead({
 }
 
 .stat-number {
-  @apply text-2xl font-bold text-white drop-shadow-sm;
+  @apply text-2xl font-bold text-white drop-shadow-lg;
 }
 
 .stat-label {
-  @apply text-blue-300 text-sm font-medium;
+  @apply text-white text-sm font-medium drop-shadow-md;
 }
 
 /* Section Headers */
