@@ -17,7 +17,7 @@
         <div
           v-if="showMainSidebar"
           :class="[
-            'absolute top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out',
+            'absolute top-0 left-0 h-full z-[9998] transition-all duration-300 ease-in-out',
             'w-full md:w-80',
           ]"
         >
@@ -216,7 +216,7 @@ import SearchPanel from "./SearchPanel.vue";
 import SidebarPanel from "./SidebarPanel.vue";
 
 // API Service
-const { fetchRoads, convertRoadsToGeoJSON } = useApiService();
+const { fetchRoadsGeoJSON } = useApiService();
 
 // Refs
 const mapDiv = ref(null);
@@ -237,7 +237,6 @@ let measurementLayer = null;
 let roadsLayer = null;
 
 // Widget variables
-let searchWidget = null;
 let basemapToggle = null;
 let scaleBar = null;
 
@@ -263,24 +262,23 @@ const currentStyle = ref({
   strokeWidth: 2,
 });
 
-// Load roads data from API
+// Load roads data from API as GeoJSON
 const loadRoadsData = async (params = {}) => {
   try {
     roadsLoading.value = true;
     roadsError.value = null;
 
-    const result = await fetchRoads({
-      limit: params.limit || 100, // Load first 100 roads for performance
+    const result = await fetchRoadsGeoJSON({
       ...params,
     });
 
     if (result.success) {
-      roadsData.value = result.data;
-      console.log(`Loaded ${result.data.length} roads from API`);
+      const geoJSON = result.data;
+      const featureCount = geoJSON.features ? geoJSON.features.length : 0;
+      console.log(`Loaded ${featureCount} roads from API`);
 
-      // Convert to GeoJSON and add to map
-      if (roadsLayer) {
-        const geoJSON = convertRoadsToGeoJSON(result.data);
+      // Add GeoJSON to map
+      if (roadsLayer && geoJSON) {
         await addRoadsToMap(geoJSON);
       }
     } else {
@@ -395,7 +393,6 @@ onMounted(async () => {
       Sketch,
       BasemapToggle,
       ScaleBar,
-      Search,
       Graphic,
     ] = await Promise.all([
       import("@arcgis/core/Map"),
@@ -404,7 +401,6 @@ onMounted(async () => {
       import("@arcgis/core/widgets/Sketch"),
       import("@arcgis/core/widgets/BasemapToggle"),
       import("@arcgis/core/widgets/ScaleBar"),
-      import("@arcgis/core/widgets/Search"),
       import("@arcgis/core/Graphic"),
     ]);
 
@@ -476,14 +472,7 @@ onMounted(async () => {
       unit: "metric",
     });
 
-    searchWidget = new Search.default({
-      view: view,
-      placeholder: "Cari lokasi...",
-      includeDefaultSources: true,
-    });
-
     // Add widgets to view (initial positioning, will be adjusted later)
-    view.ui.add(searchWidget, "top-right");
     view.ui.add(basemapToggle, "bottom-right");
     view.ui.add(scaleBar, {
       position: "manual",
@@ -593,7 +582,7 @@ const toggleMainSidebar = () => {
 
 // Function to adjust ESRI widget positioning based on sidebar state
 const adjustWidgetPositioning = () => {
-  if (!view || !searchWidget || !scaleBar) return;
+  if (!view || !scaleBar) return;
 
   // Determine positioning based on sidebar state
   const isSidebarOpen = showMainSidebar.value || showLeftSidebar.value;
@@ -652,13 +641,25 @@ const handleBasemapChange = (basemapId) => {
   }
 };
 
-const handleApplyLayer = (layerData) => {
-  console.log("Applying layer from sidebar:", layerData);
-  // Here you can implement the logic to load RDTR data based on selection
-  // For now, we'll just log the data
-  alert(
-    `Menerapkan layer untuk:\nProvinsi: ${layerData.province}\nKabupaten: ${layerData.regency}\nRDTR: ${layerData.rdtr}\nKegiatan: ${layerData.activity}`
-  );
+const handleApplyLayer = async (layerData) => {
+  console.log("Applying layer filter from sidebar:", layerData);
+
+  // Load roads data with filters
+  await loadRoadsData({
+    kecamatan: layerData.kecamatan || undefined,
+    desa: layerData.desa || undefined,
+  });
+
+  // Show notification
+  let filterText = "Semua data";
+  if (layerData.kecamatan) {
+    filterText = `Kecamatan: ${layerData.kecamatan}`;
+    if (layerData.desa) {
+      filterText += `, Desa: ${layerData.desa}`;
+    }
+  }
+
+  console.log(`Layer diterapkan untuk: ${filterText}`);
 };
 
 // Zoom controls

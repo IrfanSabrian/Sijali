@@ -1,8 +1,8 @@
 <template>
   <nav
-    class="bg-primary-500 text-white shadow-lg sticky top-0 z-50 transition-colors duration-300"
+    class="bg-primary-500 text-white shadow-lg sticky top-0 z-[9999] transition-colors duration-300"
   >
-    <div class="flex items-center justify-between max-w-full px-6 h-16">
+    <div class="flex items-center justify-between max-w-full px-8 h-16">
       <!-- Brand -->
       <div class="flex items-center space-x-3">
         <div
@@ -21,18 +21,51 @@
       <!-- Navigation Menu -->
       <div class="hidden lg:flex items-center space-x-8">
         <a
+          @click="scrollToSection('hero')"
           href="#"
-          class="text-white/90 hover:text-white border-b-2 border-white/50 pb-1 transition-colors"
+          :class="[
+            'transition-colors cursor-pointer px-3 py-2 rounded-lg',
+            activeSection === 'hero'
+              ? 'text-white bg-white/20 border border-white/30'
+              : 'text-white/70 hover:text-white hover:bg-white/10',
+          ]"
+        >
+          Beranda
+        </a>
+        <a
+          @click="scrollToSection('map')"
+          href="#"
+          :class="[
+            'transition-colors cursor-pointer px-3 py-2 rounded-lg',
+            activeSection === 'map'
+              ? 'text-white bg-white/20 border border-white/30'
+              : 'text-white/70 hover:text-white hover:bg-white/10',
+          ]"
         >
           Peta Interaktif
         </a>
-        <a href="#" class="text-white/70 hover:text-white transition-colors">
-          Data Jalan
-        </a>
-        <a href="#" class="text-white/70 hover:text-white transition-colors">
+        <a
+          @click="scrollToSection('analisis')"
+          href="#"
+          :class="[
+            'transition-colors cursor-pointer px-3 py-2 rounded-lg',
+            activeSection === 'analisis'
+              ? 'text-white bg-white/20 border border-white/30'
+              : 'text-white/70 hover:text-white hover:bg-white/10',
+          ]"
+        >
           Analisis
         </a>
-        <a href="#" class="text-white/70 hover:text-white transition-colors">
+        <a
+          @click="scrollToSection('laporan')"
+          href="#"
+          :class="[
+            'transition-colors cursor-pointer px-3 py-2 rounded-lg',
+            activeSection === 'laporan'
+              ? 'text-white bg-white/20 border border-white/30'
+              : 'text-white/70 hover:text-white hover:bg-white/10',
+          ]"
+        >
           Laporan
         </a>
       </div>
@@ -167,7 +200,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useTheme } from "~/composables/useTheme";
 import { useAuth } from "~/composables/useAuth";
 import LoginModal from "./LoginModal.vue";
@@ -182,10 +215,23 @@ const { isAuthenticated, getUserName, getUserRole, login, logout, initAuth } =
 // Local state
 const showLoginModal = ref(false);
 const showUserMenu = ref(false);
+const activeSection = ref("hero");
 
 // Initialize auth on mount
 onMounted(() => {
   initAuth();
+
+  // Listen for section changes from scroll detection
+  window.addEventListener("section-change", (event) => {
+    activeSection.value = event.detail.activeSection;
+  });
+});
+
+// Remove event listener on unmount
+onUnmounted(() => {
+  window.removeEventListener("section-change", (event) => {
+    activeSection.value = event.detail.activeSection;
+  });
 });
 
 // Handle login success
@@ -216,5 +262,17 @@ const goBackToRTR = () => {
 // Close user menu when clicking outside
 const closeUserMenu = () => {
   showUserMenu.value = false;
+};
+
+// Scroll to section function
+const scrollToSection = (sectionId) => {
+  const element = document.getElementById(sectionId);
+  if (element) {
+    activeSection.value = sectionId;
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
 };
 </script>

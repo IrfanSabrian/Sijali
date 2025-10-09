@@ -11,26 +11,10 @@
             <div class="square square-4"></div>
           </div>
           <div class="logo-text">
-            <h2>SIJALI</h2>
+            <h2>SIJALI Kab. Kubu Raya</h2>
             <p class="text-xs text-gray-600">
-              Sistem Informasi Jalan Lingkungan
+              Sistem Informasi Jalan Lingkungan Kab. Kubu Raya
             </p>
-          </div>
-        </div>
-        <div class="header-icons">
-          <div class="user-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-              />
-            </svg>
-          </div>
-          <div class="lock-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
-              />
-            </svg>
           </div>
         </div>
       </div>
@@ -56,94 +40,34 @@
       <!-- Layer Tab -->
       <div v-if="activeTab === 'layer'" class="tab-panel">
         <div class="form-group">
-          <label class="form-label">Pilih Provinsi</label>
-          <select v-model="selectedProvince" class="form-select">
-            <option value="aceh">Aceh</option>
-            <option value="sumatera-utara">Sumatera Utara</option>
-            <option value="sumatera-barat">Sumatera Barat</option>
-            <option value="riau">Riau</option>
-            <option value="kepulauan-riau">Kepulauan Riau</option>
-            <option value="jambi">Jambi</option>
-            <option value="sumatera-selatan">Sumatera Selatan</option>
-            <option value="bangka-belitung">Bangka Belitung</option>
-            <option value="bengkulu">Bengkulu</option>
-            <option value="lampung">Lampung</option>
-            <option value="jakarta">DKI Jakarta</option>
-            <option value="jawa-barat">Jawa Barat</option>
-            <option value="jawa-tengah">Jawa Tengah</option>
-            <option value="yogyakarta">DI Yogyakarta</option>
-            <option value="jawa-timur">Jawa Timur</option>
-            <option value="banten">Banten</option>
-            <option value="bali">Bali</option>
-            <option value="nusa-tenggara-barat">Nusa Tenggara Barat</option>
-            <option value="nusa-tenggara-timur">Nusa Tenggara Timur</option>
-            <option value="kalimantan-barat">Kalimantan Barat</option>
-            <option value="kalimantan-tengah">Kalimantan Tengah</option>
-            <option value="kalimantan-selatan">Kalimantan Selatan</option>
-            <option value="kalimantan-timur">Kalimantan Timur</option>
-            <option value="kalimantan-utara">Kalimantan Utara</option>
-            <option value="sulawesi-utara">Sulawesi Utara</option>
-            <option value="sulawesi-tengah">Sulawesi Tengah</option>
-            <option value="sulawesi-selatan">Sulawesi Selatan</option>
-            <option value="sulawesi-tenggara">Sulawesi Tenggara</option>
-            <option value="gorontalo">Gorontalo</option>
-            <option value="sulawesi-barat">Sulawesi Barat</option>
-            <option value="maluku">Maluku</option>
-            <option value="maluku-utara">Maluku Utara</option>
-            <option value="papua">Papua</option>
-            <option value="papua-barat">Papua Barat</option>
+          <label class="form-label">Pilih Kecamatan</label>
+          <select
+            v-model="selectedKecamatan"
+            class="form-select"
+            @change="fetchDesaOptions"
+          >
+            <option value="">-- Semua Kecamatan --</option>
+            <option
+              v-for="kecamatan in kecamatanOptions"
+              :key="kecamatan"
+              :value="kecamatan"
+            >
+              {{ kecamatan }}
+            </option>
           </select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Pilih Kabupaten/Kota</label>
-          <select v-model="selectedRegency" class="form-select">
-            <option value="aceh-tengah">Kab. Aceh Tengah</option>
-            <option value="aceh-besar">Kab. Aceh Besar</option>
-            <option value="aceh-selatan">Kab. Aceh Selatan</option>
-            <option value="aceh-timur">Kab. Aceh Timur</option>
-            <option value="aceh-utara">Kab. Aceh Utara</option>
-            <option value="banda-aceh">Kota Banda Aceh</option>
-            <option value="langsa">Kota Langsa</option>
-            <option value="lhokseumawe">Kota Lhokseumawe</option>
+          <label class="form-label">Pilih Desa</label>
+          <select v-model="selectedDesa" class="form-select">
+            <option value="">-- Semua Desa --</option>
+            <option v-for="desa in desaOptions" :key="desa" :value="desa">
+              {{ desa }}
+            </option>
           </select>
         </div>
-
-        <div class="form-group">
-          <label class="form-label">Pilih RDTR</label>
-          <select v-model="selectedRDTR" class="form-select">
-            <option value="takengon">RDTR Takengon</option>
-            <option value="banda-aceh">RDTR Banda Aceh</option>
-            <option value="langsa">RDTR Langsa</option>
-            <option value="lhokseumawe">RDTR Lhokseumawe</option>
-          </select>
-        </div>
-
-        <button class="info-button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
-            />
-          </svg>
-          Diakses OSS
-        </button>
 
         <button class="apply-button" @click="applyLayer">Terapkan Layer</button>
-
-        <div class="form-group">
-          <label class="form-label">Saring berdasarkan Kegiatan</label>
-          <select v-model="selectedActivity" class="form-select">
-            <option value="semua">Semua</option>
-            <option value="perumahan">Perumahan</option>
-            <option value="komersial">Komersial</option>
-            <option value="industri">Industri</option>
-            <option value="pertanian">Pertanian</option>
-            <option value="kehutanan">Kehutanan</option>
-            <option value="perikanan">Perikanan</option>
-            <option value="pertambangan">Pertambangan</option>
-            <option value="infrastruktur">Infrastruktur</option>
-          </select>
-        </div>
       </div>
 
       <!-- Pengaturan Tab -->
@@ -231,7 +155,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
 // Props
 defineProps({
@@ -251,12 +175,14 @@ const emit = defineEmits([
 
 // Reactive data
 const activeTab = ref("layer");
-const selectedProvince = ref("aceh");
-const selectedRegency = ref("aceh-tengah");
-const selectedRDTR = ref("takengon");
-const selectedActivity = ref("semua");
+const selectedKecamatan = ref("");
+const selectedDesa = ref("");
 const selectedBasemap = ref("streets");
 const opacity = ref(100);
+
+// Options for dropdowns
+const kecamatanOptions = ref([]);
+const desaOptions = ref([]);
 
 // Tabs configuration
 const tabs = [
@@ -277,14 +203,48 @@ const tabs = [
   },
 ];
 
+// Get runtime config for API URL
+const config = useRuntimeConfig();
+const apiUrl = config.public.apiUrl || "http://localhost:3001/api";
+
+// Fetch kecamatan options from API
+const fetchKecamatanOptions = async () => {
+  try {
+    const response = await fetch(`${apiUrl}/jalan/filters/kecamatan`);
+    const data = await response.json();
+    if (data.success) {
+      kecamatanOptions.value = data.data;
+    }
+  } catch (error) {
+    console.error("Error fetching kecamatan options:", error);
+  }
+};
+
+// Fetch desa options based on selected kecamatan
+const fetchDesaOptions = async () => {
+  try {
+    let url = `${apiUrl}/jalan/filters/desa`;
+    if (selectedKecamatan.value) {
+      url += `?kecamatan=${encodeURIComponent(selectedKecamatan.value)}`;
+    }
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.success) {
+      desaOptions.value = data.data;
+    }
+    // Reset selected desa when kecamatan changes
+    selectedDesa.value = "";
+  } catch (error) {
+    console.error("Error fetching desa options:", error);
+  }
+};
+
 // Methods
 const applyLayer = () => {
   // Emit event to parent component
   emit("apply-layer", {
-    province: selectedProvince.value,
-    regency: selectedRegency.value,
-    rdtr: selectedRDTR.value,
-    activity: selectedActivity.value,
+    kecamatan: selectedKecamatan.value,
+    desa: selectedDesa.value,
   });
 };
 
@@ -292,6 +252,12 @@ const handleBasemapChange = () => {
   // Emit basemap change event
   emit("basemap-change", selectedBasemap.value);
 };
+
+// Lifecycle hooks
+onMounted(() => {
+  fetchKecamatanOptions();
+  fetchDesaOptions();
+});
 
 // Icon components
 const LayerIcon = {
@@ -370,15 +336,6 @@ const ToolsIcon = {
   @apply text-lg font-bold text-gray-800;
 }
 
-.header-icons {
-  @apply flex items-center space-x-2;
-}
-
-.user-icon,
-.lock-icon {
-  @apply w-6 h-6 text-gray-500;
-}
-
 .navigation-tabs {
   @apply flex border-b border-gray-200;
 }
@@ -413,10 +370,6 @@ const ToolsIcon = {
 
 .form-select {
   @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
-}
-
-.info-button {
-  @apply w-full flex items-center justify-center space-x-2 py-2 px-4 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors;
 }
 
 .apply-button {

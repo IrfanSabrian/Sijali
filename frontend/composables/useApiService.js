@@ -154,11 +154,46 @@ export const useApiService = () => {
     };
   };
 
+  // Fetch roads as GeoJSON directly from PostGIS
+  const fetchRoadsGeoJSON = async (params = {}) => {
+    try {
+      const queryParams = new URLSearchParams();
+
+      // Add filters
+      if (params.kecamatan) queryParams.append("kecamatan", params.kecamatan);
+      if (params.desa) queryParams.append("desa", params.desa);
+      if (params.kondisi) queryParams.append("kondisi", params.kondisi);
+      if (params.tahun) queryParams.append("tahun", params.tahun);
+
+      const url = `${apiUrl}/jalan/geojson${
+        queryParams.toString() ? "?" + queryParams.toString() : ""
+      }`;
+
+      const response = await $fetch(url);
+
+      if (!response.success) {
+        throw new Error(response.error || "Failed to fetch GeoJSON");
+      }
+
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      console.error("Error fetching GeoJSON:", error);
+      return {
+        success: false,
+        error: error.message || "Failed to fetch GeoJSON",
+      };
+    }
+  };
+
   return {
     fetchRoads,
     fetchRoadStats,
     fetchFilterOptions,
     fetchRoadGeometry,
     convertRoadsToGeoJSON,
+    fetchRoadsGeoJSON,
   };
 };
