@@ -4,13 +4,13 @@
   >
     <div class="flex items-center justify-between max-w-full px-8 h-16">
       <!-- Brand -->
-      <div class="flex items-center space-x-3">
-        <div
-          class="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
+      <div class="flex items-center space-x-2">
+        <div class="flex items-center justify-center w-16 h-16">
+          <img
+            src="/assets/images/sijali-logo.svg"
+            alt="SIJALI Logo"
+            class="w-full h-full object-contain"
+          />
         </div>
         <div>
           <h1 class="text-xl font-bold">SIJALI</h1>
@@ -71,84 +71,7 @@
       </div>
 
       <!-- Actions -->
-      <div class="flex items-center space-x-2">
-        <!-- Sidebar Toggle Button -->
-        <button
-          @click="toggleSidebar"
-          class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-          title="Toggle Sidebar"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-          </svg>
-        </button>
-
-        <!-- User Info (when logged in) -->
-        <div v-if="isAuthenticated" class="flex items-center space-x-3">
-          <div class="text-right hidden sm:block">
-            <div class="text-sm font-medium text-white">
-              {{ getUserName }}
-            </div>
-            <div class="text-xs text-white/70">
-              {{ getUserRole }}
-            </div>
-          </div>
-          <div class="relative">
-            <button
-              @click="showUserMenu = !showUserMenu"
-              class="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors"
-            >
-              {{ getUserName.charAt(0).toUpperCase() }}
-            </button>
-            <!-- User Dropdown Menu -->
-            <div
-              v-if="showUserMenu"
-              class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
-            >
-              <div class="p-3 border-b border-gray-200 dark:border-gray-700">
-                <div
-                  class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  {{ getUserName }}
-                </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ getUserRole }}
-                </div>
-              </div>
-              <div class="py-1">
-                <button
-                  @click="handleLogout"
-                  class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Login Button (when not logged in) -->
-        <button
-          v-else
-          @click="showLoginModal = true"
-          class="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors text-sm font-medium"
-        >
-          Login
-        </button>
-
-        <!-- Back to RTR Button -->
-        <button
-          @click="goBackToRTR"
-          class="flex items-center space-x-2 px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors text-sm font-medium"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"
-            />
-          </svg>
-          <span>KEMBALI KE RTR</span>
-        </button>
-
+      <div class="flex items-center">
         <!-- Theme Toggle -->
         <button
           @click="toggleTheme"
@@ -176,15 +99,6 @@
             <path
               d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z"
             />
-          </svg>
-        </button>
-
-        <!-- Menu Button (Mobile) -->
-        <button
-          class="lg:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
           </svg>
         </button>
       </div>

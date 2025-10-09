@@ -4,11 +4,12 @@
     <div class="sidebar-header">
       <div class="logo-section">
         <div class="logo">
-          <div class="logo-squares">
-            <div class="square square-1"></div>
-            <div class="square square-2"></div>
-            <div class="square square-3"></div>
-            <div class="square square-4"></div>
+          <div class="logo-image">
+            <img
+              src="/assets/images/sijali-logo.svg"
+              alt="SIJALI Logo"
+              class="w-12 h-12 object-contain"
+            />
           </div>
           <div class="logo-text">
             <h2>SIJALI Kab. Kubu Raya</h2>
@@ -308,28 +309,8 @@ const ToolsIcon = {
   @apply flex items-center space-x-2;
 }
 
-.logo-squares {
-  @apply flex flex-col space-y-1;
-}
-
-.square {
-  @apply w-3 h-3 bg-blue-500;
-}
-
-.square-1 {
-  @apply bg-blue-600;
-}
-
-.square-2 {
-  @apply bg-blue-500;
-}
-
-.square-3 {
-  @apply bg-blue-400;
-}
-
-.square-4 {
-  @apply bg-blue-300;
+.logo-image {
+  @apply flex items-center justify-center;
 }
 
 .logo-text h2 {

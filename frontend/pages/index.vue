@@ -229,7 +229,18 @@
         </p>
       </div>
       <div class="map-container">
-        <MapView ref="mapViewRef" />
+        <!-- Map Title Frame -->
+        <div class="map-title-frame">
+          <div class="title-frame-content">
+            <h3 class="map-title-text">
+              Sistem Informasi Jalan Lingkungan Kab. Kubu Raya
+            </h3>
+          </div>
+        </div>
+        <!-- Map Canvas -->
+        <div class="map-canvas-wrapper">
+          <MapView ref="mapViewRef" />
+        </div>
       </div>
     </section>
 
@@ -916,6 +927,27 @@ useHead({
 
 .map-container {
   @apply container mx-auto px-8;
+}
+
+/* Map Title Frame */
+.map-title-frame {
+  @apply bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg;
+  @apply rounded-t-xl;
+}
+
+.title-frame-content {
+  @apply px-6 py-2 text-left;
+}
+
+.map-title-text {
+  @apply text-xl font-bold text-white drop-shadow-md;
+  @apply tracking-wide;
+}
+
+/* Map Canvas Wrapper */
+.map-canvas-wrapper {
+  @apply rounded-b-xl overflow-hidden shadow-lg;
+  border-top: none;
 }
 
 /* Analisis Section */

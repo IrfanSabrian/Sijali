@@ -1,8 +1,8 @@
 <template>
   <div
-    class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-colors duration-300"
+    class="bg-white dark:bg-gray-800 overflow-hidden transition-colors duration-300 h-[80vh] w-full"
   >
-    <div class="relative h-[calc(100vh-8rem)] min-h-[600px]">
+    <div class="relative h-[80vh] w-full">
       <!-- Mobile Overlay -->
       <transition name="fade">
         <div
