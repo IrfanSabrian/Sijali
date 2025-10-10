@@ -77,7 +77,7 @@
           <h3>Pengaturan Peta</h3>
 
           <!-- Controls Row -->
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div class="grid grid-cols-1 gap-4">
             <!-- Opacity Card -->
             <div
               class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white"
@@ -92,66 +92,11 @@
                   min="0"
                   max="100"
                   class="flex-1"
+                  @input="emit('opacity-change', parseInt($event.target.value))"
                 />
                 <span class="text-sm text-gray-600 w-10 text-right"
                   >{{ opacity }}%</span
                 >
-              </div>
-            </div>
-
-            <!-- Toggles Card -->
-            <div
-              class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white grid grid-cols-2 gap-4"
-            >
-              <div>
-                <div class="text-sm font-semibold text-gray-800 mb-3">
-                  Visibilitas Layer
-                </div>
-                <label
-                  class="inline-flex items-center cursor-pointer select-none"
-                >
-                  <input
-                    type="checkbox"
-                    v-model="layerVisible"
-                    class="sr-only"
-                  />
-                  <span
-                    :class="[
-                      'relative inline-flex h-8 w-14 items-center rounded-full transition-colors',
-                      layerVisible ? 'bg-teal-500' : 'bg-gray-300',
-                    ]"
-                  >
-                    <span
-                      :class="[
-                        'inline-block h-6 w-6 transform rounded-full bg-white transition',
-                        layerVisible ? 'translate-x-7' : 'translate-x-1',
-                      ]"
-                    ></span>
-                  </span>
-                </label>
-              </div>
-              <div>
-                <div class="text-sm font-semibold text-gray-800 mb-3">
-                  Kunci Area
-                </div>
-                <label
-                  class="inline-flex items-center cursor-pointer select-none"
-                >
-                  <input type="checkbox" v-model="lockArea" class="sr-only" />
-                  <span
-                    :class="[
-                      'relative inline-flex h-8 w-14 items-center rounded-full transition-colors',
-                      lockArea ? 'bg-teal-500' : 'bg-gray-300',
-                    ]"
-                  >
-                    <span
-                      :class="[
-                        'inline-block h-6 w-6 transform rounded-full bg-white transition',
-                        lockArea ? 'translate-x-7' : 'translate-x-1',
-                      ]"
-                    ></span>
-                  </span>
-                </label>
               </div>
             </div>
           </div>
@@ -236,7 +181,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 
 // Props
 defineProps({
@@ -252,6 +197,7 @@ const emit = defineEmits([
   "apply-layer",
   "basemap-change",
   "tool-change",
+  "opacity-change",
 ]);
 
 // Reactive data
@@ -260,12 +206,15 @@ const selectedKecamatan = ref("");
 const selectedDesa = ref("");
 const selectedBasemap = ref("streets");
 const opacity = ref(100);
-const layerVisible = ref(true);
-const lockArea = ref(false);
 
 // Options for dropdowns
 const kecamatanOptions = ref([]);
 const desaOptions = ref([]);
+
+// Watch for opacity changes and emit event
+watch(opacity, (newOpacity) => {
+  emit("opacity-change", newOpacity);
+});
 
 // Tabs configuration
 const tabs = [
@@ -425,24 +374,29 @@ const resolveThumbnail = (thumbnailOrStyle) => {
 // Icon components
 const LayerIcon = {
   template: `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18M3 12h18M3 18h18"/>
+      <path d="M3 6l6 6-6 6M3 12l6 6-6 6"/>
+      <circle cx="18" cy="6" r="2"/>
+      <circle cx="18" cy="12" r="2"/>
+      <circle cx="18" cy="18" r="2"/>
     </svg>
   `,
 };
 
 const SettingsIcon = {
   template: `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m15.5-6.5l-4.24 4.24M7.76 16.76L3.5 21.01M16.5 21.01l-4.24-4.24M7.76 7.76L3.5 3.5"/>
     </svg>
   `,
 };
 
 const ToolsIcon = {
   template: `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M22.7,19l-9.1-9.1c0.9-2.3,0.4-5-1.5-6.9c-2-2-5-2.4-7.4-1.3L9,6.6L6.6,9L1.6,4.7C0.4,7.1,0.9,10.1,2.9,12.1 c1.9,1.9,4.6,2.4,6.9,1.5l9.1,9.1c0.4,0.4,1,0.4,1.4,0l2.3-2.3C23.1,20,23.1,19.4,22.7,19z"/>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
     </svg>
   `,
 };
@@ -485,6 +439,7 @@ const ToolsIcon = {
 
 .tab-button {
   @apply flex-1 flex items-center justify-center space-x-2 py-3 px-4 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors;
+  min-height: 48px;
 }
 
 .tab-button.active {
@@ -492,6 +447,10 @@ const ToolsIcon = {
 }
 
 .tab-icon {
+  @apply w-5 h-5 flex-shrink-0;
+}
+
+.tab-icon svg {
   @apply w-5 h-5;
 }
 

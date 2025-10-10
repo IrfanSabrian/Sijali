@@ -25,6 +25,7 @@
             @apply-layer="handleApplyLayer"
             @basemap-change="handleBasemapChange"
             @tool-change="handleToolChange"
+            @opacity-change="handleOpacityChange"
           />
         </div>
       </transition>
@@ -242,6 +243,51 @@ import SidebarPanel from "./SidebarPanel.vue";
 // API Service
 const { fetchRoadsGeoJSON } = useApiService();
 
+// Function to calculate optimal bounds for Kubu Raya district
+const calculateAllDataBounds = () => {
+  // Approximate central coordinate for Kabupaten Kubu Raya (near Kuala Dua–Ambawang)
+  // Around: 0°5' S, 109°20' E
+  const kubuRayaCenter = {
+    longitude: 109.3333, // 109°20' E
+    latitude: -0.0833,   // 0°5' S
+  };
+
+  // Adjusted bounds to frame Kubu Raya more evenly
+  const bounds = {
+    minLon: 108.9, // Western boundary
+    maxLon: 109.8, // Eastern boundary
+    minLat: -0.5,  // Southern boundary
+    maxLat: 0.3,   // Northern boundary
+  };
+
+  // Calculate zoom level to fit entire Kalimantan Barat province
+  const lonRange = bounds.maxLon - bounds.minLon;
+  const latRange = bounds.maxLat - bounds.minLat;
+  const maxRange = Math.max(lonRange, latRange);
+
+  // Add padding to ensure entire province is visible
+  const paddedRange = maxRange * 1.1;
+
+  let zoomLevel;
+  if (paddedRange > 5.0) {
+    zoomLevel = 6; // Very large area (entire province)
+  } else if (paddedRange > 2.0) {
+    zoomLevel = 7; // Large area
+  } else if (paddedRange > 1.0) {
+    zoomLevel = 8; // Medium-large area
+  } else if (paddedRange > 0.5) {
+    zoomLevel = 9; // Medium area
+  } else {
+    zoomLevel = 10; // Smaller area
+  }
+
+  return {
+    center: [kubuRayaCenter.longitude, kubuRayaCenter.latitude],
+    zoom: zoomLevel,
+    bounds: bounds,
+  };
+};
+
 // Refs
 const mapDiv = ref(null);
 const loading = ref(true);
@@ -269,13 +315,19 @@ const roadsData = ref([]);
 const roadsLoading = ref(false);
 const roadsError = ref(null);
 
+// Calculate optimal view for all road data
+const optimalView = calculateAllDataBounds();
+
 // Map state
-const currentZoom = ref(10);
+const currentZoom = ref(optimalView.zoom);
 const currentScale = ref(50000);
-const mapCenter = reactive({ longitude: "109.3425", latitude: "-0.0263" });
+const mapCenter = reactive({
+  longitude: optimalView.center[0].toString(),
+  latitude: optimalView.center[1].toString(),
+});
 const mouseCoordinates = reactive({
-  longitude: "109.3425",
-  latitude: "-0.0263",
+  longitude: optimalView.center[0].toString(),
+  latitude: optimalView.center[1].toString(),
 });
 
 // Drawing state
@@ -339,30 +391,59 @@ const addRoadsToMap = async (geoJSON) => {
         spatialReference: { wkid: 4326 },
       });
 
-      // Style based on road condition
+      // Style based on road keterangan (condition status)
+      // Color scheme: Red (worst) -> Orange -> Yellow -> Light Green -> Green (best)
       let color = "#666666"; // Default color
-      let width = 2;
+      let width = 3; // Default width
 
-      switch (feature.properties.kondisi) {
-        case "Beton":
-          color = "#2E8B57"; // Sea Green
+      switch (feature.properties.keterangan) {
+        case "Rusak Berat":
+        case "Rusak":
+          color = "#DC2626"; // Red - Worst condition
           width = 3;
           break;
-        case "Aspal":
-          color = "#696969"; // Dim Gray
+        case "Rusak Ringan":
+        case "Sedang":
+          color = "#EA580C"; // Orange - Poor condition
           width = 3;
           break;
-        case "Kayu":
-          color = "#8B4513"; // Saddle Brown
-          width = 2;
+        case "Cukup":
+        case "Lumayan":
+          color = "#D97706"; // Amber - Fair condition
+          width = 3;
           break;
-        case "Tanah":
-          color = "#D2691E"; // Chocolate
-          width = 2;
+        case "Baik":
+          color = "#16A34A"; // Green - Good condition
+          width = 3;
+          break;
+        case "Sangat Baik":
+        case "Baru":
+          color = "#059669"; // Emerald - Excellent condition
+          width = 3;
           break;
         default:
-          color = "#666666";
-          width = 2;
+          // Fallback based on kondisi if keterangan is not available
+          switch (feature.properties.kondisi) {
+            case "Beton":
+              color = "#16A34A"; // Green for concrete roads
+              width = 3;
+              break;
+            case "Aspal":
+              color = "#D97706"; // Amber for asphalt roads
+              width = 3;
+              break;
+            case "Kayu":
+              color = "#EA580C"; // Orange for wooden roads
+              width = 2;
+              break;
+            case "Tanah":
+              color = "#DC2626"; // Red for dirt roads
+              width = 2;
+              break;
+            default:
+              color = "#666666"; // Gray for unknown
+              width = 2;
+          }
       }
 
       const symbol = new SimpleLineSymbol.default({
@@ -453,8 +534,8 @@ onMounted(async () => {
     view = new MapView.default({
       container: mapDiv.value,
       map: map,
-      center: [109.3425, -0.0263], // Koordinat Pontianak, Kalimantan Barat
-      zoom: 12,
+      center: optimalView.center, // Center of Kalimantan Barat province
+      zoom: optimalView.zoom,
       ui: {
         components: ["attribution"], // Remove default zoom widget, only keep attribution
       },
@@ -545,6 +626,18 @@ onMounted(async () => {
 
     // Load roads data from API
     await loadRoadsData();
+
+    // Set initial view to show all data bounds
+    setTimeout(() => {
+      const allDataView = calculateAllDataBounds();
+      view.goTo({
+        center: allDataView.center,
+        zoom: allDataView.zoom,
+      });
+      console.log(
+        `Initial view set to Kalimantan Barat province: center [${allDataView.center[0]}, ${allDataView.center[1]}], zoom ${allDataView.zoom}`
+      );
+    }, 1000);
 
     // Set initial widget positioning after view is created
     adjustWidgetPositioning();
@@ -684,6 +777,196 @@ const handleApplyLayer = async (layerData) => {
   }
 
   console.log(`Layer diterapkan untuk: ${filterText}`);
+
+  // Zoom to the loaded roads data extent with a small delay to ensure data is loaded
+  setTimeout(() => {
+    zoomToRoadsExtent();
+  }, 500);
+};
+
+// Function to zoom to the extent of loaded roads data
+const zoomToRoadsExtent = () => {
+  if (!roadsLayer || !roadsLayer.graphics || roadsLayer.graphics.length === 0) {
+    console.log("No roads data to zoom to");
+    return;
+  }
+
+  try {
+    // Calculate bounds from all road graphics
+    let minLon = Infinity,
+      maxLon = -Infinity;
+    let minLat = Infinity,
+      maxLat = -Infinity;
+
+    roadsLayer.graphics.forEach((graphic) => {
+      if (graphic.geometry && graphic.geometry.paths) {
+        graphic.geometry.paths.forEach((path) => {
+          path.forEach(([lon, lat]) => {
+            minLon = Math.min(minLon, lon);
+            maxLon = Math.max(maxLon, lon);
+            minLat = Math.min(minLat, lat);
+            maxLat = Math.max(maxLat, lat);
+          });
+        });
+      }
+    });
+
+    // Check if we have valid bounds
+    if (
+      minLon !== Infinity &&
+      maxLon !== -Infinity &&
+      minLat !== Infinity &&
+      maxLat !== -Infinity
+    ) {
+      // Calculate center point
+      const centerLon = (minLon + maxLon) / 2;
+      const centerLat = (minLat + maxLat) / 2;
+
+      // Calculate appropriate zoom level based on extent
+      const lonRange = maxLon - minLon;
+      const latRange = maxLat - minLat;
+      const maxRange = Math.max(lonRange, latRange);
+
+      // Determine zoom level based on extent size
+      let zoomLevel;
+      if (maxRange > 0.1) {
+        zoomLevel = 9; // Large area
+      } else if (maxRange > 0.05) {
+        zoomLevel = 11; // Medium area
+      } else if (maxRange > 0.01) {
+        zoomLevel = 13; // Small area
+      } else {
+        zoomLevel = 15; // Very small area
+      }
+
+      // Zoom to the calculated extent
+      view.goTo({
+        center: [centerLon, centerLat],
+        zoom: zoomLevel,
+      });
+
+      console.log(
+        `Zoomed to roads extent: center [${centerLon}, ${centerLat}], zoom ${zoomLevel}`
+      );
+      console.log(`Bounds: [${minLon}, ${minLat}] to [${maxLon}, ${maxLat}]`);
+    } else {
+      console.log("Invalid bounds calculated from roads data");
+    }
+  } catch (error) {
+    console.error("Error zooming to roads extent:", error);
+  }
+};
+
+// Function to zoom to the extent of GeoJSON data
+const zoomToGeoJSONExtent = (geoJsonData) => {
+  if (
+    !geoJsonData ||
+    !geoJsonData.features ||
+    geoJsonData.features.length === 0
+  ) {
+    console.log("No GeoJSON data to zoom to");
+    return;
+  }
+
+  try {
+    // Calculate bounds from all GeoJSON features
+    let minLon = Infinity,
+      maxLon = -Infinity;
+    let minLat = Infinity,
+      maxLat = -Infinity;
+
+    geoJsonData.features.forEach((feature) => {
+      if (feature.geometry && feature.geometry.coordinates) {
+        const processCoordinates = (coords) => {
+          if (Array.isArray(coords[0])) {
+            // Multi-dimensional array (LineString, Polygon, etc.)
+            coords.forEach(processCoordinates);
+          } else {
+            // Single coordinate pair [lon, lat]
+            const [lon, lat] = coords;
+            minLon = Math.min(minLon, lon);
+            maxLon = Math.max(maxLon, lon);
+            minLat = Math.min(minLat, lat);
+            maxLat = Math.max(maxLat, lat);
+          }
+        };
+
+        processCoordinates(feature.geometry.coordinates);
+      }
+    });
+
+    // Check if we have valid bounds
+    if (
+      minLon !== Infinity &&
+      maxLon !== -Infinity &&
+      minLat !== Infinity &&
+      maxLat !== -Infinity
+    ) {
+      // Calculate center point
+      const centerLon = (minLon + maxLon) / 2;
+      const centerLat = (minLat + maxLat) / 2;
+
+      // Calculate appropriate zoom level based on extent
+      const lonRange = maxLon - minLon;
+      const latRange = maxLat - minLat;
+      const maxRange = Math.max(lonRange, latRange);
+
+      // Determine zoom level based on extent size
+      let zoomLevel;
+      if (maxRange > 0.1) {
+        zoomLevel = 9; // Large area
+      } else if (maxRange > 0.05) {
+        zoomLevel = 11; // Medium area
+      } else if (maxRange > 0.01) {
+        zoomLevel = 13; // Small area
+      } else {
+        zoomLevel = 15; // Very small area
+      }
+
+      // Zoom to the calculated extent
+      view.goTo({
+        center: [centerLon, centerLat],
+        zoom: zoomLevel,
+      });
+
+      console.log(
+        `Zoomed to GeoJSON extent: center [${centerLon}, ${centerLat}], zoom ${zoomLevel}`
+      );
+      console.log(`Bounds: [${minLon}, ${minLat}] to [${maxLon}, ${maxLat}]`);
+    } else {
+      console.log("Invalid bounds calculated from GeoJSON data");
+    }
+  } catch (error) {
+    console.error("Error zooming to GeoJSON extent:", error);
+  }
+};
+
+const handleOpacityChange = (opacityValue) => {
+  console.log("Opacity changed to:", opacityValue);
+
+  if (map && map.layers) {
+    // Convert opacity from 0-100 to 0-1 range
+    const opacity = opacityValue / 100;
+
+    // Apply opacity to specific operational layers
+    map.layers.forEach((layer) => {
+      // Apply to roads layer, graphics layer, measurement layer, and GeoJSON layers
+      if (
+        layer.title === "Jalan Lingkungan" ||
+        layer.title === "Drawing Layer" ||
+        layer.title === "Measurement Layer" ||
+        layer.type === "graphics" ||
+        layer.type === "geojson"
+      ) {
+        layer.opacity = opacity;
+        console.log(
+          `Applied opacity ${opacity} to layer: ${layer.title || layer.id}`
+        );
+      }
+    });
+
+    console.log(`Applied opacity ${opacity} to all operational layers`);
+  }
 };
 
 // Zoom controls
@@ -1022,7 +1305,7 @@ const handleLayerLoaded = async (layerData) => {
       url: url,
       title: layerData.name,
       visible: layerData.visible,
-      opacity: layerData.opacity,
+      opacity: layerData.opacity || 1.0,
       renderer: {
         type: "simple",
         symbol: {
@@ -1054,12 +1337,15 @@ const handleLayerLoaded = async (layerData) => {
     // Add layer to map
     map.add(geoJsonLayer);
 
-    // Zoom to layer extent if center and zoom are provided
+    // Zoom to layer extent if center and zoom are provided, or auto-calculate extent
     if (layerData.center && layerData.zoom) {
       view.goTo({
         center: layerData.center,
         zoom: layerData.zoom,
       });
+    } else {
+      // Auto-calculate extent from GeoJSON data and zoom to it
+      zoomToGeoJSONExtent(layerData.data);
     }
 
     // Clean up blob URL after layer is loaded
@@ -1080,6 +1366,10 @@ defineExpose({
   handleApplyLayer,
   handleBasemapChange,
   handleToolChange,
+  handleOpacityChange,
+  zoomToRoadsExtent,
+  zoomToGeoJSONExtent,
+  calculateAllDataBounds,
   handleLocationSelected,
   handleCoordinatesSelected,
   handleLayerChange,
