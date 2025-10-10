@@ -23,6 +23,81 @@
       </button>
     </div>
 
+    <!-- Layer Controls -->
+    <div class="space-y-4 mb-6">
+      <!-- Opasitas Layer -->
+      <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-3 w-full">
+        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          Opasitas Layer
+        </h4>
+        <div class="w-full">
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="100"
+            class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+          />
+          <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <span>0%</span>
+            <span class="font-medium">100%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visibilitas Layer -->
+      <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          Visibilitas Layer
+        </h4>
+        <div class="space-y-2">
+          <label class="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked
+              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            />
+            <span class="text-sm text-gray-600 dark:text-gray-400">Tampilkan semua layer</span>
+          </label>
+          <label class="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked
+              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            />
+            <span class="text-sm text-gray-600 dark:text-gray-400">Layer infrastruktur</span>
+          </label>
+          <label class="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked
+              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            />
+            <span class="text-sm text-gray-600 dark:text-gray-400">Layer administratif</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Kunci Area -->
+      <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          Kunci Area
+        </h4>
+        <div class="space-y-2">
+          <button
+            class="w-full px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-md transition-colors duration-200"
+          >
+            Pilih Area
+          </button>
+          <button
+            class="w-full px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded-md transition-colors duration-200"
+          >
+            Reset Pilihan
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Legend Items -->
     <div class="space-y-4">
       <div

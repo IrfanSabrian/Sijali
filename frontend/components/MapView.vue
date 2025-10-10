@@ -122,9 +122,10 @@
         <div ref="mapDiv" class="w-full h-full min-h-[500px] bg-gray-100"></div>
 
         <!-- Left Control Panel -->
+        <!-- Sidebar Toggle Container (shifts with sidebar state) -->
         <div
           :class="[
-            'controls-container absolute top-4 space-y-2 transition-all duration-300 ease-in-out',
+            'absolute top-4 transition-all duration-300 ease-in-out',
             showMainSidebar || showLeftSidebar
               ? 'controls-container--sidebar-open'
               : 'controls-container--sidebar-closed',
@@ -133,38 +134,61 @@
           <!-- Main Sidebar Toggle Button -->
           <button
             @click="toggleMainSidebar"
-            class="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-blue-500"
+            class="sidebar-toggle-btn px-3 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:text-blue-600 inline-flex items-center gap-3 whitespace-nowrap"
             :title="showMainSidebar ? 'Tutup Sidebar' : 'Buka Sidebar'"
           >
-            <svg
-              v-if="showMainSidebar"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-            <svg
-              v-else
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <template v-if="showMainSidebar">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </template>
+            <template v-else>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="text-gray-700 dark:text-gray-300"
+              >
+                <path d="M3 6h18M3 12h18M3 18h18" />
+              </svg>
+              <img
+                src="/assets/images/sijali-logo.svg"
+                alt="SIJALI Logo"
+                class="h-12 w-12 object-contain flex-shrink-0"
+              />
+              <div class="leading-tight text-left">
+                <div class="text-base font-extrabold tracking-wide">SIJALI</div>
+                <div class="text-[11px] text-gray-500 dark:text-gray-400">
+                  Kab. Kubu Raya
+                </div>
+              </div>
+            </template>
           </button>
+        </div>
 
-          <!-- Custom Zoom Controls -->
+        <!-- Zoom Controls Container (shifts with sidebar state) -->
+        <div
+          :class="[
+            'zoom-controls-container absolute top-28 transition-all duration-300 ease-in-out',
+            showMainSidebar || showLeftSidebar
+              ? 'controls-container--sidebar-open'
+              : 'controls-container--sidebar-closed',
+          ]"
+        >
           <div class="zoom-controls">
             <button
               @click="zoomIn"
@@ -221,7 +245,7 @@ const { fetchRoadsGeoJSON } = useApiService();
 // Refs
 const mapDiv = ref(null);
 const loading = ref(true);
-const showMainSidebar = ref(true); // Main sidebar (RDTR Interaktif)
+const showMainSidebar = ref(true); // Main sidebar open by default
 const showLeftSidebar = ref(false); // Legacy sidebar panels
 const showRightSidebar = ref(false);
 const showHelp = ref(false);

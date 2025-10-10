@@ -75,33 +75,113 @@
       <div v-if="activeTab === 'pengaturan'" class="tab-panel">
         <div class="settings-content">
           <h3>Pengaturan Peta</h3>
-          <div class="setting-item">
-            <label>Basemap</label>
-            <select
-              v-model="selectedBasemap"
-              @change="handleBasemapChange"
-              class="form-select"
+
+          <!-- Controls Row -->
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <!-- Opacity Card -->
+            <div
+              class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white"
             >
-              <option value="streets">Streets</option>
-              <option value="satellite">Satellite</option>
-              <option value="hybrid">Hybrid</option>
-              <option value="topographic">Topographic</option>
-              <option value="gray">Gray</option>
-              <option value="dark-gray">Dark Gray</option>
-              <option value="oceans">Oceans</option>
-              <option value="national-geographic">National Geographic</option>
-            </select>
+              <div class="text-sm font-semibold text-gray-800 mb-3">
+                Opasitas Layer
+              </div>
+              <div class="flex items-center space-x-3">
+                <input
+                  type="range"
+                  v-model="opacity"
+                  min="0"
+                  max="100"
+                  class="flex-1"
+                />
+                <span class="text-sm text-gray-600 w-10 text-right"
+                  >{{ opacity }}%</span
+                >
+              </div>
+            </div>
+
+            <!-- Toggles Card -->
+            <div
+              class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white grid grid-cols-2 gap-4"
+            >
+              <div>
+                <div class="text-sm font-semibold text-gray-800 mb-3">
+                  Visibilitas Layer
+                </div>
+                <label
+                  class="inline-flex items-center cursor-pointer select-none"
+                >
+                  <input
+                    type="checkbox"
+                    v-model="layerVisible"
+                    class="sr-only"
+                  />
+                  <span
+                    :class="[
+                      'relative inline-flex h-8 w-14 items-center rounded-full transition-colors',
+                      layerVisible ? 'bg-teal-500' : 'bg-gray-300',
+                    ]"
+                  >
+                    <span
+                      :class="[
+                        'inline-block h-6 w-6 transform rounded-full bg-white transition',
+                        layerVisible ? 'translate-x-7' : 'translate-x-1',
+                      ]"
+                    ></span>
+                  </span>
+                </label>
+              </div>
+              <div>
+                <div class="text-sm font-semibold text-gray-800 mb-3">
+                  Kunci Area
+                </div>
+                <label
+                  class="inline-flex items-center cursor-pointer select-none"
+                >
+                  <input type="checkbox" v-model="lockArea" class="sr-only" />
+                  <span
+                    :class="[
+                      'relative inline-flex h-8 w-14 items-center rounded-full transition-colors',
+                      lockArea ? 'bg-teal-500' : 'bg-gray-300',
+                    ]"
+                  >
+                    <span
+                      :class="[
+                        'inline-block h-6 w-6 transform rounded-full bg-white transition',
+                        lockArea ? 'translate-x-7' : 'translate-x-1',
+                      ]"
+                    ></span>
+                  </span>
+                </label>
+              </div>
+            </div>
           </div>
-          <div class="setting-item">
-            <label>Opacity</label>
-            <input
-              type="range"
-              v-model="opacity"
-              min="0"
-              max="100"
-              class="slider"
-            />
-            <span>{{ opacity }}%</span>
+
+          <!-- Basemap Gallery -->
+          <div
+            class="mt-4 p-4 rounded-xl border border-gray-200 shadow-sm bg-white"
+          >
+            <div class="text-sm font-semibold text-gray-800 mb-3">
+              Peta Dasar
+            </div>
+            <div class="grid grid-cols-1 gap-3">
+              <div
+                v-for="bm in basemapOptions"
+                :key="bm.id"
+                @click="selectBasemap(bm.id)"
+                class="flex items-center space-x-4 p-3 rounded-xl border border-gray-200 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition"
+                :class="{ 'ring-2 ring-blue-500': selectedBasemap === bm.id }"
+              >
+                <img
+                  :src="resolveThumbnail(bm.thumbnail)"
+                  :alt="bm.label"
+                  referrerpolicy="no-referrer"
+                  loading="lazy"
+                  @error="onThumbError($event, bm)"
+                  class="w-20 h-20 object-cover rounded-md bg-gray-100 border border-gray-200"
+                />
+                <div class="text-gray-700 font-medium">{{ bm.label }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -180,6 +260,8 @@ const selectedKecamatan = ref("");
 const selectedDesa = ref("");
 const selectedBasemap = ref("streets");
 const opacity = ref(100);
+const layerVisible = ref(true);
+const lockArea = ref(false);
 
 // Options for dropdowns
 const kecamatanOptions = ref([]);
@@ -254,11 +336,91 @@ const handleBasemapChange = () => {
   emit("basemap-change", selectedBasemap.value);
 };
 
+const basemapOptions = [
+  // Imagery (example using working arcgis.com item thumbnail)
+  {
+    id: "satellite",
+    label: "Citra",
+    thumbnail:
+      "https://www.arcgis.com/sharing/rest/content/items/81c82e5d0f9241469f78f94b0037581a/info/thumbnail/thumbnail1591224931210.jpeg",
+  },
+  {
+    id: "hybrid",
+    label: "Citra Hibrida",
+    style: "/styles/arcgis/imagery/labels",
+  },
+  { id: "streets", label: "Jalan", style: "/styles/arcgis/streets" },
+  {
+    id: "topographic",
+    label: "Topografi",
+    style: "/styles/arcgis/topographic",
+  },
+  { id: "gray", label: "Abu-abu", style: "/styles/arcgis/light-gray" },
+  {
+    id: "dark-gray",
+    label: "Abu-abu Gelap",
+    style: "/styles/arcgis/dark-gray",
+  },
+  { id: "oceans", label: "Lautan", style: "/styles/arcgis/oceans" },
+  {
+    id: "arcgis-navigation",
+    label: "Navigation",
+    style: "/styles/arcgis/navigation",
+  },
+  {
+    id: "arcgis-navigation-night",
+    label: "Navigation Night",
+    style: "/styles/arcgis/navigation-night",
+  },
+  {
+    id: "national-geographic",
+    label: "National Geographic",
+    style: "/styles/arcgis/charted-territory",
+  },
+  { id: "arcgis-terrain", label: "Terrain", style: "/styles/arcgis/terrain" },
+  {
+    id: "arcgis-human-geography",
+    label: "Human Geography",
+    style: "/styles/arcgis/human-geography",
+  },
+  { id: "arcgis-nova", label: "Nova", style: "/styles/arcgis/nova" },
+];
+
+const selectBasemap = (id) => {
+  selectedBasemap.value = id;
+  handleBasemapChange();
+};
+
 // Lifecycle hooks
 onMounted(() => {
   fetchKecamatanOptions();
   fetchDesaOptions();
 });
+
+// Thumbnail error fallback
+const onThumbError = (event, bm) => {
+  // Inline SVG placeholder (gray chequered)
+  event.target.src =
+    "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23e5e7eb'/%3E%3Ctext x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='10' fill='%239ca3af'%3ENo Img%3C/text%3E%3C/svg%3E";
+};
+
+// Normalize/resolve incoming thumbnail URLs so they are image URLs
+const resolveThumbnail = (thumbnailOrStyle) => {
+  if (!thumbnailOrStyle) return null;
+  // If it's an arcgis.com sharing thumbnail URL, just strip ?f=json
+  if (/arcgis\.com\/sharing\/rest\//i.test(thumbnailOrStyle)) {
+    return thumbnailOrStyle.replace(/\?f=json.*/i, "");
+  }
+  // If it's a Basemaps style path from your list, use Basemaps API thumbnail
+  if (/^\/?styles\//.test(thumbnailOrStyle)) {
+    const stylePath = thumbnailOrStyle.startsWith("/")
+      ? thumbnailOrStyle
+      : `/${thumbnailOrStyle}`;
+    // Public thumbnail endpoint (no key required for image preview)
+    return `https://basemaps-api.arcgis.com/arcgis/rest/services${stylePath}/resources/thumbnail?f=image`;
+  }
+  return thumbnailOrStyle;
+};
 
 // Icon components
 const LayerIcon = {
