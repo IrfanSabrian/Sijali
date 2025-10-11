@@ -16,25 +16,26 @@
       </div>
 
       <div class="hero-content">
-        <div class="hero-text">
-          <div class="hero-badge">
-            <span class="badge-icon">🗺️</span>
-            <span class="badge-text">Platform GIS Terintegrasi</span>
-          </div>
-
+        <div class="hero-text hero-text-animated">
           <h1 class="hero-title">
-            <span class="title-line-1">Sistem Informasi</span>
-            <span class="title-line-2">Jalan Lingkungan</span>
-            <span class="title-highlight">Kabupaten Kubu Raya</span>
+            <span class="title-line-1 animate-slide-in-1"
+              >Sistem Informasi</span
+            >
+            <span class="title-line-2 animate-slide-in-2"
+              >Jalan Lingkungan</span
+            >
+            <span class="title-highlight animate-slide-in-3"
+              >Kabupaten Kubu Raya</span
+            >
           </h1>
 
-          <p class="hero-description">
+          <p class="hero-description animate-fade-in">
             Platform GIS terintegrasi untuk pengelolaan dan analisis data jalan
             lingkungan di Kabupaten Kubu Raya dengan teknologi ArcGIS terdepan.
             Monitor, analisis, dan kelola infrastruktur jalan secara real-time.
           </p>
 
-          <div class="hero-buttons">
+          <div class="hero-buttons animate-fade-in-up">
             <button @click="scrollToSection('map')" class="btn-primary">
               <div class="btn-icon">
                 <svg
@@ -81,43 +82,8 @@
           </div>
         </div>
 
-        <div class="hero-visual">
-          <div class="hero-card">
-            <div class="card-header">
-              <div class="card-dots">
-                <span class="dot dot-red"></span>
-                <span class="dot dot-yellow"></span>
-                <span class="dot dot-green"></span>
-              </div>
-              <span class="card-title">Live Map Preview</span>
-            </div>
-            <div class="card-content">
-              <div class="map-preview">
-                <div class="map-grid">
-                  <div class="grid-line"></div>
-                  <div class="grid-line"></div>
-                  <div class="grid-line"></div>
-                  <div class="grid-line"></div>
-                </div>
-                <div class="map-elements">
-                  <div class="map-road road-1"></div>
-                  <div class="map-road road-2"></div>
-                  <div class="map-road road-3"></div>
-                  <div class="map-point point-1"></div>
-                  <div class="map-point point-2"></div>
-                  <div class="map-point point-3"></div>
-                </div>
-                <div class="map-overlay">
-                  <div class="overlay-stats">
-                    <div class="overlay-stat">
-                      <span class="stat-value">5,575</span>
-                      <span class="stat-label">Roads</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="hero-visual hero-visual-animated">
+          <WeatherWidget />
         </div>
       </div>
 
@@ -212,8 +178,8 @@
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">Real-time</h3>
-            <p class="stat-label">Monitoring</p>
+            <h3 class="stat-number" id="goodConditionCount">-</h3>
+            <p class="stat-label">Jalan Kondisi Baik</p>
           </div>
         </div>
       </div>
@@ -570,6 +536,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 // Import components
 import Navbar from "~/components/Navbar.vue";
 import MapView from "~/components/MapView.vue";
+import WeatherWidget from "~/components/WeatherWidget.vue";
 
 // Refs
 const mapViewRef = ref(null);
@@ -654,7 +621,7 @@ useHead({
 
 /* Hero Section */
 .hero-section {
-  @apply min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 text-white flex flex-col justify-center relative overflow-hidden;
+  @apply min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 text-white flex flex-col justify-center relative overflow-hidden pt-10;
 }
 
 .hero-bg-elements {
@@ -690,11 +657,15 @@ useHead({
 }
 
 .hero-content {
-  @apply container mx-auto px-8 py-20 relative z-10 flex items-center justify-between;
+  @apply container mx-auto px-24 py-20 relative z-10 flex items-center justify-between;
 }
 
 .hero-text {
   @apply flex-1 max-w-2xl;
+}
+
+.hero-text-animated {
+  animation: fadeIn 0.8s ease-out;
 }
 
 .hero-badge {
@@ -715,18 +686,43 @@ useHead({
 
 .title-line-1 {
   @apply block text-4xl font-light text-white/90;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.title-line-1:hover {
+  transform: translateX(10px);
+  color: rgba(255, 255, 255, 1);
 }
 
 .title-line-2 {
   @apply block text-5xl font-bold text-white mt-2;
+  transition: transform 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.title-line-2:hover {
+  transform: scale(1.05);
+  letter-spacing: 0.05em;
 }
 
 .title-highlight {
   @apply block text-3xl font-semibold text-blue-300 mt-4 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent;
+  transition: transform 0.3s ease;
+  background-size: 200% auto;
+  animation: gradientShift 3s ease infinite;
+}
+
+.title-highlight:hover {
+  transform: translateX(10px);
 }
 
 .hero-description {
   @apply text-lg text-blue-100 mb-10 leading-relaxed max-w-xl;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.hero-description:hover {
+  transform: translateY(-2px);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .hero-buttons {
@@ -735,10 +731,54 @@ useHead({
 
 .btn-primary {
   @apply bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
 }
 
 .btn-secondary {
   @apply bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-1;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-secondary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.btn-secondary:hover::before {
+  left: 100%;
 }
 
 .btn-icon {
@@ -759,6 +799,11 @@ useHead({
 
 .hero-visual {
   @apply flex-1 max-w-lg ml-12;
+}
+
+.hero-visual-animated {
+  animation: fadeInRight 1s ease-out, float 3s ease-in-out infinite;
+  animation-delay: 0s, 1s;
 }
 
 .hero-card {
@@ -797,76 +842,6 @@ useHead({
   @apply p-6;
 }
 
-.map-preview {
-  @apply relative h-64 bg-gradient-to-br from-slate-900 to-blue-900 rounded-lg overflow-hidden;
-}
-
-.map-grid {
-  @apply absolute inset-0 opacity-20;
-  background-image: linear-gradient(
-      rgba(59, 130, 246, 0.3) 1px,
-      transparent 1px
-    ),
-    linear-gradient(90deg, rgba(59, 130, 246, 0.3) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-
-.map-elements {
-  @apply absolute inset-0;
-}
-
-.map-road {
-  @apply absolute bg-blue-500 rounded-full opacity-70;
-}
-
-.road-1 {
-  @apply w-32 h-1 top-16 left-8 rotate-12;
-}
-
-.road-2 {
-  @apply w-24 h-1 top-32 left-16 -rotate-12;
-}
-
-.road-3 {
-  @apply w-28 h-1 top-48 left-12 rotate-6;
-}
-
-.map-point {
-  @apply absolute w-3 h-3 bg-indigo-500 rounded-full shadow-lg;
-}
-
-.point-1 {
-  @apply top-20 left-20;
-}
-
-.point-2 {
-  @apply top-36 left-32;
-}
-
-.point-3 {
-  @apply top-52 left-24;
-}
-
-.map-overlay {
-  @apply absolute bottom-4 right-4;
-}
-
-.overlay-stats {
-  @apply bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/30 shadow-lg;
-}
-
-.overlay-stat {
-  @apply text-center;
-}
-
-.stat-value {
-  @apply block text-lg font-bold text-white drop-shadow-lg;
-}
-
-.stat-label {
-  @apply text-xs text-white font-medium drop-shadow-md;
-}
-
 .hero-stats {
   @apply container mx-auto px-8 py-12 relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
 }
@@ -888,7 +863,7 @@ useHead({
 }
 
 .stat-label {
-  @apply text-white text-sm font-medium drop-shadow-md;
+  @apply text-white/90 text-sm font-medium drop-shadow-md;
 }
 
 /* Section Headers */
@@ -1562,6 +1537,69 @@ useHead({
   @apply text-blue-600 font-bold;
 }
 
+/* Animations & Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes gradientShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-slide-in-1 {
+  animation: fadeIn 0.6s ease-out 0.2s both;
+}
+
+.animate-slide-in-2 {
+  animation: fadeIn 0.6s ease-out 0.4s both;
+}
+
+.animate-slide-in-3 {
+  animation: fadeIn 0.6s ease-out 0.6s both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out 0.8s both;
+}
+
+.animate-fade-in-up {
+  animation: fadeIn 1s ease-out 1s both;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .hero-content {
@@ -1771,7 +1809,6 @@ export default {
             "Teluk Pakedai",
             "Terentang",
             "Batu Ampar",
-            "Teluk Pak Kedai",
           ],
           datasets: [
             {
@@ -1891,6 +1928,9 @@ export default {
       await this.updateKondisiMaterialCharts("");
       await this.updateMaterialDamageChart("");
       console.log("Initial chart data loaded");
+
+      // Load good condition road count for hero stats
+      await this.loadGoodConditionCount();
 
       // District Chart - Real Data
       const districtCtx = document.getElementById("districtChart");
@@ -2123,6 +2163,66 @@ export default {
 
       // Add event listeners for filters
       this.setupFilterListeners();
+    },
+    async loadGoodConditionCount() {
+      try {
+        console.log("Loading good condition road count...");
+        const response = await fetch(
+          "/api/jalan/stats/kondisi-material-filtered",
+          {
+            method: "GET",
+            mode: "cors",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log("Good condition API result:", result);
+
+        if (result.success && result.data && result.data.kondisiStats) {
+          // Find the count for "Baik" condition
+          const baikCondition = result.data.kondisiStats.find(
+            (stat) => stat.keterangan === "Baik"
+          );
+
+          if (baikCondition) {
+            const goodCount = baikCondition._count.keterangan;
+            const goodCountElement =
+              document.getElementById("goodConditionCount");
+            if (goodCountElement) {
+              goodCountElement.textContent = goodCount.toLocaleString();
+            }
+            console.log("Good condition count loaded:", goodCount);
+          } else {
+            console.log("No 'Baik' condition found in data");
+            const goodCountElement =
+              document.getElementById("goodConditionCount");
+            if (goodCountElement) {
+              goodCountElement.textContent = "0";
+            }
+          }
+        } else {
+          console.error("Failed to fetch good condition data");
+          const goodCountElement =
+            document.getElementById("goodConditionCount");
+          if (goodCountElement) {
+            goodCountElement.textContent = "0";
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching good condition count:", error);
+        const goodCountElement = document.getElementById("goodConditionCount");
+        if (goodCountElement) {
+          goodCountElement.textContent = "0";
+        }
+      }
     },
     setupFilterListeners() {
       // Filter for Analisis Kondisi & Material Jalan

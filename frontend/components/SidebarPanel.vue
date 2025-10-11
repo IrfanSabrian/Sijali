@@ -30,7 +30,7 @@
         :class="['tab-button', { active: activeTab === tab.id }]"
       >
         <div class="tab-icon">
-          <component :is="tab.icon" />
+          <font-awesome-icon :icon="tab.icon" />
         </div>
         <span>{{ tab.label }}</span>
       </button>
@@ -40,35 +40,50 @@
     <div class="tab-content">
       <!-- Layer Tab -->
       <div v-if="activeTab === 'layer'" class="tab-panel">
-        <div class="form-group">
-          <label class="form-label">Pilih Kecamatan</label>
-          <select
-            v-model="selectedKecamatan"
-            class="form-select"
-            @change="fetchDesaOptions"
-          >
-            <option value="">-- Semua Kecamatan --</option>
-            <option
-              v-for="kecamatan in kecamatanOptions"
-              :key="kecamatan"
-              :value="kecamatan"
+        <!-- Filter Jalan Section -->
+        <div class="filter-section">
+          <h4 class="section-title">Filter Data Jalan</h4>
+
+          <div class="form-group">
+            <label class="form-label">Pilih Kecamatan</label>
+            <select
+              v-model="selectedKecamatan"
+              class="form-select"
+              @change="fetchDesaOptions"
             >
-              {{ kecamatan }}
-            </option>
-          </select>
-        </div>
+              <option value="">-- Semua Kecamatan --</option>
+              <option
+                v-for="kecamatan in kecamatanOptions"
+                :key="kecamatan"
+                :value="kecamatan"
+              >
+                {{ kecamatan }}
+              </option>
+            </select>
+          </div>
 
-        <div class="form-group">
-          <label class="form-label">Pilih Desa</label>
-          <select v-model="selectedDesa" class="form-select">
-            <option value="">-- Semua Desa --</option>
-            <option v-for="desa in desaOptions" :key="desa" :value="desa">
-              {{ desa }}
-            </option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label class="form-label">Pilih Desa</label>
+            <select
+              v-model="selectedDesa"
+              class="form-select"
+              :disabled="!selectedKecamatan"
+              :class="{ 'opacity-50 cursor-not-allowed': !selectedKecamatan }"
+            >
+              <option value="">-- Semua Desa --</option>
+              <option v-for="desa in desaOptions" :key="desa" :value="desa">
+                {{ desa }}
+              </option>
+            </select>
+            <p v-if="!selectedKecamatan" class="text-xs text-gray-500 mt-1">
+              Pilih kecamatan terlebih dahulu
+            </p>
+          </div>
 
-        <button class="apply-button" @click="applyLayer">Terapkan Layer</button>
+          <button class="apply-button" @click="applyLayer">
+            Terapkan Filter
+          </button>
+        </div>
       </div>
 
       <!-- Pengaturan Tab -->
@@ -182,6 +197,12 @@
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import {
+  faLayerGroup,
+  faCog,
+  faTools,
+} from "@fortawesome/free-solid-svg-icons";
 
 // Props
 defineProps({
@@ -216,22 +237,22 @@ watch(opacity, (newOpacity) => {
   emit("opacity-change", newOpacity);
 });
 
-// Tabs configuration
+// Tabs configuration with Font Awesome icons
 const tabs = [
   {
     id: "layer",
     label: "Layer",
-    icon: "LayerIcon",
+    icon: faLayerGroup,
   },
   {
     id: "pengaturan",
     label: "Pengaturan",
-    icon: "SettingsIcon",
+    icon: faCog,
   },
   {
     id: "alat",
     label: "Alat",
-    icon: "ToolsIcon",
+    icon: faTools,
   },
 ];
 
@@ -254,6 +275,15 @@ const fetchKecamatanOptions = async () => {
 
 // Fetch desa options based on selected kecamatan
 const fetchDesaOptions = async () => {
+  // Reset selected desa when kecamatan changes
+  selectedDesa.value = "";
+
+  // Clear desa options if no kecamatan selected
+  if (!selectedKecamatan.value) {
+    desaOptions.value = [];
+    return;
+  }
+
   try {
     let url = `${apiUrl}/jalan/filters/desa`;
     if (selectedKecamatan.value) {
@@ -264,8 +294,6 @@ const fetchDesaOptions = async () => {
     if (data.success) {
       desaOptions.value = data.data;
     }
-    // Reset selected desa when kecamatan changes
-    selectedDesa.value = "";
   } catch (error) {
     console.error("Error fetching desa options:", error);
   }
@@ -369,36 +397,6 @@ const resolveThumbnail = (thumbnailOrStyle) => {
     return `https://basemaps-api.arcgis.com/arcgis/rest/services${stylePath}/resources/thumbnail?f=image`;
   }
   return thumbnailOrStyle;
-};
-
-// Icon components
-const LayerIcon = {
-  template: `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 6h18M3 12h18M3 18h18"/>
-      <path d="M3 6l6 6-6 6M3 12l6 6-6 6"/>
-      <circle cx="18" cy="6" r="2"/>
-      <circle cx="18" cy="12" r="2"/>
-      <circle cx="18" cy="18" r="2"/>
-    </svg>
-  `,
-};
-
-const SettingsIcon = {
-  template: `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m15.5-6.5l-4.24 4.24M7.76 16.76L3.5 21.01M16.5 21.01l-4.24-4.24M7.76 7.76L3.5 3.5"/>
-    </svg>
-  `,
-};
-
-const ToolsIcon = {
-  template: `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-    </svg>
-  `,
 };
 </script>
 
@@ -510,5 +508,61 @@ const ToolsIcon = {
 
 .tool-button svg {
   @apply text-gray-600;
+}
+
+/* Boundary Section Styles */
+.boundary-section,
+.filter-section {
+  @apply space-y-4;
+}
+
+.section-title {
+  @apply text-base font-semibold text-gray-800 mb-3;
+}
+
+.boundary-toggle-item {
+  @apply p-4 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors;
+}
+
+.boundary-label {
+  @apply flex items-center text-sm font-medium text-gray-700;
+}
+
+.boundary-description {
+  @apply mt-2 text-xs text-gray-500;
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+  @apply relative inline-block w-12 h-6 cursor-pointer;
+}
+
+.toggle-switch input {
+  @apply opacity-0 w-0 h-0;
+}
+
+.toggle-slider {
+  @apply absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-300 rounded-full transition-all duration-300;
+}
+
+.toggle-slider:before {
+  @apply absolute content-[''] h-5 w-5 left-0.5 bottom-0.5 bg-white rounded-full transition-all duration-300;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  @apply bg-blue-600;
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  @apply transform translate-x-6;
+}
+
+.toggle-switch input:focus + .toggle-slider {
+  @apply ring-2 ring-blue-300;
+}
+
+/* Divider */
+.divider {
+  @apply border-t border-gray-200 my-4;
 }
 </style>

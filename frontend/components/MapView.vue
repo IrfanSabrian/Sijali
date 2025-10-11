@@ -226,13 +226,146 @@
             </button>
           </div>
         </div>
+
+        <!-- Search Control Container (separate, below zoom controls) -->
+        <div
+          :class="[
+            'search-controls-container absolute transition-all duration-300 ease-in-out',
+            showMainSidebar || showLeftSidebar
+              ? 'controls-container--sidebar-open'
+              : 'controls-container--sidebar-closed',
+          ]"
+          style="top: 12.5rem"
+        >
+          <div class="search-control">
+            <button
+              @click="toggleSearchBox"
+              class="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 hover:text-blue-500"
+              :class="
+                searchBoxOpen
+                  ? 'text-blue-500'
+                  : 'text-gray-600 dark:text-gray-400'
+              "
+              title="Cari Jalan"
+              style="width: 44px"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </button>
+
+            <!-- Search Box (appears below search button) -->
+            <transition name="slide-down">
+              <div
+                v-if="searchBoxOpen"
+                class="search-box absolute left-0 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                style="top: 52px"
+              >
+                <div class="p-3">
+                  <div class="relative">
+                    <input
+                      v-model="searchQuery"
+                      @input="handleSearchInput"
+                      @focus="searchFocused = true"
+                      type="text"
+                      placeholder="Cari nama jalan..."
+                      class="w-full px-3 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                    />
+                    <button
+                      v-if="searchQuery"
+                      @click="clearSearch"
+                      class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Autocomplete Results -->
+                  <div
+                    v-if="searchResults.length > 0 && searchFocused"
+                    class="mt-2 max-h-60 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg"
+                  >
+                    <button
+                      v-for="(result, index) in searchResults"
+                      :key="index"
+                      @click="selectSearchResult(result)"
+                      class="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
+                    >
+                      <div
+                        class="text-sm font-medium text-gray-800 dark:text-white"
+                      >
+                        {{ result.nama }}
+                      </div>
+                      <div
+                        class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+                      >
+                        {{ result.desa }}, {{ result.kecamatan }}
+                        <span v-if="result.keterangan" class="ml-2">
+                          • {{ result.keterangan }}
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+
+                  <!-- No Results -->
+                  <div
+                    v-if="
+                      searchQuery &&
+                      searchResults.length === 0 &&
+                      !searchLoading
+                    "
+                    class="mt-2 text-center py-3 text-sm text-gray-500 dark:text-gray-400"
+                  >
+                    Tidak ada hasil ditemukan
+                  </div>
+
+                  <!-- Loading -->
+                  <div
+                    v-if="searchLoading"
+                    class="mt-2 text-center py-3 text-sm text-gray-500 dark:text-gray-400"
+                  >
+                    <div
+                      class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500 mx-auto"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </transition>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted, watch } from "vue";
+import {
+  ref,
+  reactive,
+  computed,
+  onMounted,
+  onUnmounted,
+  watch,
+  markRaw,
+} from "vue";
 import DrawingSidebar from "./DrawingSidebar.vue";
 import LayerPanel from "./LayerPanel.vue";
 import LegendPanel from "./LegendPanel.vue";
@@ -249,15 +382,15 @@ const calculateAllDataBounds = () => {
   // Around: 0°5' S, 109°20' E
   const kubuRayaCenter = {
     longitude: 109.3333, // 109°20' E
-    latitude: -0.0833,   // 0°5' S
+    latitude: -0.0833, // 0°5' S
   };
 
   // Adjusted bounds to frame Kubu Raya more evenly
   const bounds = {
     minLon: 108.9, // Western boundary
     maxLon: 109.8, // Eastern boundary
-    minLat: -0.5,  // Southern boundary
-    maxLat: 0.3,   // Northern boundary
+    minLat: -0.5, // Southern boundary
+    maxLat: 0.3, // Northern boundary
   };
 
   // Calculate zoom level to fit entire Kalimantan Barat province
@@ -305,6 +438,14 @@ let sketch = null;
 let graphicsLayer = null;
 let measurementLayer = null;
 let roadsLayer = null;
+let batasKabupatenLayer = null;
+let batasKecamatanLayer = null;
+let batasDesaLayer = null;
+
+// GeoJSON data storage
+let batasKabupatenGeoJSON = null;
+let batasKecamatanGeoJSON = null;
+let batasDesaGeoJSON = null;
 
 // Widget variables
 let basemapToggle = null;
@@ -314,6 +455,15 @@ let scaleBar = null;
 const roadsData = ref([]);
 const roadsLoading = ref(false);
 const roadsError = ref(null);
+
+// Search state
+const searchBoxOpen = ref(false);
+const searchQuery = ref("");
+const searchResults = ref([]);
+const searchLoading = ref(false);
+const searchFocused = ref(false);
+const selectedRoadName = ref(null); // Track selected road by name (not graphic object)
+let searchDebounceTimeout = null;
 
 // Calculate optimal view for all road data
 const optimalView = calculateAllDataBounds();
@@ -369,6 +519,46 @@ const loadRoadsData = async (params = {}) => {
   }
 };
 
+// Get color based on road condition
+const getRoadColor = (feature) => {
+  let color = "#666666"; // Default color (gray for unknown)
+
+  switch (feature.properties.keterangan) {
+    case "Baik":
+      color = "#10b981"; // Green - Good condition
+      break;
+    case "Sedang":
+      color = "#fbbf24"; // Yellow - Fair condition
+      break;
+    case "Rusak Ringan":
+      color = "#f59e0b"; // Orange - Light damage
+      break;
+    case "Rusak Berat":
+      color = "#ef4444"; // Red - Heavy damage
+      break;
+    default:
+      // Fallback to material type if keterangan not available
+      switch (feature.properties.kondisi) {
+        case "Beton":
+          color = "#10b981"; // Green for concrete
+          break;
+        case "Aspal":
+          color = "#fbbf24"; // Yellow for asphalt
+          break;
+        case "Paving":
+          color = "#3b82f6"; // Blue for paving
+          break;
+        case "Tanah":
+          color = "#a855f7"; // Purple for dirt
+          break;
+        default:
+          color = "#6b7280"; // Gray for unknown
+      }
+  }
+
+  return color;
+};
+
 // Add roads to map as graphics
 const addRoadsToMap = async (geoJSON) => {
   try {
@@ -391,64 +581,11 @@ const addRoadsToMap = async (geoJSON) => {
         spatialReference: { wkid: 4326 },
       });
 
-      // Style based on road keterangan (condition status)
-      // Color scheme: Red (worst) -> Orange -> Yellow -> Light Green -> Green (best)
-      let color = "#666666"; // Default color
-      let width = 3; // Default width
-
-      switch (feature.properties.keterangan) {
-        case "Rusak Berat":
-        case "Rusak":
-          color = "#DC2626"; // Red - Worst condition
-          width = 3;
-          break;
-        case "Rusak Ringan":
-        case "Sedang":
-          color = "#EA580C"; // Orange - Poor condition
-          width = 3;
-          break;
-        case "Cukup":
-        case "Lumayan":
-          color = "#D97706"; // Amber - Fair condition
-          width = 3;
-          break;
-        case "Baik":
-          color = "#16A34A"; // Green - Good condition
-          width = 3;
-          break;
-        case "Sangat Baik":
-        case "Baru":
-          color = "#059669"; // Emerald - Excellent condition
-          width = 3;
-          break;
-        default:
-          // Fallback based on kondisi if keterangan is not available
-          switch (feature.properties.kondisi) {
-            case "Beton":
-              color = "#16A34A"; // Green for concrete roads
-              width = 3;
-              break;
-            case "Aspal":
-              color = "#D97706"; // Amber for asphalt roads
-              width = 3;
-              break;
-            case "Kayu":
-              color = "#EA580C"; // Orange for wooden roads
-              width = 2;
-              break;
-            case "Tanah":
-              color = "#DC2626"; // Red for dirt roads
-              width = 2;
-              break;
-            default:
-              color = "#666666"; // Gray for unknown
-              width = 2;
-          }
-      }
+      const color = getRoadColor(feature);
 
       const symbol = new SimpleLineSymbol.default({
         color: color,
-        width: width,
+        width: 1.2, // Fixed width
         style: "solid",
       });
 
@@ -480,6 +617,373 @@ const addRoadsToMap = async (geoJSON) => {
     console.log(`Added ${graphics.length} road graphics to map`);
   } catch (error) {
     console.error("Error adding roads to map:", error);
+  }
+};
+
+// Load Batas Kabupaten GeoJSON - store data without displaying
+const loadBatasKabupaten = async () => {
+  try {
+    const response = await fetch("/geojson/Batas Kabupaten Kubu Raya.geojson");
+    batasKabupatenGeoJSON = await response.json();
+    console.log(
+      `Loaded ${batasKabupatenGeoJSON.features.length} kabupaten boundaries data`
+    );
+  } catch (error) {
+    console.error("Error loading batas kabupaten:", error);
+  }
+};
+
+// Display Batas Kabupaten (for "Semua Kecamatan" selection)
+const displayBatasKabupaten = async () => {
+  if (!batasKabupatenLayer || !batasKabupatenGeoJSON) return;
+
+  // Clear existing graphics
+  batasKabupatenLayer.removeAll();
+
+  try {
+    // Import required modules
+    const [Graphic, Polygon, SimpleFillSymbol, SimpleLineSymbol] =
+      await Promise.all([
+        import("@arcgis/core/Graphic"),
+        import("@arcgis/core/geometry/Polygon"),
+        import("@arcgis/core/symbols/SimpleFillSymbol"),
+        import("@arcgis/core/symbols/SimpleLineSymbol"),
+      ]);
+
+    // Create graphics from GeoJSON features
+    const graphics = batasKabupatenGeoJSON.features.map((feature) => {
+      // Convert MultiPolygon to Polygon
+      let rings = [];
+      if (feature.geometry.type === "MultiPolygon") {
+        // Flatten MultiPolygon to single array of rings
+        feature.geometry.coordinates.forEach((polygon) => {
+          rings.push(...polygon);
+        });
+      } else if (feature.geometry.type === "Polygon") {
+        rings = feature.geometry.coordinates;
+      }
+
+      const polygon = new Polygon.default({
+        rings: rings,
+        spatialReference: { wkid: 4326 },
+      });
+
+      // Style for kabupaten boundary - no fill, only outline
+      const symbol = new SimpleFillSymbol.default({
+        color: [0, 0, 0, 0], // Transparent fill (no fill)
+        outline: new SimpleLineSymbol.default({
+          color: [59, 130, 246, 1], // Blue - tidak nabrak dengan warna jalan
+          width: 1.25,
+          style: "solid",
+        }),
+      });
+
+      return new Graphic.default({
+        geometry: polygon,
+        symbol: symbol,
+        attributes: feature.properties,
+        popupTemplate: {
+          title: `Kabupaten Kubu Raya`,
+          content: `
+            <div class="p-2">
+              <p><strong>Kabupaten:</strong> Kubu Raya</p>
+              <p><strong>Provinsi:</strong> Kalimantan Barat</p>
+            </div>
+          `,
+        },
+      });
+    });
+
+    // Add graphics to layer and make visible
+    batasKabupatenLayer.addMany(graphics);
+    batasKabupatenLayer.visible = true;
+    console.log(`Displayed ${graphics.length} kabupaten boundary`);
+  } catch (error) {
+    console.error("Error displaying batas kabupaten:", error);
+  }
+};
+
+// Load Batas Kecamatan GeoJSON - store data without displaying
+const loadBatasKecamatan = async () => {
+  try {
+    const response = await fetch("/geojson/Batas Kecamatan Kubu Raya.geojson");
+    batasKecamatanGeoJSON = await response.json();
+    console.log(
+      `Loaded ${batasKecamatanGeoJSON.features.length} kecamatan boundaries data`
+    );
+  } catch (error) {
+    console.error("Error loading batas kecamatan:", error);
+  }
+};
+
+// Function to zoom to boundary extent (dynamic zoom based on GeoJSON size)
+const zoomToBoundaryExtent = async (layer) => {
+  if (!layer || !view || layer.graphics.length === 0) return;
+
+  try {
+    // Import Extent module
+    const Extent = await import("@arcgis/core/geometry/Extent");
+
+    // Calculate bounds from all graphics in the layer
+    let minLon = Infinity,
+      maxLon = -Infinity;
+    let minLat = Infinity,
+      maxLat = -Infinity;
+
+    layer.graphics.forEach((graphic) => {
+      if (graphic.geometry && graphic.geometry.rings) {
+        graphic.geometry.rings.forEach((ring) => {
+          ring.forEach(([lon, lat]) => {
+            minLon = Math.min(minLon, lon);
+            maxLon = Math.max(maxLon, lon);
+            minLat = Math.min(minLat, lat);
+            maxLat = Math.max(maxLat, lat);
+          });
+        });
+      }
+    });
+
+    // Check if we have valid bounds
+    if (
+      minLon !== Infinity &&
+      maxLon !== -Infinity &&
+      minLat !== Infinity &&
+      maxLat !== -Infinity
+    ) {
+      // Create extent from bounds
+      const extent = new Extent.default({
+        xmin: minLon,
+        ymin: minLat,
+        xmax: maxLon,
+        ymax: maxLat,
+        spatialReference: { wkid: 4326 },
+      });
+
+      // Zoom to extent with padding factor (1.2 = 20% padding around the boundary)
+      // ArcGIS will automatically calculate the best zoom level to fit the extent
+      await view.goTo(extent.expand(1.2), {
+        duration: 1000,
+        easing: "ease-in-out",
+      });
+
+      console.log(
+        `Zoomed to boundary extent: [${minLon.toFixed(4)}, ${minLat.toFixed(
+          4
+        )}] to [${maxLon.toFixed(4)}, ${maxLat.toFixed(4)}]`
+      );
+    }
+  } catch (error) {
+    console.error("Error zooming to boundary extent:", error);
+  }
+};
+
+// Filter and display Batas Kecamatan based on selected kecamatan
+const filterAndDisplayBatasKecamatan = async (kecamatanName) => {
+  if (!batasKecamatanLayer || !batasKecamatanGeoJSON) return;
+
+  // Clear existing graphics
+  batasKecamatanLayer.removeAll();
+
+  // If no kecamatan selected, show kabupaten boundary instead
+  if (!kecamatanName) {
+    batasKecamatanLayer.visible = false;
+    // Display kabupaten boundary
+    if (batasKabupatenLayer) {
+      await displayBatasKabupaten();
+      // Zoom to kabupaten
+      setTimeout(() => zoomToBoundaryExtent(batasKabupatenLayer), 500);
+    }
+    return;
+  }
+
+  // Hide kabupaten layer when kecamatan is selected
+  if (batasKabupatenLayer) {
+    batasKabupatenLayer.removeAll();
+    batasKabupatenLayer.visible = false;
+  }
+
+  try {
+    // Import required modules
+    const [Graphic, Polygon, SimpleFillSymbol, SimpleLineSymbol] =
+      await Promise.all([
+        import("@arcgis/core/Graphic"),
+        import("@arcgis/core/geometry/Polygon"),
+        import("@arcgis/core/symbols/SimpleFillSymbol"),
+        import("@arcgis/core/symbols/SimpleLineSymbol"),
+      ]);
+
+    // Filter features by kecamatan name
+    const filteredFeatures = batasKecamatanGeoJSON.features.filter(
+      (feature) => feature.properties.WADMKC === kecamatanName
+    );
+
+    if (filteredFeatures.length === 0) {
+      console.log(`No boundary found for kecamatan: ${kecamatanName}`);
+      batasKecamatanLayer.visible = false;
+      return;
+    }
+
+    // Create graphics from filtered GeoJSON features
+    const graphics = filteredFeatures.map((feature) => {
+      // Convert MultiPolygon to Polygon
+      let rings = [];
+      if (feature.geometry.type === "MultiPolygon") {
+        // Flatten MultiPolygon to single array of rings
+        feature.geometry.coordinates.forEach((polygon) => {
+          rings.push(...polygon);
+        });
+      } else if (feature.geometry.type === "Polygon") {
+        rings = feature.geometry.coordinates;
+      }
+
+      const polygon = new Polygon.default({
+        rings: rings,
+        spatialReference: { wkid: 4326 },
+      });
+
+      // Style for kecamatan boundary - no fill, only outline
+      const symbol = new SimpleFillSymbol.default({
+        color: [0, 0, 0, 0], // Transparent fill (no fill)
+        outline: new SimpleLineSymbol.default({
+          color: [236, 72, 153, 1], // Pink - tidak nabrak dengan warna jalan
+          width: 1,
+          style: "solid",
+        }),
+      });
+
+      return new Graphic.default({
+        geometry: polygon,
+        symbol: symbol,
+        attributes: feature.properties,
+        popupTemplate: {
+          title: `Kecamatan ${feature.properties.WADMKC}`,
+          content: `
+            <div class="p-2">
+              <p><strong>Kecamatan:</strong> ${feature.properties.WADMKC}</p>
+              <p><strong>Kabupaten:</strong> ${feature.properties.WADMKK}</p>
+              <p><strong>Provinsi:</strong> ${feature.properties.WADMPR}</p>
+            </div>
+          `,
+        },
+      });
+    });
+
+    // Add graphics to layer and make visible
+    batasKecamatanLayer.addMany(graphics);
+    batasKecamatanLayer.visible = true;
+    console.log(
+      `Displayed ${graphics.length} kecamatan boundary for: ${kecamatanName}`
+    );
+
+    // Zoom to kecamatan boundary after adding graphics
+    setTimeout(() => zoomToBoundaryExtent(batasKecamatanLayer), 300);
+  } catch (error) {
+    console.error("Error filtering and displaying batas kecamatan:", error);
+  }
+};
+
+// Load Batas Desa GeoJSON - store data without displaying
+const loadBatasDesa = async () => {
+  try {
+    const response = await fetch("/geojson/Batas Desa Kubu Raya.geojson");
+    batasDesaGeoJSON = await response.json();
+    console.log(
+      `Loaded ${batasDesaGeoJSON.features.length} desa boundaries data`
+    );
+  } catch (error) {
+    console.error("Error loading batas desa:", error);
+  }
+};
+
+// Filter and display Batas Desa based on selected desa
+const filterAndDisplayBatasDesa = async (desaName) => {
+  if (!batasDesaLayer || !batasDesaGeoJSON) return;
+
+  // Clear existing graphics
+  batasDesaLayer.removeAll();
+
+  // If no desa selected, hide the layer
+  if (!desaName) {
+    batasDesaLayer.visible = false;
+    return;
+  }
+
+  try {
+    // Import required modules
+    const [Graphic, Polygon, SimpleFillSymbol, SimpleLineSymbol] =
+      await Promise.all([
+        import("@arcgis/core/Graphic"),
+        import("@arcgis/core/geometry/Polygon"),
+        import("@arcgis/core/symbols/SimpleFillSymbol"),
+        import("@arcgis/core/symbols/SimpleLineSymbol"),
+      ]);
+
+    // Filter features by desa name
+    const filteredFeatures = batasDesaGeoJSON.features.filter(
+      (feature) => feature.properties.WADMKD === desaName
+    );
+
+    if (filteredFeatures.length === 0) {
+      console.log(`No boundary found for desa: ${desaName}`);
+      batasDesaLayer.visible = false;
+      return;
+    }
+
+    // Create graphics from filtered GeoJSON features
+    const graphics = filteredFeatures.map((feature) => {
+      // Convert MultiPolygon to Polygon
+      let rings = [];
+      if (feature.geometry.type === "MultiPolygon") {
+        // Flatten MultiPolygon to single array of rings
+        feature.geometry.coordinates.forEach((polygon) => {
+          rings.push(...polygon);
+        });
+      } else if (feature.geometry.type === "Polygon") {
+        rings = feature.geometry.coordinates;
+      }
+
+      const polygon = new Polygon.default({
+        rings: rings,
+        spatialReference: { wkid: 4326 },
+      });
+
+      // Style for desa boundary - no fill, only outline
+      const symbol = new SimpleFillSymbol.default({
+        color: [0, 0, 0, 0], // Transparent fill (no fill)
+        outline: new SimpleLineSymbol.default({
+          color: [168, 85, 247, 1], // Purple - tidak nabrak dengan warna jalan
+          width: 0.9,
+          style: "solid",
+        }),
+      });
+
+      return new Graphic.default({
+        geometry: polygon,
+        symbol: symbol,
+        attributes: feature.properties,
+        popupTemplate: {
+          title: `Desa ${feature.properties.WADMKD}`,
+          content: `
+            <div class="p-2">
+              <p><strong>Desa:</strong> ${feature.properties.WADMKD}</p>
+              <p><strong>Kecamatan:</strong> ${feature.properties.WADMKC_1}</p>
+              <p><strong>Kabupaten:</strong> ${feature.properties.WADMKK_1}</p>
+              <p><strong>Provinsi:</strong> ${feature.properties.WADMPR_1}</p>
+            </div>
+          `,
+        },
+      });
+    });
+
+    // Add graphics to layer and make visible
+    batasDesaLayer.addMany(graphics);
+    batasDesaLayer.visible = true;
+    console.log(`Displayed ${graphics.length} desa boundary for: ${desaName}`);
+
+    // Zoom to desa boundary after adding graphics
+    setTimeout(() => zoomToBoundaryExtent(batasDesaLayer), 300);
+  } catch (error) {
+    console.error("Error filtering and displaying batas desa:", error);
   }
 };
 
@@ -524,10 +1028,36 @@ onMounted(async () => {
       visible: true,
     });
 
+    // Create batas kabupaten layer (initially hidden)
+    batasKabupatenLayer = new GraphicsLayer.default({
+      title: "Batas Kabupaten",
+      visible: false,
+    });
+
+    // Create batas kecamatan layer (initially hidden)
+    batasKecamatanLayer = new GraphicsLayer.default({
+      title: "Batas Kecamatan",
+      visible: false,
+    });
+
+    // Create batas desa layer (initially hidden)
+    batasDesaLayer = new GraphicsLayer.default({
+      title: "Batas Desa",
+      visible: false,
+    });
+
     // Create map with basic basemap that doesn't require API key
+    // Layer order: bottom to top (batas desa, batas kecamatan, batas kabupaten, roads, drawing, measurement)
     map = new Map.default({
       basemap: "streets", // Basic basemap that works without API key
-      layers: [roadsLayer, graphicsLayer, measurementLayer],
+      layers: [
+        batasDesaLayer,
+        batasKecamatanLayer,
+        batasKabupatenLayer,
+        roadsLayer,
+        graphicsLayer,
+        measurementLayer,
+      ],
     });
 
     // Create map view
@@ -624,20 +1154,60 @@ onMounted(async () => {
 
     console.log("Map loaded successfully");
 
-    // Load roads data from API
-    await loadRoadsData();
+    // Load boundary GeoJSON data first (before roads)
+    await loadBatasKabupaten();
+    await loadBatasKecamatan();
+    await loadBatasDesa();
 
-    // Set initial view to show all data bounds
-    setTimeout(() => {
-      const allDataView = calculateAllDataBounds();
-      view.goTo({
-        center: allDataView.center,
-        zoom: allDataView.zoom,
+    // Display kabupaten boundary by default (pertama kali dimuat)
+    await displayBatasKabupaten();
+
+    // Set initial view to kabupaten boundary immediately (using extent)
+    if (batasKabupatenLayer && batasKabupatenLayer.graphics.length > 0) {
+      const Extent = await import("@arcgis/core/geometry/Extent");
+
+      // Calculate kabupaten bounds
+      let minLon = Infinity,
+        maxLon = -Infinity;
+      let minLat = Infinity,
+        maxLat = -Infinity;
+
+      batasKabupatenLayer.graphics.forEach((graphic) => {
+        if (graphic.geometry && graphic.geometry.rings) {
+          graphic.geometry.rings.forEach((ring) => {
+            ring.forEach(([lon, lat]) => {
+              minLon = Math.min(minLon, lon);
+              maxLon = Math.max(maxLon, lon);
+              minLat = Math.min(minLat, lat);
+              maxLat = Math.max(maxLat, lat);
+            });
+          });
+        }
       });
-      console.log(
-        `Initial view set to Kalimantan Barat province: center [${allDataView.center[0]}, ${allDataView.center[1]}], zoom ${allDataView.zoom}`
-      );
-    }, 1000);
+
+      if (minLon !== Infinity && maxLon !== -Infinity) {
+        // Create extent and expand for padding
+        const extent = new Extent.default({
+          xmin: minLon,
+          ymin: minLat,
+          xmax: maxLon,
+          ymax: maxLat,
+          spatialReference: { wkid: 4326 },
+        });
+
+        // Zoom to extent immediately (no animation for initial load)
+        await view.goTo(extent.expand(1.2), {
+          animate: false,
+        });
+
+        console.log(
+          "Initial view set to Kabupaten Kubu Raya boundary (instant)"
+        );
+      }
+    }
+
+    // Load roads data from API (after view is set)
+    await loadRoadsData();
 
     // Set initial widget positioning after view is created
     adjustWidgetPositioning();
@@ -669,6 +1239,11 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  // Clear search timeout
+  if (searchDebounceTimeout) {
+    clearTimeout(searchDebounceTimeout);
+  }
+
   // Remove window resize listener
   window.removeEventListener("resize", adjustWidgetPositioning);
 
@@ -761,11 +1336,18 @@ const handleBasemapChange = (basemapId) => {
 const handleApplyLayer = async (layerData) => {
   console.log("Applying layer filter from sidebar:", layerData);
 
+  // Reset selected road when applying new filter
+  selectedRoadName.value = null;
+
   // Load roads data with filters
   await loadRoadsData({
     kecamatan: layerData.kecamatan || undefined,
     desa: layerData.desa || undefined,
   });
+
+  // Filter and display boundaries based on selection
+  await filterAndDisplayBatasKecamatan(layerData.kecamatan || "");
+  await filterAndDisplayBatasDesa(layerData.desa || "");
 
   // Show notification
   let filterText = "Semua data";
@@ -778,9 +1360,26 @@ const handleApplyLayer = async (layerData) => {
 
   console.log(`Layer diterapkan untuk: ${filterText}`);
 
-  // Zoom to the loaded roads data extent with a small delay to ensure data is loaded
+  // Zoom to boundary extent (prioritas: desa > kecamatan > kabupaten)
   setTimeout(() => {
-    zoomToRoadsExtent();
+    if (
+      layerData.desa &&
+      batasDesaLayer &&
+      batasDesaLayer.graphics.length > 0
+    ) {
+      // Zoom to desa boundary
+      zoomToBoundaryExtent(batasDesaLayer);
+    } else if (
+      layerData.kecamatan &&
+      batasKecamatanLayer &&
+      batasKecamatanLayer.graphics.length > 0
+    ) {
+      // Zoom to kecamatan boundary
+      zoomToBoundaryExtent(batasKecamatanLayer);
+    } else if (batasKabupatenLayer && batasKabupatenLayer.graphics.length > 0) {
+      // Zoom to kabupaten boundary
+      zoomToBoundaryExtent(batasKabupatenLayer);
+    }
   }, 500);
 };
 
@@ -985,6 +1584,177 @@ const zoomOut = () => {
     });
   }
 };
+
+// Search functions
+const toggleSearchBox = () => {
+  searchBoxOpen.value = !searchBoxOpen.value;
+  if (!searchBoxOpen.value) {
+    clearSearch();
+    // Show all roads when closing search
+    if (selectedRoadName.value) {
+      showAllRoads();
+    }
+  }
+};
+
+const handleSearchInput = () => {
+  // Clear previous timeout
+  if (searchDebounceTimeout) {
+    clearTimeout(searchDebounceTimeout);
+  }
+
+  // If query is empty, clear results
+  if (!searchQuery.value.trim()) {
+    searchResults.value = [];
+    searchLoading.value = false;
+    return;
+  }
+
+  // Set loading state
+  searchLoading.value = true;
+
+  // Debounce search (wait 300ms after user stops typing)
+  searchDebounceTimeout = setTimeout(async () => {
+    await performSearch();
+  }, 300);
+};
+
+const performSearch = async () => {
+  if (!searchQuery.value.trim()) {
+    searchResults.value = [];
+    searchLoading.value = false;
+    return;
+  }
+
+  try {
+    const query = searchQuery.value.trim().toLowerCase();
+
+    // Search through roads layer graphics
+    if (roadsLayer && roadsLayer.graphics) {
+      const results = [];
+
+      roadsLayer.graphics.forEach((graphic) => {
+        const props = graphic.attributes;
+        if (props && props.nama) {
+          // Check if road name contains search query
+          if (props.nama.toLowerCase().includes(query)) {
+            // Use markRaw to prevent Vue from making geometry reactive
+            results.push({
+              nama: props.nama,
+              kecamatan: props.kecamatan || "-",
+              desa: props.desa || "-",
+              keterangan: props.keterangan || props.kondisi || "-",
+              geometry: markRaw(graphic.geometry), // Prevent Vue reactivity on ArcGIS objects
+            });
+          }
+        }
+      });
+
+      // Limit results to top 10
+      searchResults.value = results.slice(0, 10);
+    } else {
+      searchResults.value = [];
+    }
+  } catch (error) {
+    console.error("Error performing search:", error);
+    searchResults.value = [];
+  } finally {
+    searchLoading.value = false;
+  }
+};
+
+const selectSearchResult = async (result) => {
+  if (!view || !result.geometry) return;
+
+  try {
+    // Close search box
+    searchFocused.value = false;
+
+    // Store selected road name (not the graphic object to avoid Vue reactivity issues)
+    selectedRoadName.value = result.nama;
+
+    // Hide all roads except the selected one
+    if (roadsLayer && roadsLayer.graphics) {
+      roadsLayer.graphics.forEach((graphic) => {
+        const graphicName = graphic.attributes?.nama;
+        // Hide all graphics except the selected one
+        if (graphicName !== result.nama) {
+          graphic.visible = false;
+        } else {
+          graphic.visible = true;
+        }
+      });
+    }
+
+    // Zoom to the road geometry
+    await view.goTo(
+      {
+        target: result.geometry,
+        zoom: 16, // Zoom in close to see the road
+      },
+      {
+        duration: 1000,
+        easing: "ease-in-out",
+      }
+    );
+
+    // Open popup for the selected road (find the graphic again to avoid reactivity issues)
+    if (roadsLayer && roadsLayer.graphics) {
+      const selectedGraphic = roadsLayer.graphics.find(
+        (g) => g.attributes?.nama === result.nama
+      );
+      if (selectedGraphic) {
+        view.popup.open({
+          features: [selectedGraphic],
+          location: result.geometry.extent.center,
+        });
+      }
+    }
+
+    console.log(`Zoomed to road: ${result.nama} (other roads hidden)`);
+  } catch (error) {
+    console.error("Error zooming to search result:", error);
+  }
+};
+
+// Function to show all roads again
+const showAllRoads = () => {
+  if (roadsLayer && roadsLayer.graphics) {
+    roadsLayer.graphics.forEach((graphic) => {
+      graphic.visible = true;
+    });
+    selectedRoadName.value = null;
+    console.log("All roads shown");
+  }
+};
+
+const clearSearch = () => {
+  searchQuery.value = "";
+  searchResults.value = [];
+  searchLoading.value = false;
+  searchFocused.value = false;
+
+  if (searchDebounceTimeout) {
+    clearTimeout(searchDebounceTimeout);
+  }
+};
+
+// Close search results when clicking outside
+if (typeof document !== "undefined") {
+  document.addEventListener("click", (e) => {
+    const searchBox = document.querySelector(".search-box");
+    const searchButton = e.target.closest('[title="Cari Jalan"]');
+
+    if (
+      searchBox &&
+      !searchBox.contains(e.target) &&
+      !searchButton &&
+      searchFocused.value
+    ) {
+      searchFocused.value = false;
+    }
+  });
+}
 
 const handleLayerChange = (layerData) => {
   console.log("Layer changed:", layerData);
@@ -1426,6 +2196,32 @@ defineExpose({
   opacity: 0;
 }
 
+/* Slide down transition for search box */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease-in-out;
+}
+
+.slide-down-enter-from {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.slide-down-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.slide-down-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 /* Controls Container - holds both toggle button and zoom controls */
 .controls-container {
   display: flex;
@@ -1467,21 +2263,46 @@ defineExpose({
   flex-direction: column;
 }
 
-/* Button group styling */
-.zoom-controls button,
-.controls-container > button {
+.zoom-controls button {
   display: block;
   width: 100%;
 }
 
-.zoom-controls button:hover,
-.controls-container > button:hover {
+.zoom-controls button:hover {
   z-index: 10;
 }
 
-.zoom-controls button:focus,
-.controls-container > button:focus {
+.zoom-controls button:focus {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
+}
+
+/* Search Controls Container */
+.search-controls-container {
+  width: 44px; /* Fixed width to match zoom controls */
+}
+
+/* Search Control Styling (separate from zoom) */
+.search-control {
+  position: relative;
+  width: 44px; /* Fixed width, same as zoom buttons */
+}
+
+.search-control button {
+  display: block;
+}
+
+.search-control button:hover {
+  z-index: 10;
+}
+
+.search-control button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Search box absolute positioning to not affect button width */
+.search-box {
+  z-index: 9999;
 }
 </style>

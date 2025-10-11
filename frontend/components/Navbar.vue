@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="bg-gradient-to-r from-slate-800 to-blue-900 text-white shadow-lg sticky top-0 z-[9999] transition-colors duration-300"
+    class="fixed top-0 left-0 right-0 bg-slate-900/40 backdrop-blur-lg text-white shadow-xl border-b border-white/10 z-[9999] transition-all duration-300"
   >
     <div class="flex items-center justify-between max-w-full px-8 h-16">
       <!-- Brand -->
@@ -24,10 +24,10 @@
           @click="scrollToSection('hero')"
           href="#"
           :class="[
-            'transition-colors cursor-pointer px-3 py-2 rounded-lg',
+            'transition-all duration-300 cursor-pointer px-4 py-2 rounded-lg font-medium',
             activeSection === 'hero'
-              ? 'text-white bg-white/20 border border-white/30'
-              : 'text-white/70 hover:text-white hover:bg-white/10',
+              ? 'text-white bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg'
+              : 'text-white/80 hover:text-white hover:bg-white/10 hover:backdrop-blur-sm hover:border hover:border-white/20',
           ]"
         >
           Beranda
@@ -36,10 +36,10 @@
           @click="scrollToSection('map')"
           href="#"
           :class="[
-            'transition-colors cursor-pointer px-3 py-2 rounded-lg',
+            'transition-all duration-300 cursor-pointer px-4 py-2 rounded-lg font-medium',
             activeSection === 'map'
-              ? 'text-white bg-white/20 border border-white/30'
-              : 'text-white/70 hover:text-white hover:bg-white/10',
+              ? 'text-white bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg'
+              : 'text-white/80 hover:text-white hover:bg-white/10 hover:backdrop-blur-sm hover:border hover:border-white/20',
           ]"
         >
           Peta Interaktif
@@ -48,10 +48,10 @@
           @click="scrollToSection('analisis')"
           href="#"
           :class="[
-            'transition-colors cursor-pointer px-3 py-2 rounded-lg',
+            'transition-all duration-300 cursor-pointer px-4 py-2 rounded-lg font-medium',
             activeSection === 'analisis'
-              ? 'text-white bg-white/20 border border-white/30'
-              : 'text-white/70 hover:text-white hover:bg-white/10',
+              ? 'text-white bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg'
+              : 'text-white/80 hover:text-white hover:bg-white/10 hover:backdrop-blur-sm hover:border hover:border-white/20',
           ]"
         >
           Analisis
@@ -60,10 +60,10 @@
           @click="scrollToSection('laporan')"
           href="#"
           :class="[
-            'transition-colors cursor-pointer px-3 py-2 rounded-lg',
+            'transition-all duration-300 cursor-pointer px-4 py-2 rounded-lg font-medium',
             activeSection === 'laporan'
-              ? 'text-white bg-white/20 border border-white/30'
-              : 'text-white/70 hover:text-white hover:bg-white/10',
+              ? 'text-white bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg'
+              : 'text-white/80 hover:text-white hover:bg-white/10 hover:backdrop-blur-sm hover:border hover:border-white/20',
           ]"
         >
           Laporan
@@ -75,7 +75,7 @@
         <!-- Theme Toggle -->
         <button
           @click="toggleTheme"
-          class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+          class="p-2 rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105"
           :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
         >
           <svg
