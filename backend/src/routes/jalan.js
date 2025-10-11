@@ -405,6 +405,252 @@ router.get("/filters/desa", async (req, res) => {
   }
 });
 
+// GET /api/jalan/stats/keterangan - Get keterangan statistics
+// MUST BE BEFORE /:id route
+router.get("/stats/keterangan", async (req, res) => {
+  try {
+    const keteranganStats = await prisma.jalanLingkunganKubuRaya.groupBy({
+      by: ["keterangan"],
+      _count: {
+        keterangan: true,
+      },
+      _sum: {
+        panjangM: true,
+      },
+      where: {
+        keterangan: {
+          not: null,
+        },
+      },
+      orderBy: {
+        _count: {
+          keterangan: "desc",
+        },
+      },
+    });
+
+    res.json({
+      success: true,
+      data: keteranganStats,
+    });
+  } catch (error) {
+    console.error("Error fetching keterangan stats:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch keterangan statistics",
+    });
+  }
+});
+
+// GET /api/jalan/stats/kecamatan-kondisi - Get road condition statistics by kecamatan
+router.get("/stats/kecamatan-kondisi", async (req, res) => {
+  try {
+    const kecamatanKondisiStats = await prisma.jalanLingkunganKubuRaya.groupBy({
+      by: ["kecamatan", "keterangan"],
+      _count: {
+        keterangan: true,
+      },
+      _sum: {
+        panjangM: true,
+      },
+      where: {
+        keterangan: {
+          not: null,
+        },
+        kecamatan: {
+          not: null,
+        },
+      },
+      orderBy: {
+        kecamatan: "asc",
+      },
+    });
+
+    // Group by kecamatan and format data
+    const groupedData = {};
+    kecamatanKondisiStats.forEach((stat) => {
+      if (!groupedData[stat.kecamatan]) {
+        groupedData[stat.kecamatan] = {
+          kecamatan: stat.kecamatan,
+          conditions: {},
+          totalRoads: 0,
+          totalLength: 0,
+        };
+      }
+
+      groupedData[stat.kecamatan].conditions[stat.keterangan] = {
+        count: stat._count.keterangan,
+        length: stat._sum.panjangM || 0,
+      };
+
+      groupedData[stat.kecamatan].totalRoads += stat._count.keterangan;
+      groupedData[stat.kecamatan].totalLength += stat._sum.panjangM || 0;
+    });
+
+    // Convert to array and sort by total roads
+    const result = Object.values(groupedData).sort(
+      (a, b) => b.totalRoads - a.totalRoads
+    );
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error fetching kecamatan-kondisi stats:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch kecamatan-kondisi statistics",
+    });
+  }
+});
+
+// GET /api/jalan/stats/material-kondisi - Get road condition statistics by material
+router.get("/stats/material-kondisi", async (req, res) => {
+  try {
+    const { kecamatan } = req.query;
+
+    // Build where clause
+    const where = {
+      keterangan: {
+        not: null,
+      },
+      kondisi: {
+        not: null,
+      },
+    };
+
+    // Add kecamatan filter if provided
+    if (kecamatan) {
+      where.kecamatan = kecamatan;
+    }
+
+    const materialKondisiStats = await prisma.jalanLingkunganKubuRaya.groupBy({
+      by: ["kondisi", "keterangan"],
+      _count: {
+        keterangan: true,
+      },
+      _sum: {
+        panjangM: true,
+      },
+      where,
+      orderBy: {
+        kondisi: "asc",
+      },
+    });
+
+    // Group by material and format data
+    const groupedData = {};
+    materialKondisiStats.forEach((stat) => {
+      if (!groupedData[stat.kondisi]) {
+        groupedData[stat.kondisi] = {
+          material: stat.kondisi,
+          conditions: {},
+          totalRoads: 0,
+          totalLength: 0,
+        };
+      }
+
+      groupedData[stat.kondisi].conditions[stat.keterangan] = {
+        count: stat._count.keterangan,
+        length: stat._sum.panjangM || 0,
+      };
+
+      groupedData[stat.kondisi].totalRoads += stat._count.keterangan;
+      groupedData[stat.kondisi].totalLength += stat._sum.panjangM || 0;
+    });
+
+    // Convert to array and sort by total roads
+    const result = Object.values(groupedData).sort(
+      (a, b) => b.totalRoads - a.totalRoads
+    );
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error fetching material-kondisi stats:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch material-kondisi statistics",
+    });
+  }
+});
+
+// GET /api/jalan/stats/kondisi-material-filtered - Get condition and material stats filtered by kecamatan
+router.get("/stats/kondisi-material-filtered", async (req, res) => {
+  try {
+    const { kecamatan } = req.query;
+
+    // Build where clause
+    const where = {
+      keterangan: {
+        not: null,
+      },
+    };
+
+    // Add kecamatan filter if provided
+    if (kecamatan) {
+      where.kecamatan = kecamatan;
+    }
+
+    const [kondisiStats, materialStats] = await Promise.all([
+      // Get kondisi stats
+      prisma.jalanLingkunganKubuRaya.groupBy({
+        by: ["keterangan"],
+        _count: {
+          keterangan: true,
+        },
+        _sum: {
+          panjangM: true,
+        },
+        where,
+        orderBy: {
+          _count: {
+            keterangan: "desc",
+          },
+        },
+      }),
+      // Get material stats
+      prisma.jalanLingkunganKubuRaya.groupBy({
+        by: ["kondisi"],
+        _count: {
+          kondisi: true,
+        },
+        _sum: {
+          panjangM: true,
+        },
+        where: {
+          kondisi: {
+            not: null,
+          },
+          ...(kecamatan ? { kecamatan } : {}),
+        },
+        orderBy: {
+          _count: {
+            kondisi: "desc",
+          },
+        },
+      }),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        kondisiStats,
+        materialStats,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching kondisi-material-filtered stats:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch kondisi-material-filtered statistics",
+    });
+  }
+});
+
 // GET /api/jalan/filters/options - Get filter options
 // MUST BE BEFORE /:id route
 router.get("/filters/options", async (req, res) => {

@@ -5,8 +5,19 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ["@nuxtjs/tailwindcss"],
   css: ["~/assets/css/main.css"],
+  devServer: {
+    port: 3000,
+  },
   tailwindcss: {
     cssPath: "~/assets/css/main.css",
+  },
+  nitro: {
+    devProxy: {
+      "/api": {
+        target: "http://localhost:3001/api",
+        changeOrigin: true,
+      },
+    },
   },
   app: {
     head: {
