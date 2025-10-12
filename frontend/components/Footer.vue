@@ -14,7 +14,7 @@
           </div>
           <div>
             <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              SIJALI Web GIS
+              SIJALI Kab. Kubu Raya
             </p>
             <p class="text-xs text-gray-500 dark:text-gray-400">
               Sistem Informasi Jalan Lingkungan - Kabupaten Kubu Raya

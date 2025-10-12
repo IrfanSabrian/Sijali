@@ -21,13 +21,13 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: "SIJALI Web GIS",
+      title: "SIJALI Kab. Kubu Raya",
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         {
           name: "description",
-          content: "Sistem Informasi Jalan Lingkungan Web GIS",
+          content: "Sistem Informasi Jalan Lingkungan Kab. Kubu Raya",
         },
       ],
       link: [

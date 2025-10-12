@@ -18,7 +18,7 @@
           v-if="showMainSidebar"
           :class="[
             'absolute top-0 left-0 h-full z-[9998] transition-all duration-300 ease-in-out',
-            'w-full md:w-80',
+            'w-[85%] md:w-80',
           ]"
         >
           <SidebarPanel
@@ -32,6 +32,7 @@
             @drawing-tool="handleDrawingTool"
             @clear-drawing="handleClearDrawing"
             @selection-mode="handleSelectionMode"
+            @close="showMainSidebar = false"
           />
         </div>
       </transition>
@@ -90,7 +91,7 @@
         <!-- Roads Loading Indicator -->
         <div
           v-if="roadsLoading"
-          class="absolute top-4 left-4 z-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 px-3 py-2"
+          class="absolute top-4 left-4 z-[9999] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 px-3 py-2"
         >
           <div class="flex items-center">
             <div
@@ -105,7 +106,7 @@
         <!-- Roads Error Indicator -->
         <div
           v-if="roadsError"
-          class="absolute top-4 left-4 z-40 bg-red-100 dark:bg-red-900 rounded-lg shadow-lg border border-red-200 dark:border-red-700 px-3 py-2"
+          class="absolute top-4 left-4 z-[9999] bg-red-100 dark:bg-red-900 rounded-lg shadow-lg border border-red-200 dark:border-red-700 px-3 py-2"
         >
           <div class="flex items-center">
             <svg
@@ -664,7 +665,7 @@
                 <iframe
                   v-if="videoPopupVisible"
                   class="absolute top-0 left-0 w-full h-full"
-                  src="https://www.youtube.com/embed/1cxs89NrDJo?autoplay=1&rel=0"
+                  src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0"
                   title="Video Dokumentasi Jalan"
                   frameborder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -747,7 +748,10 @@ const calculateAllDataBounds = () => {
 // Refs
 const mapDiv = ref(null);
 const loading = ref(true);
-const showMainSidebar = ref(true); // Main sidebar open by default
+// Sidebar: open by default on desktop, closed on mobile
+const showMainSidebar = ref(
+  typeof window !== "undefined" ? window.innerWidth >= 768 : true
+);
 const showLeftSidebar = ref(false); // Legacy sidebar panels
 const showRightSidebar = ref(false);
 const showHelp = ref(false);

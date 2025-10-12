@@ -1,6 +1,6 @@
 <template>
   <div class="sidebar-panel">
-    <!-- Header dengan Logo dan Tombol Hide -->
+    <!-- Header dengan Logo dan Tombol Close (Mobile) -->
     <div class="sidebar-header">
       <div class="logo-section">
         <div class="logo">
@@ -19,6 +19,26 @@
           </div>
         </div>
       </div>
+      <!-- Close Button (Mobile Only) -->
+      <button
+        @click="$emit('close')"
+        class="close-button md:hidden"
+        title="Tutup Sidebar"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
 
     <!-- Navigation Tabs -->
@@ -355,6 +375,7 @@ const props = defineProps({
 // Emits
 const emit = defineEmits([
   "hide",
+  "close",
   "apply-layer",
   "basemap-change",
   "tool-change",
@@ -635,6 +656,10 @@ const resolveThumbnail = (thumbnailUrl) => {
 
 .sidebar-header {
   @apply flex items-center justify-between p-4 border-b border-gray-200;
+}
+
+.close-button {
+  @apply p-2 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors;
 }
 
 .logo-section {

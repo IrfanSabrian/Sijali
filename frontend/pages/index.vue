@@ -39,9 +39,10 @@
           </h1>
 
           <p class="hero-description" data-aos="fade-up" data-aos-delay="400">
-            Platform GIS terintegrasi untuk pengelolaan dan analisis data jalan
-            lingkungan di Kabupaten Kubu Raya dengan teknologi ArcGIS terdepan.
-            Monitor, analisis, dan kelola infrastruktur jalan secara real-time.
+            Platform WebGIS untuk pengelolaan data jalan lingkungan di Kabupaten
+            Kubu Raya. Menyajikan informasi kondisi jalan, material perkerasan,
+            dan analisis kerusakan untuk mendukung pengambilan keputusan dalam
+            pemeliharaan infrastruktur.
           </p>
 
           <div class="hero-buttons" data-aos="fade-up" data-aos-delay="500">
@@ -63,7 +64,7 @@
               </div>
               <div class="btn-content">
                 <span class="btn-title">Lihat Peta Interaktif</span>
-                <span class="btn-subtitle">Eksplorasi data GIS</span>
+                <span class="btn-subtitle">Akses peta & data spasial</span>
               </div>
             </button>
 
@@ -85,7 +86,7 @@
               </div>
               <div class="btn-content">
                 <span class="btn-title">Analisis Data</span>
-                <span class="btn-subtitle">Dashboard komprehensif</span>
+                <span class="btn-subtitle">Visualisasi & statistik</span>
               </div>
             </button>
           </div>
@@ -203,8 +204,8 @@
       <div class="section-header" data-aos="fade-up">
         <h2 class="section-title">Peta Interaktif</h2>
         <p class="section-description">
-          Eksplorasi data jalan lingkungan dengan peta interaktif yang
-          dilengkapi dengan berbagai layer dan alat analisis GIS.
+          Jelajahi data jalan lingkungan melalui peta interaktif dengan berbagai
+          layer informasi dan fitur analisis spasial.
         </p>
       </div>
       <div class="map-container" data-aos="zoom-in" data-aos-delay="200">
@@ -226,10 +227,10 @@
     <!-- Analisis Section -->
     <section id="analisis" class="analisis-section">
       <div class="section-header" data-aos="fade-up">
-        <h2 class="section-title">Analisis Kerusakan & Kondisi Jalan</h2>
+        <h2 class="section-title">Analisis Kondisi & Kerusakan Jalan</h2>
         <p class="section-description">
-          Dashboard analisis komprehensif untuk memahami kerusakan jalan dan
-          kondisi material infrastruktur jalan lingkungan di Kabupaten Kubu
+          Visualisasi dan analisis mendalam kondisi jalan berdasarkan tingkat
+          kerusakan, jenis material, dan sebaran geografis di Kabupaten Kubu
           Raya.
         </p>
       </div>
@@ -407,6 +408,12 @@ let goodConditionCounter = null;
 // Flag to track if data is loaded
 const statsLoaded = ref(false);
 
+// Flag to track if animation has been played
+const animationPlayed = ref(false);
+
+// Intersection Observer for stat cards
+let statsObserver = null;
+
 // Flag to prevent scroll detection during manual scroll
 let isManualScrolling = false;
 let scrollTimeout = null;
@@ -486,6 +493,12 @@ const initializeCounters = () => {
 // Start counter animations sequentially (left to right)
 const startCounters = () => {
   if (!statsLoaded.value) return;
+
+  // Prevent animation from playing multiple times
+  if (animationPlayed.value) return;
+
+  // Mark animation as played
+  animationPlayed.value = true;
 
   // Reset counters to 0 first
   if (roadLengthCounter) roadLengthCounter.reset();
@@ -606,15 +619,73 @@ const loadHeroStats = async () => {
       }
     }
 
-    // Mark stats as loaded and start counters
+    // Mark stats as loaded (but don't start animation yet)
     statsLoaded.value = true;
-    // Wait a bit for DOM to be ready, then start animation
-    setTimeout(() => {
-      startCounters();
-    }, 100);
+    // Animation will be triggered by Intersection Observer when stat cards are visible
   } catch (error) {
     console.error("Error loading hero stats:", error);
   }
+};
+
+// Setup Intersection Observer for stat cards
+const setupStatsObserver = () => {
+  if (typeof window === "undefined") return;
+
+  const statsElement = document.querySelector(".hero-stats");
+  if (!statsElement) return;
+
+  // Create intersection observer with threshold for mobile/desktop
+  const options = {
+    root: null,
+    rootMargin: "0px",
+    threshold: 0.3, // Trigger when 30% of the element is visible
+  };
+
+  statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting && statsLoaded.value && !animationPlayed.value) {
+        // Element is visible, start counter animation
+        console.log("Stat cards visible, starting animation...");
+        setTimeout(() => {
+          startCounters();
+        }, 100);
+      }
+    });
+  }, options);
+
+  // Start observing the stats element
+  statsObserver.observe(statsElement);
+  console.log("Stats observer setup complete");
+
+  // Check if element is already visible (for desktop)
+  // If stat cards are immediately visible on page load, trigger animation
+  setTimeout(() => {
+    if (statsLoaded.value && !animationPlayed.value) {
+      const rect = statsElement.getBoundingClientRect();
+      const isVisible =
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <=
+          (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <=
+          (window.innerWidth || document.documentElement.clientWidth);
+
+      // If at least partially visible in viewport, start animation
+      const isPartiallyVisible =
+        rect.top <
+          (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.bottom > 0;
+
+      if (isVisible || isPartiallyVisible) {
+        console.log(
+          "Stat cards already visible on load (desktop), starting animation..."
+        );
+        setTimeout(() => {
+          startCounters();
+        }, 100);
+      }
+    }
+  }, 300);
 };
 
 // Scroll to section function with proper offset
@@ -699,18 +770,28 @@ onMounted(() => {
   // Initialize counters first
   initializeCounters();
 
-  // Load hero stats from API (animation will run once after data loaded)
+  // Load hero stats from API
   loadHeroStats();
+
+  // Setup intersection observer for stat cards (with delay to ensure DOM is ready)
+  setTimeout(() => {
+    setupStatsObserver();
+  }, 200);
 });
 
 // Remove scroll listener on unmount
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
+
+  // Disconnect intersection observer
+  if (statsObserver) {
+    statsObserver.disconnect();
+  }
 });
 
 // Set page meta
 useHead({
-  title: "SIJALI Web GIS - Sistem Informasi Jalan Lingkungan",
+  title: "SIJALI Kab. Kubu Raya - Sistem Informasi Jalan Lingkungan",
   meta: [
     {
       name: "description",
