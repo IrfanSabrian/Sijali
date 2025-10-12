@@ -39,9 +39,9 @@
     <!-- Tab Content -->
     <div class="tab-content">
       <!-- Layer Tab -->
-      <div v-if="activeTab === 'layer'" class="tab-panel">
-        <!-- Filter Jalan Section -->
-        <div class="filter-section">
+      <div v-if="activeTab === 'layer'" class="tab-panel layer-tab-wrapper">
+        <!-- Scrollable Filter Section -->
+        <div class="filter-section-scrollable">
           <h4 class="section-title">Filter Data Jalan</h4>
 
           <div class="form-group">
@@ -80,6 +80,33 @@
             </p>
           </div>
 
+          <div class="form-group">
+            <label class="form-label">Pilih Tahun/Periode</label>
+            <select v-model="selectedTahun" class="form-select">
+              <option value="">-- Semua Tahun --</option>
+              <option v-for="tahun in tahunOptions" :key="tahun" :value="tahun">
+                {{ tahun }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Pilih Kondisi Material</label>
+            <select v-model="selectedKondisi" class="form-select">
+              <option value="">-- Semua Kondisi --</option>
+              <option
+                v-for="kondisi in kondisiOptions"
+                :key="kondisi"
+                :value="kondisi"
+              >
+                {{ kondisi }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fixed Apply Button -->
+        <div class="filter-button-fixed">
           <button class="apply-button" @click="applyLayer">
             Terapkan Filter
           </button>
@@ -151,43 +178,143 @@
         <div class="tools-content">
           <h3>Alat Peta</h3>
           <div class="tool-buttons">
-            <button class="tool-button">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="currentColor"
+            <!-- Drawing Tools -->
+            <div class="tool-section">
+              <h4
+                class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3"
               >
-                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              Pencarian
-            </button>
-            <button class="tool-button">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="currentColor"
+                Alat Gambar
+              </h4>
+              <div class="grid grid-cols-3 gap-2">
+                <button
+                  @click="activateDrawingTool('polyline')"
+                  class="tool-button-small"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="4 17 10 11 16 17 22 11" />
+                  </svg>
+                  <span>Garis</span>
+                </button>
+                <button
+                  @click="activateDrawingTool('polygon')"
+                  class="tool-button-small"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                    <polyline points="2 17 12 22 22 17" />
+                    <polyline points="2 12 12 17 22 12" />
+                  </svg>
+                  <span>Poligon</span>
+                </button>
+                <button
+                  @click="activateDrawingTool('rectangle')"
+                  class="tool-button-small"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  </svg>
+                  <span>Persegi</span>
+                </button>
+              </div>
+              <div class="grid grid-cols-2 gap-2 mt-2">
+                <button
+                  @click="activateSelectionMode"
+                  class="tool-button-small bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" />
+                  </svg>
+                  <span>Pilih</span>
+                </button>
+                <button
+                  @click="clearDrawing"
+                  class="tool-button-small bg-red-50 hover:bg-red-100 text-red-600 border-red-200"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path
+                      d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                    />
+                  </svg>
+                  <span>Hapus</span>
+                </button>
+              </div>
+
+              <!-- Shape Info Section -->
+              <div
+                v-if="shapeInfo"
+                class="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
               >
-                <path
-                  d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-                />
-              </svg>
-              Gambar
-            </button>
-            <button class="tool-button">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path
-                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"
-                />
-              </svg>
-              Ukur
-            </button>
+                <h5
+                  class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                >
+                  {{
+                    shapeInfo.type === "polyline" ? "Panjang Area" : "Luas Area"
+                  }}
+                </h5>
+                <p
+                  class="text-sm font-bold text-blue-600 dark:text-blue-400 mb-3"
+                >
+                  {{ shapeInfo.measurement }}
+                </p>
+
+                <div class="flex items-center justify-between mb-2">
+                  <h5
+                    class="text-xs font-semibold text-gray-700 dark:text-gray-300"
+                  >
+                    GeoJSON
+                  </h5>
+                  <button
+                    @click="copyGeoJSON"
+                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors p-1"
+                    title="Copy GeoJSON"
+                  >
+                    <FontAwesomeIcon :icon="faCopy" class="text-sm" />
+                  </button>
+                </div>
+                <div>
+                  <pre
+                    class="text-xs bg-white dark:bg-gray-800 p-2 rounded border border-gray-300 dark:border-gray-600 overflow-x-auto max-h-48 overflow-y-auto"
+                    >{{ shapeInfo.geojson }}</pre
+                  >
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -202,13 +329,26 @@ import {
   faLayerGroup,
   faCog,
   faTools,
+  faCopy,
 } from "@fortawesome/free-solid-svg-icons";
 
 // Props
-defineProps({
+const props = defineProps({
   isVisible: {
     type: Boolean,
     default: true,
+  },
+  currentOpacity: {
+    type: Number,
+    default: 100,
+  },
+  currentBasemap: {
+    type: String,
+    default: "topo",
+  },
+  shapeInfo: {
+    type: Object,
+    default: null,
   },
 });
 
@@ -219,23 +359,55 @@ const emit = defineEmits([
   "basemap-change",
   "tool-change",
   "opacity-change",
+  "drawing-tool",
+  "clear-drawing",
+  "selection-mode",
 ]);
 
 // Reactive data
 const activeTab = ref("layer");
 const selectedKecamatan = ref("");
 const selectedDesa = ref("");
-const selectedBasemap = ref("streets");
-const opacity = ref(100);
+const selectedTahun = ref("");
+const selectedKondisi = ref("");
+const selectedBasemap = ref(props.currentBasemap);
+const opacity = ref(props.currentOpacity);
 
 // Options for dropdowns
 const kecamatanOptions = ref([]);
 const desaOptions = ref([]);
+const tahunOptions = ref([]);
+const kondisiOptions = ref([]);
 
 // Watch for opacity changes and emit event
 watch(opacity, (newOpacity) => {
   emit("opacity-change", newOpacity);
 });
+
+// Watch for currentOpacity prop changes to sync local state
+watch(
+  () => props.currentOpacity,
+  (newValue) => {
+    opacity.value = newValue;
+  }
+);
+
+// Watch for currentBasemap prop changes to sync local state
+watch(
+  () => props.currentBasemap,
+  (newValue) => {
+    selectedBasemap.value = newValue;
+  }
+);
+
+// Watch shapeInfo prop for debugging
+watch(
+  () => props.shapeInfo,
+  (newValue) => {
+    console.log("[SidebarPanel] shapeInfo prop changed:", newValue);
+  },
+  { deep: true }
+);
 
 // Tabs configuration with Font Awesome icons
 const tabs = [
@@ -299,12 +471,40 @@ const fetchDesaOptions = async () => {
   }
 };
 
+// Fetch tahun options from API
+const fetchTahunOptions = async () => {
+  try {
+    const response = await fetch(`${apiUrl}/jalan/filters/tahun`);
+    const data = await response.json();
+    if (data.success) {
+      tahunOptions.value = data.data;
+    }
+  } catch (error) {
+    console.error("Error fetching tahun options:", error);
+  }
+};
+
+// Fetch kondisi options from API
+const fetchKondisiOptions = async () => {
+  try {
+    const response = await fetch(`${apiUrl}/jalan/filters/kondisi`);
+    const data = await response.json();
+    if (data.success) {
+      kondisiOptions.value = data.data;
+    }
+  } catch (error) {
+    console.error("Error fetching kondisi options:", error);
+  }
+};
+
 // Methods
 const applyLayer = () => {
   // Emit event to parent component
   emit("apply-layer", {
     kecamatan: selectedKecamatan.value,
     desa: selectedDesa.value,
+    tahun: selectedTahun.value,
+    kondisi: selectedKondisi.value,
   });
 };
 
@@ -314,53 +514,51 @@ const handleBasemapChange = () => {
 };
 
 const basemapOptions = [
-  // Imagery (example using working arcgis.com item thumbnail)
   {
     id: "satellite",
-    label: "Citra",
-    thumbnail:
-      "https://www.arcgis.com/sharing/rest/content/items/81c82e5d0f9241469f78f94b0037581a/info/thumbnail/thumbnail1591224931210.jpeg",
+    label: "Imagery",
+    thumbnail: "/basemap/imagery.png",
   },
   {
     id: "hybrid",
-    label: "Citra Hibrida",
-    style: "/styles/arcgis/imagery/labels",
-  },
-  { id: "streets", label: "Jalan", style: "/styles/arcgis/streets" },
-  {
-    id: "topographic",
-    label: "Topografi",
-    style: "/styles/arcgis/topographic",
-  },
-  { id: "gray", label: "Abu-abu", style: "/styles/arcgis/light-gray" },
-  {
-    id: "dark-gray",
-    label: "Abu-abu Gelap",
-    style: "/styles/arcgis/dark-gray",
-  },
-  { id: "oceans", label: "Lautan", style: "/styles/arcgis/oceans" },
-  {
-    id: "arcgis-navigation",
-    label: "Navigation",
-    style: "/styles/arcgis/navigation",
+    label: "Imagery With Labels",
+    thumbnail: "/basemap/imageryWithLabels.png",
   },
   {
-    id: "arcgis-navigation-night",
-    label: "Navigation Night",
-    style: "/styles/arcgis/navigation-night",
+    id: "streets",
+    label: "Streets",
+    thumbnail: "/basemap/streets.png",
+  },
+  {
+    id: "topo",
+    label: "Topographic",
+    thumbnail: "/basemap/topographic.png",
+  },
+  {
+    id: "terrain",
+    label: "Terrain With Labels",
+    thumbnail: "/basemap/terrainWithLabels.png",
+  },
+  {
+    id: "gray",
+    label: "Light Gray Canvas",
+    thumbnail: "/basemap/lightGrayCanvas.png",
   },
   {
     id: "national-geographic",
     label: "National Geographic",
-    style: "/styles/arcgis/charted-territory",
+    thumbnail: "/basemap/nationalGeographic.png",
   },
-  { id: "arcgis-terrain", label: "Terrain", style: "/styles/arcgis/terrain" },
   {
-    id: "arcgis-human-geography",
-    label: "Human Geography",
-    style: "/styles/arcgis/human-geography",
+    id: "oceans",
+    label: "Ocean",
+    thumbnail: "/basemap/ocean.png",
   },
-  { id: "arcgis-nova", label: "Nova", style: "/styles/arcgis/nova" },
+  {
+    id: "osm",
+    label: "OpenStreetMap",
+    thumbnail: "/basemap/openStreetMap.png",
+  },
 ];
 
 const selectBasemap = (id) => {
@@ -368,10 +566,42 @@ const selectBasemap = (id) => {
   handleBasemapChange();
 };
 
+// Drawing tools
+const activateDrawingTool = (tool) => {
+  emit("drawing-tool", tool);
+  console.log(`Drawing tool activated: ${tool}`);
+};
+
+const activateSelectionMode = () => {
+  emit("selection-mode");
+  console.log("Selection mode activated");
+};
+
+const clearDrawing = () => {
+  emit("clear-drawing");
+  console.log("Clear all drawings");
+};
+
+const copyGeoJSON = () => {
+  if (props.shapeInfo && props.shapeInfo.geojson) {
+    navigator.clipboard
+      .writeText(props.shapeInfo.geojson)
+      .then(() => {
+        alert("GeoJSON copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy GeoJSON:", err);
+        alert("Failed to copy GeoJSON");
+      });
+  }
+};
+
 // Lifecycle hooks
 onMounted(() => {
   fetchKecamatanOptions();
   fetchDesaOptions();
+  fetchTahunOptions();
+  fetchKondisiOptions();
 });
 
 // Thumbnail error fallback
@@ -382,21 +612,13 @@ const onThumbError = (event, bm) => {
 };
 
 // Normalize/resolve incoming thumbnail URLs so they are image URLs
-const resolveThumbnail = (thumbnailOrStyle) => {
-  if (!thumbnailOrStyle) return null;
-  // If it's an arcgis.com sharing thumbnail URL, just strip ?f=json
-  if (/arcgis\.com\/sharing\/rest\//i.test(thumbnailOrStyle)) {
-    return thumbnailOrStyle.replace(/\?f=json.*/i, "");
+const resolveThumbnail = (thumbnailUrl) => {
+  if (!thumbnailUrl) {
+    // Return a placeholder SVG if no thumbnail is provided
+    return "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23e5e7eb'/%3E%3Ctext x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='10' fill='%239ca3af'%3ENo Img%3C/text%3E%3C/svg%3E";
   }
-  // If it's a Basemaps style path from your list, use Basemaps API thumbnail
-  if (/^\/?styles\//.test(thumbnailOrStyle)) {
-    const stylePath = thumbnailOrStyle.startsWith("/")
-      ? thumbnailOrStyle
-      : `/${thumbnailOrStyle}`;
-    // Public thumbnail endpoint (no key required for image preview)
-    return `https://basemaps-api.arcgis.com/arcgis/rest/services${stylePath}/resources/thumbnail?f=image`;
-  }
-  return thumbnailOrStyle;
+  // Return the thumbnail URL as-is (it's already a direct image URL)
+  return thumbnailUrl;
 };
 </script>
 
@@ -460,6 +682,21 @@ const resolveThumbnail = (thumbnailOrStyle) => {
   @apply p-4 space-y-4;
 }
 
+/* Layer Tab Wrapper - Flex container for scrollable content + fixed button */
+.layer-tab-wrapper {
+  @apply flex flex-col h-full p-0 space-y-0;
+}
+
+/* Scrollable Filter Section */
+.filter-section-scrollable {
+  @apply flex-1 overflow-y-auto p-4 space-y-4;
+}
+
+/* Fixed Apply Button Container */
+.filter-button-fixed {
+  @apply sticky bottom-0 bg-white border-t border-gray-200 p-4 shadow-lg;
+}
+
 .form-group {
   @apply space-y-2;
 }
@@ -499,15 +736,35 @@ const resolveThumbnail = (thumbnailOrStyle) => {
 }
 
 .tool-buttons {
-  @apply grid grid-cols-1 gap-3;
+  @apply space-y-4;
+}
+
+.tool-section {
+  @apply space-y-2;
 }
 
 .tool-button {
-  @apply flex items-center space-x-3 p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors;
+  @apply flex items-center justify-center space-x-3 w-full p-3 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-all;
 }
 
 .tool-button svg {
   @apply text-gray-600;
+}
+
+.tool-button:hover svg {
+  @apply text-blue-600;
+}
+
+.tool-button-small {
+  @apply flex flex-col items-center justify-center space-y-1 p-3 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-all text-xs font-medium text-gray-700;
+}
+
+.tool-button-small svg {
+  @apply text-gray-600;
+}
+
+.tool-button-small:hover svg {
+  @apply text-blue-600;
 }
 
 /* Boundary Section Styles */

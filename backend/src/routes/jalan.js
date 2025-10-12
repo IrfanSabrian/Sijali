@@ -293,11 +293,8 @@ router.get("/stats/summary", async (req, res) => {
             panjangM: true,
           },
           orderBy: {
-            _count: {
-              kecamatan: "desc",
-            },
+            kecamatan: "asc",
           },
-          take: 10,
         }),
         prisma.jalanLingkunganKubuRaya.groupBy({
           by: ["tahun"],
@@ -405,6 +402,70 @@ router.get("/filters/desa", async (req, res) => {
   }
 });
 
+// GET /api/jalan/filters/tahun - Get distinct tahun list
+// MUST BE BEFORE /:id route
+router.get("/filters/tahun", async (req, res) => {
+  try {
+    const tahuns = await prisma.jalanLingkunganKubuRaya.findMany({
+      select: {
+        tahun: true,
+      },
+      distinct: ["tahun"],
+      where: {
+        tahun: {
+          not: null,
+        },
+      },
+      orderBy: {
+        tahun: "desc", // Descending order for years (newest first)
+      },
+    });
+
+    res.json({
+      success: true,
+      data: tahuns.map((t) => t.tahun).filter(Boolean),
+    });
+  } catch (error) {
+    console.error("Error fetching tahun options:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch tahun options",
+    });
+  }
+});
+
+// GET /api/jalan/filters/kondisi - Get distinct kondisi list
+// MUST BE BEFORE /:id route
+router.get("/filters/kondisi", async (req, res) => {
+  try {
+    const kondisis = await prisma.jalanLingkunganKubuRaya.findMany({
+      select: {
+        kondisi: true,
+      },
+      distinct: ["kondisi"],
+      where: {
+        kondisi: {
+          not: null,
+        },
+      },
+      orderBy: {
+        kondisi: "asc",
+      },
+    });
+
+    res.json({
+      success: true,
+      data: kondisis.map((k) => k.kondisi).filter(Boolean),
+    });
+  } catch (error) {
+    console.error("Error fetching kondisi options:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch kondisi options",
+    });
+  }
+});
+
 // GET /api/jalan/stats/keterangan - Get keterangan statistics
 // MUST BE BEFORE /:id route
 router.get("/stats/keterangan", async (req, res) => {
@@ -487,9 +548,9 @@ router.get("/stats/kecamatan-kondisi", async (req, res) => {
       groupedData[stat.kecamatan].totalLength += stat._sum.panjangM || 0;
     });
 
-    // Convert to array and sort by total roads
-    const result = Object.values(groupedData).sort(
-      (a, b) => b.totalRoads - a.totalRoads
+    // Convert to array and sort by kecamatan name (alphabetically)
+    const result = Object.values(groupedData).sort((a, b) =>
+      a.kecamatan.localeCompare(b.kecamatan)
     );
 
     res.json({

@@ -22,10 +22,16 @@
           ]"
         >
           <SidebarPanel
+            :current-opacity="currentOpacity"
+            :current-basemap="currentBasemap"
+            :shape-info="shapeInfo"
             @apply-layer="handleApplyLayer"
             @basemap-change="handleBasemapChange"
             @tool-change="handleToolChange"
             @opacity-change="handleOpacityChange"
+            @drawing-tool="handleDrawingTool"
+            @clear-drawing="handleClearDrawing"
+            @selection-mode="handleSelectionMode"
           />
         </div>
       </transition>
@@ -276,7 +282,7 @@
                       @input="handleSearchInput"
                       @focus="searchFocused = true"
                       type="text"
-                      placeholder="Cari nama jalan..."
+                      placeholder="Cari nomor ruas atau nama jalan..."
                       class="w-full px-3 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
                     />
                     <button
@@ -309,18 +315,23 @@
                       @click="selectSearchResult(result)"
                       class="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
                     >
-                      <div
-                        class="text-sm font-medium text-gray-800 dark:text-white"
-                      >
-                        {{ result.nama }}
-                      </div>
-                      <div
-                        class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"
-                      >
-                        {{ result.desa }}, {{ result.kecamatan }}
-                        <span v-if="result.keterangan" class="ml-2">
-                          • {{ result.keterangan }}
-                        </span>
+                      <div>
+                        <div
+                          class="text-sm font-medium text-gray-800 dark:text-white"
+                        >
+                          {{ result.nama }}
+                        </div>
+                        <div
+                          class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+                        >
+                          {{ result.desa }}, {{ result.kecamatan }}
+                        </div>
+                        <div
+                          v-if="result.noRuas && result.noRuas !== '-'"
+                          class="text-xs text-gray-600 dark:text-gray-300 mt-1"
+                        >
+                          • No. Ruas: {{ result.noRuas }}
+                        </div>
                       </div>
                     </button>
                   </div>
@@ -351,6 +362,318 @@
             </transition>
           </div>
         </div>
+
+        <!-- Legend (Top Right) -->
+        <div class="absolute top-4 right-4 z-40">
+          <!-- Legend Toggle Button (when hidden) -->
+          <button
+            v-if="!legendVisible"
+            @click="legendVisible = true"
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            title="Tampilkan Legenda"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              class="text-gray-700 dark:text-gray-300"
+            >
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </button>
+
+          <!-- Legend Content -->
+          <div
+            v-if="legendVisible"
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+          >
+            <div class="p-3">
+              <!-- Header with Close Button -->
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-sm font-bold text-gray-800 dark:text-white">
+                  Legenda
+                </h4>
+                <button
+                  @click="legendVisible = false"
+                  class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                  title="Sembunyikan Legenda"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Boundaries Section -->
+              <div class="mb-3">
+                <p
+                  class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2"
+                >
+                  Batas Wilayah
+                </p>
+                <div class="space-y-1.5">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-0.5 bg-[#3b82f6] rounded"></div>
+                    <span class="text-xs text-gray-700 dark:text-gray-300"
+                      >Kabupaten</span
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-0.5 bg-[#ec4899] rounded"></div>
+                    <span class="text-xs text-gray-700 dark:text-gray-300"
+                      >Kecamatan</span
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-0.5 bg-[#a855f7] rounded"></div>
+                    <span class="text-xs text-gray-700 dark:text-gray-300"
+                      >Desa</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Road Conditions Section -->
+              <div class="border-t border-gray-200 dark:border-gray-700 pt-2">
+                <p
+                  class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2"
+                >
+                  Kondisi Jalan
+                </p>
+                <div class="space-y-1.5">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-1 bg-[#10b981] rounded"></div>
+                    <span class="text-xs text-gray-700 dark:text-gray-300"
+                      >Baik</span
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-1 bg-[#eab308] rounded"></div>
+                    <span class="text-xs text-gray-700 dark:text-gray-300"
+                      >Sedang</span
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-1 bg-[#f97316] rounded"></div>
+                    <span class="text-xs text-gray-700 dark:text-gray-300"
+                      >Rusak Ringan</span
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-1 bg-[#dc2626] rounded"></div>
+                    <span class="text-xs text-gray-700 dark:text-gray-300"
+                      >Rusak Berat</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Road Info Box (Bottom Right) -->
+        <transition name="slide-up">
+          <div
+            v-if="roadInfoVisible && selectedRoadInfo"
+            class="absolute bottom-4 right-4 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
+          >
+            <!-- Header -->
+            <div
+              class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3 flex items-center justify-between"
+            >
+              <h3 class="font-bold text-lg">
+                {{ selectedRoadInfo.nama || "Informasi Jalan" }}
+              </h3>
+              <button
+                @click="closeRoadInfo"
+                class="text-white hover:text-gray-200 transition-colors"
+                title="Tutup"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Content -->
+            <div class="p-4 space-y-3 max-h-96 overflow-y-auto">
+              <div class="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">No Ruas</p>
+                <p
+                  class="text-sm font-medium text-gray-900 dark:text-white mt-1"
+                >
+                  {{ selectedRoadInfo.nomorRuas || "-" }}
+                </p>
+              </div>
+
+              <div class="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Periode</p>
+                <p
+                  class="text-sm font-medium text-gray-900 dark:text-white mt-1"
+                >
+                  {{ selectedRoadInfo.periode || "-" }}
+                </p>
+              </div>
+
+              <div class="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  Nama Jalan
+                </p>
+                <p
+                  class="text-sm font-medium text-gray-900 dark:text-white mt-1"
+                >
+                  {{ selectedRoadInfo.nama || "-" }}
+                </p>
+              </div>
+
+              <div class="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  Kecamatan
+                </p>
+                <p
+                  class="text-sm font-medium text-gray-900 dark:text-white mt-1"
+                >
+                  {{ selectedRoadInfo.kecamatan || "-" }}
+                </p>
+              </div>
+
+              <div class="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Desa</p>
+                <p
+                  class="text-sm font-medium text-gray-900 dark:text-white mt-1"
+                >
+                  {{ selectedRoadInfo.desa || "-" }}
+                </p>
+              </div>
+
+              <div class="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Kondisi</p>
+                <p
+                  class="text-sm font-medium text-gray-900 dark:text-white mt-1"
+                >
+                  {{ selectedRoadInfo.kondisi || "-" }}
+                </p>
+              </div>
+
+              <div class="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  Keterangan
+                </p>
+                <p
+                  class="text-sm font-medium text-gray-900 dark:text-white mt-1"
+                >
+                  {{ selectedRoadInfo.keterangan || "-" }}
+                </p>
+              </div>
+
+              <div class="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Panjang</p>
+                <p
+                  class="text-sm font-medium text-gray-900 dark:text-white mt-1"
+                >
+                  {{
+                    selectedRoadInfo.panjangM
+                      ? selectedRoadInfo.panjangM.toFixed(2) + " m"
+                      : "-"
+                  }}
+                </p>
+              </div>
+
+              <div class="border-b border-gray-200 dark:border-gray-700 pb-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Lebar</p>
+                <p
+                  class="text-sm font-medium text-gray-900 dark:text-white mt-1"
+                >
+                  {{
+                    selectedRoadInfo.lebarM
+                      ? selectedRoadInfo.lebarM + " m"
+                      : "-"
+                  }}
+                </p>
+              </div>
+
+              <div class="pb-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  Dokumentasi
+                </p>
+                <div
+                  @click="openVideoPopup"
+                  class="relative cursor-pointer group rounded-lg overflow-hidden border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 transition-all"
+                >
+                  <img
+                    src="https://img.youtube.com/vi/1cxs89NrDJo/maxresdefault.jpg"
+                    alt="Video Dokumentasi"
+                    class="w-full h-32 object-cover"
+                  />
+                  <div
+                    class="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-50 flex items-center justify-center transition-all"
+                  >
+                    <div
+                      class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"
+                    >
+                      <svg
+                        class="w-8 h-8 text-white ml-1"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+
+        <!-- Video Popup Modal -->
+        <transition name="fade">
+          <div
+            v-if="videoPopupVisible"
+            @click="closeVideoPopup"
+            class="fixed inset-0 bg-black bg-opacity-75 z-[9999] flex items-center justify-center p-4"
+          >
+            <div
+              @click.stop
+              class="relative w-full max-w-4xl bg-black rounded-lg overflow-hidden shadow-2xl"
+            >
+              <!-- YouTube Video Embed -->
+              <div class="relative" style="padding-bottom: 56.25%">
+                <iframe
+                  v-if="videoPopupVisible"
+                  class="absolute top-0 left-0 w-full h-full"
+                  src="https://www.youtube.com/embed/1cxs89NrDJo?autoplay=1&rel=0"
+                  title="Video Dokumentasi Jalan"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </transition>
       </div>
     </div>
   </div>
@@ -438,6 +761,7 @@ let sketch = null;
 let graphicsLayer = null;
 let measurementLayer = null;
 let roadsLayer = null;
+let geometryEngine = null;
 let batasKabupatenLayer = null;
 let batasKecamatanLayer = null;
 let batasDesaLayer = null;
@@ -448,7 +772,6 @@ let batasKecamatanGeoJSON = null;
 let batasDesaGeoJSON = null;
 
 // Widget variables
-let basemapToggle = null;
 let scaleBar = null;
 
 // Road data
@@ -462,8 +785,18 @@ const searchQuery = ref("");
 const searchResults = ref([]);
 const searchLoading = ref(false);
 const searchFocused = ref(false);
-const selectedRoadName = ref(null); // Track selected road by name (not graphic object)
+const selectedRoadGraphic = ref(null); // Track selected road graphic
 let searchDebounceTimeout = null;
+
+// Road info box state
+const roadInfoVisible = ref(false);
+const selectedRoadInfo = ref(null);
+
+// Legend state
+const legendVisible = ref(false);
+
+// Video popup state
+const videoPopupVisible = ref(false);
 
 // Calculate optimal view for all road data
 const optimalView = calculateAllDataBounds();
@@ -487,6 +820,12 @@ const currentStyle = ref({
   strokeColor: "#2c5aa0",
   strokeWidth: 2,
 });
+
+// Opacity state
+const currentOpacity = ref(100);
+
+// Basemap state
+const currentBasemap = ref("topo");
 
 // Load roads data from API as GeoJSON
 const loadRoadsData = async (params = {}) => {
@@ -528,13 +867,13 @@ const getRoadColor = (feature) => {
       color = "#10b981"; // Green - Good condition
       break;
     case "Sedang":
-      color = "#fbbf24"; // Yellow - Fair condition
+      color = "#eab308"; // Yellow - Fair condition
       break;
     case "Rusak Ringan":
-      color = "#f59e0b"; // Orange - Light damage
+      color = "#f97316"; // Orange - Light damage
       break;
     case "Rusak Berat":
-      color = "#ef4444"; // Red - Heavy damage
+      color = "#dc2626"; // Red - Heavy damage (bright red)
       break;
     default:
       // Fallback to material type if keterangan not available
@@ -543,7 +882,7 @@ const getRoadColor = (feature) => {
           color = "#10b981"; // Green for concrete
           break;
         case "Aspal":
-          color = "#fbbf24"; // Yellow for asphalt
+          color = "#eab308"; // Yellow for asphalt
           break;
         case "Paving":
           color = "#3b82f6"; // Blue for paving
@@ -557,6 +896,90 @@ const getRoadColor = (feature) => {
   }
 
   return color;
+};
+
+// Function to highlight selected road with cyan outline border
+const highlightRoad = async (graphic) => {
+  try {
+    // Import required modules
+    const [SimpleLineSymbol, Graphic] = await Promise.all([
+      import("@arcgis/core/symbols/SimpleLineSymbol"),
+      import("@arcgis/core/Graphic"),
+    ]);
+
+    // Remove previous highlight from measurement layer
+    if (measurementLayer) {
+      // Remove only highlight graphics (not measurement graphics)
+      const highlightGraphics = measurementLayer.graphics.filter(
+        (g) => g.attributes && g.attributes.isHighlight
+      );
+      measurementLayer.removeMany(highlightGraphics);
+    }
+
+    // Create cyan outline border as separate graphics on measurement layer
+    if (graphic && graphic.geometry) {
+      // Get original road color
+      const originalColor = getRoadColor({ properties: graphic.attributes });
+
+      // 1. Create thicker cyan line as outer border
+      const outlineSymbol = new SimpleLineSymbol.default({
+        color: [6, 182, 212, 1], // Cyan color (#06b6d4)
+        width: 6, // Thicker for border effect
+        style: "solid",
+        cap: "round",
+        join: "round",
+      });
+
+      const outlineGraphic = new Graphic.default({
+        geometry: graphic.geometry,
+        symbol: outlineSymbol,
+        attributes: {
+          isHighlight: true, // Mark as highlight graphic
+          highlightType: "outline",
+        },
+      });
+
+      // 2. Create inner line with original color (appears on top of cyan)
+      const innerSymbol = new SimpleLineSymbol.default({
+        color: originalColor,
+        width: 3, // Slightly thicker than original to show better
+        style: "solid",
+        cap: "round",
+        join: "round",
+      });
+
+      const innerGraphic = new Graphic.default({
+        geometry: graphic.geometry,
+        symbol: innerSymbol,
+        attributes: {
+          isHighlight: true, // Mark as highlight graphic
+          highlightType: "inner",
+        },
+      });
+
+      // Add both graphics to measurement layer (outline first, then inner)
+      if (measurementLayer) {
+        measurementLayer.add(outlineGraphic);
+        measurementLayer.add(innerGraphic);
+      }
+
+      selectedRoadGraphic.value = graphic;
+    }
+  } catch (error) {
+    console.error("Error highlighting road:", error);
+  }
+};
+
+// Function to clear road highlight
+const clearRoadHighlight = async () => {
+  if (measurementLayer) {
+    // Remove only highlight graphics (not measurement graphics)
+    const highlightGraphics = measurementLayer.graphics.filter(
+      (g) => g.attributes && g.attributes.isHighlight
+    );
+    measurementLayer.removeMany(highlightGraphics);
+  }
+  selectedRoadGraphic.value = null;
 };
 
 // Add roads to map as graphics
@@ -593,22 +1016,6 @@ const addRoadsToMap = async (geoJSON) => {
         geometry: polyline,
         symbol: symbol,
         attributes: feature.properties,
-        popupTemplate: {
-          title: feature.properties.nama,
-          content: `
-            <div class="p-2">
-              <p><strong>Nama Jalan:</strong> ${feature.properties.nama}</p>
-              <p><strong>Kecamatan:</strong> ${feature.properties.kecamatan}</p>
-              <p><strong>Desa:</strong> ${feature.properties.desa}</p>
-              <p><strong>Kondisi:</strong> ${feature.properties.kondisi}</p>
-              <p><strong>Panjang:</strong> ${feature.properties.panjangM?.toFixed(
-                2
-              )} m</p>
-              <p><strong>Lebar:</strong> ${feature.properties.lebarM} m</p>
-              <p><strong>Tahun:</strong> ${feature.properties.tahun}</p>
-            </div>
-          `,
-        },
       });
     });
 
@@ -682,15 +1089,6 @@ const displayBatasKabupaten = async () => {
         geometry: polygon,
         symbol: symbol,
         attributes: feature.properties,
-        popupTemplate: {
-          title: `Kabupaten Kubu Raya`,
-          content: `
-            <div class="p-2">
-              <p><strong>Kabupaten:</strong> Kubu Raya</p>
-              <p><strong>Provinsi:</strong> Kalimantan Barat</p>
-            </div>
-          `,
-        },
       });
     });
 
@@ -855,16 +1253,6 @@ const filterAndDisplayBatasKecamatan = async (kecamatanName) => {
         geometry: polygon,
         symbol: symbol,
         attributes: feature.properties,
-        popupTemplate: {
-          title: `Kecamatan ${feature.properties.WADMKC}`,
-          content: `
-            <div class="p-2">
-              <p><strong>Kecamatan:</strong> ${feature.properties.WADMKC}</p>
-              <p><strong>Kabupaten:</strong> ${feature.properties.WADMKK}</p>
-              <p><strong>Provinsi:</strong> ${feature.properties.WADMPR}</p>
-            </div>
-          `,
-        },
       });
     });
 
@@ -961,17 +1349,6 @@ const filterAndDisplayBatasDesa = async (desaName) => {
         geometry: polygon,
         symbol: symbol,
         attributes: feature.properties,
-        popupTemplate: {
-          title: `Desa ${feature.properties.WADMKD}`,
-          content: `
-            <div class="p-2">
-              <p><strong>Desa:</strong> ${feature.properties.WADMKD}</p>
-              <p><strong>Kecamatan:</strong> ${feature.properties.WADMKC_1}</p>
-              <p><strong>Kabupaten:</strong> ${feature.properties.WADMKK_1}</p>
-              <p><strong>Provinsi:</strong> ${feature.properties.WADMPR_1}</p>
-            </div>
-          `,
-        },
       });
     });
 
@@ -1000,18 +1377,34 @@ onMounted(async () => {
       MapView,
       GraphicsLayer,
       Sketch,
-      BasemapToggle,
       ScaleBar,
       Graphic,
+      GeometryEngine,
     ] = await Promise.all([
       import("@arcgis/core/Map"),
       import("@arcgis/core/views/MapView"),
       import("@arcgis/core/layers/GraphicsLayer"),
       import("@arcgis/core/widgets/Sketch"),
-      import("@arcgis/core/widgets/BasemapToggle"),
       import("@arcgis/core/widgets/ScaleBar"),
       import("@arcgis/core/Graphic"),
+      import("@arcgis/core/geometry/geometryEngine"),
     ]);
+
+    // Store geometryEngine globally for shape calculations
+    // Try multiple ways to access geometryEngine
+    geometryEngine = GeometryEngine.default || GeometryEngine;
+    console.log("[onMounted] GeometryEngine module:", GeometryEngine);
+    console.log("[onMounted] GeometryEngine.default:", GeometryEngine.default);
+    console.log("[onMounted] geometryEngine stored:", geometryEngine);
+
+    if (
+      !geometryEngine ||
+      typeof geometryEngine.geodesicLength !== "function"
+    ) {
+      console.error("[onMounted] geometryEngine not properly loaded!");
+    } else {
+      console.log("[onMounted] ✅ geometryEngine ready!");
+    }
 
     // Create graphics layers
     graphicsLayer = new GraphicsLayer.default({
@@ -1049,7 +1442,7 @@ onMounted(async () => {
     // Create map with basic basemap that doesn't require API key
     // Layer order: bottom to top (batas desa, batas kecamatan, batas kabupaten, roads, drawing, measurement)
     map = new Map.default({
-      basemap: "streets", // Basic basemap that works without API key
+      basemap: "topo", // Topographic basemap as default
       layers: [
         batasDesaLayer,
         batasKecamatanLayer,
@@ -1078,7 +1471,7 @@ onMounted(async () => {
     sketch = new Sketch.default({
       layer: graphicsLayer,
       view: view,
-      creationMode: "update",
+      creationMode: "update", // Allows both creation and updating/deleting
       visibleElements: {
         createTools: {
           point: false,
@@ -1088,27 +1481,58 @@ onMounted(async () => {
           circle: false,
         },
         selectionTools: {
-          "lasso-selection": false,
-          "rectangle-selection": false,
+          "lasso-selection": true, // Enable lasso selection
+          "rectangle-selection": true, // Enable rectangle selection
         },
         settingsMenu: false,
-        undoRedoMenu: false,
+        undoRedoMenu: true, // Enable undo/redo for better UX
+      },
+      // Enable deletion of selected graphics
+      defaultUpdateOptions: {
+        tool: "reshape",
+        enableZ: false,
+        toggleToolOnClick: false,
       },
     });
 
-    // Add widgets
-    basemapToggle = new BasemapToggle.default({
-      view: view,
-      nextBasemap: "satellite",
+    // Add event listener for delete operation
+    sketch.on("delete", (event) => {
+      console.log("Graphics deleted:", event.graphics.length);
+      // Clear shape info when graphic is deleted
+      shapeInfo.value = null;
     });
 
+    // Add event listener for create (when drawing is in progress and finished)
+    sketch.on("create", async (event) => {
+      console.log("Sketch create event:", event.state, event.graphic);
+      if (event.state === "complete" && event.graphic) {
+        console.log("Shape created - calculating info");
+        // Calculate and display shape info
+        await calculateShapeInfo(event.graphic);
+      }
+    });
+
+    // Add event listener for update (when shape is selected or moved)
+    sketch.on("update", async (event) => {
+      console.log("Sketch update event:", event.state, event.graphics.length);
+      if (event.state === "start" && event.graphics.length > 0) {
+        console.log("Shape selected - calculating info");
+        // Calculate and display shape info for selected shape
+        await calculateShapeInfo(event.graphics[0]);
+      } else if (event.state === "complete" && event.graphics.length > 0) {
+        // Recalculate after shape is moved/resized
+        console.log("Shape updated - recalculating info");
+        await calculateShapeInfo(event.graphics[0]);
+      }
+    });
+
+    // Add widgets
     scaleBar = new ScaleBar.default({
       view: view,
       unit: "metric",
     });
 
     // Add widgets to view (initial positioning, will be adjusted later)
-    view.ui.add(basemapToggle, "bottom-right");
     view.ui.add(scaleBar, {
       position: "manual",
     });
@@ -1132,6 +1556,47 @@ onMounted(async () => {
       if (point) {
         mouseCoordinates.longitude = point.longitude.toFixed(6);
         mouseCoordinates.latitude = point.latitude.toFixed(6);
+      }
+    });
+
+    // Add click event listener for road selection
+    view.on("click", async (event) => {
+      try {
+        const response = await view.hitTest(event, {
+          include: [roadsLayer],
+        });
+
+        if (response.results.length > 0) {
+          const graphic = response.results[0].graphic;
+          if (graphic && graphic.attributes) {
+            // Highlight the selected road
+            await highlightRoad(graphic);
+
+            // Show road info box
+            selectedRoadInfo.value = {
+              nomorRuas:
+                graphic.attributes.noRuas || graphic.attributes.no_ruas || null,
+              periode: graphic.attributes.tahun || null,
+              nama: graphic.attributes.nama || null,
+              kecamatan: graphic.attributes.kecamatan || null,
+              desa: graphic.attributes.desa || null,
+              kondisi: graphic.attributes.kondisi || null,
+              keterangan: graphic.attributes.keterangan || null,
+              panjangM:
+                graphic.attributes.panjangM ||
+                graphic.attributes.panjang_m ||
+                null,
+              lebarM:
+                graphic.attributes.lebarM || graphic.attributes.lebar_m || null,
+            };
+            roadInfoVisible.value = true;
+          }
+        } else {
+          // Click on empty area - close info box (which also clears highlight)
+          await closeRoadInfo();
+        }
+      } catch (error) {
+        console.error("Error handling road click:", error);
       }
     });
 
@@ -1310,20 +1775,57 @@ const toggleLeftSidebar = (type) => {
 };
 
 // Basemap and layer handlers
-const handleBasemapChange = (basemapId) => {
+const handleBasemapChange = async (basemapId) => {
   if (map) {
     try {
       console.log("Changing basemap to:", basemapId);
-      map.basemap = basemapId;
-      console.log("Basemap changed successfully to:", basemapId);
+
+      // Special handling for National Geographic basemap (uses Portal Item)
+      if (basemapId === "national-geographic") {
+        try {
+          const [Basemap, PortalItem] = await Promise.all([
+            import("@arcgis/core/Basemap"),
+            import("@arcgis/core/portal/PortalItem"),
+          ]);
+
+          // Create basemap from National Geographic Portal Item
+          const portalItem = new PortalItem.default({
+            id: "d94dcdbe78e141c2b2d3a91d5ca8b9c9", // National Geographic Style basemap
+          });
+
+          const natGeoBasemap = new Basemap.default({
+            portalItem: portalItem,
+          });
+
+          map.basemap = natGeoBasemap;
+          console.log("National Geographic basemap loaded successfully");
+
+          // Update current basemap state
+          currentBasemap.value = basemapId;
+        } catch (natGeoError) {
+          console.error(
+            "Error loading National Geographic basemap:",
+            natGeoError
+          );
+          throw natGeoError;
+        }
+      } else {
+        // Standard basemap IDs
+        map.basemap = basemapId;
+        console.log("Basemap changed successfully to:", basemapId);
+
+        // Update current basemap state
+        currentBasemap.value = basemapId;
+      }
     } catch (error) {
       console.error("Error changing basemap:", error);
-      // Fallback to streets if basemap change fails
+      // Fallback to topo if basemap change fails
       try {
-        map.basemap = "streets";
-        console.log("Fallback to streets successful");
+        map.basemap = "topo";
+        currentBasemap.value = "topo";
+        console.log("Fallback to topo successful");
         alert(
-          `Basemap "${basemapId}" tidak tersedia, menggunakan Streets sebagai gantinya.`
+          `Basemap "${basemapId}" tidak tersedia, menggunakan Topographic sebagai gantinya.`
         );
       } catch (fallbackError) {
         console.error("Fallback basemap also failed:", fallbackError);
@@ -1336,13 +1838,15 @@ const handleBasemapChange = (basemapId) => {
 const handleApplyLayer = async (layerData) => {
   console.log("Applying layer filter from sidebar:", layerData);
 
-  // Reset selected road when applying new filter
-  selectedRoadName.value = null;
+  // Reset selected road when applying new filter (closes info box and clears highlight)
+  await closeRoadInfo();
 
   // Load roads data with filters
   await loadRoadsData({
     kecamatan: layerData.kecamatan || undefined,
     desa: layerData.desa || undefined,
+    tahun: layerData.tahun || undefined,
+    kondisi: layerData.kondisi || undefined,
   });
 
   // Filter and display boundaries based on selection
@@ -1356,6 +1860,12 @@ const handleApplyLayer = async (layerData) => {
     if (layerData.desa) {
       filterText += `, Desa: ${layerData.desa}`;
     }
+  }
+  if (layerData.tahun) {
+    filterText += `, Tahun: ${layerData.tahun}`;
+  }
+  if (layerData.kondisi) {
+    filterText += `, Kondisi: ${layerData.kondisi}`;
   }
 
   console.log(`Layer diterapkan untuk: ${filterText}`);
@@ -1543,6 +2053,9 @@ const zoomToGeoJSONExtent = (geoJsonData) => {
 const handleOpacityChange = (opacityValue) => {
   console.log("Opacity changed to:", opacityValue);
 
+  // Update current opacity state
+  currentOpacity.value = opacityValue;
+
   if (map && map.layers) {
     // Convert opacity from 0-100 to 0-1 range
     const opacity = opacityValue / 100;
@@ -1589,10 +2102,14 @@ const zoomOut = () => {
 const toggleSearchBox = () => {
   searchBoxOpen.value = !searchBoxOpen.value;
   if (!searchBoxOpen.value) {
-    clearSearch();
-    // Show all roads when closing search
-    if (selectedRoadName.value) {
-      showAllRoads();
+    // Clear search input when closing search box
+    searchQuery.value = "";
+    searchResults.value = [];
+    searchLoading.value = false;
+    searchFocused.value = false;
+
+    if (searchDebounceTimeout) {
+      clearTimeout(searchDebounceTimeout);
     }
   }
 };
@@ -1635,12 +2152,18 @@ const performSearch = async () => {
 
       roadsLayer.graphics.forEach((graphic) => {
         const props = graphic.attributes;
-        if (props && props.nama) {
-          // Check if road name contains search query
-          if (props.nama.toLowerCase().includes(query)) {
+        if (props) {
+          // Check if road name or noRuas contains search query
+          const namaMatch =
+            props.nama && props.nama.toLowerCase().includes(query);
+          const noRuasMatch =
+            props.noRuas && String(props.noRuas).toLowerCase().includes(query);
+
+          if (namaMatch || noRuasMatch) {
             // Use markRaw to prevent Vue from making geometry reactive
             results.push({
-              nama: props.nama,
+              noRuas: props.noRuas || "-",
+              nama: props.nama || "-",
               kecamatan: props.kecamatan || "-",
               desa: props.desa || "-",
               keterangan: props.keterangan || props.kondisi || "-",
@@ -1667,65 +2190,86 @@ const selectSearchResult = async (result) => {
   if (!view || !result.geometry) return;
 
   try {
-    // Close search box
-    searchFocused.value = false;
+    // Find the selected road graphic
+    // Use noRuas as primary identifier (more unique than nama)
+    const selectedGraphic = roadsLayer?.graphics.find((g) => {
+      if (result.noRuas && result.noRuas !== "-") {
+        return g.attributes?.noRuas === result.noRuas;
+      }
+      return g.attributes?.nama === result.nama;
+    });
 
-    // Store selected road name (not the graphic object to avoid Vue reactivity issues)
-    selectedRoadName.value = result.nama;
+    if (selectedGraphic) {
+      // Highlight the selected road with cyan outline border
+      await highlightRoad(selectedGraphic);
 
-    // Hide all roads except the selected one
-    if (roadsLayer && roadsLayer.graphics) {
-      roadsLayer.graphics.forEach((graphic) => {
-        const graphicName = graphic.attributes?.nama;
-        // Hide all graphics except the selected one
-        if (graphicName !== result.nama) {
-          graphic.visible = false;
-        } else {
-          graphic.visible = true;
+      // Zoom to the road geometry
+      await view.goTo(
+        {
+          target: result.geometry,
+          zoom: 16, // Zoom in close to see the road
+        },
+        {
+          duration: 1000,
+          easing: "ease-in-out",
         }
-      });
-    }
-
-    // Zoom to the road geometry
-    await view.goTo(
-      {
-        target: result.geometry,
-        zoom: 16, // Zoom in close to see the road
-      },
-      {
-        duration: 1000,
-        easing: "ease-in-out",
-      }
-    );
-
-    // Open popup for the selected road (find the graphic again to avoid reactivity issues)
-    if (roadsLayer && roadsLayer.graphics) {
-      const selectedGraphic = roadsLayer.graphics.find(
-        (g) => g.attributes?.nama === result.nama
       );
-      if (selectedGraphic) {
-        view.popup.open({
-          features: [selectedGraphic],
-          location: result.geometry.extent.center,
-        });
-      }
-    }
 
-    console.log(`Zoomed to road: ${result.nama} (other roads hidden)`);
+      // Show road info box for the selected road
+      if (selectedGraphic.attributes) {
+        selectedRoadInfo.value = {
+          nomorRuas:
+            selectedGraphic.attributes.noRuas ||
+            selectedGraphic.attributes.no_ruas ||
+            null,
+          periode: selectedGraphic.attributes.tahun || null,
+          nama: selectedGraphic.attributes.nama || null,
+          kecamatan: selectedGraphic.attributes.kecamatan || null,
+          desa: selectedGraphic.attributes.desa || null,
+          kondisi: selectedGraphic.attributes.kondisi || null,
+          keterangan: selectedGraphic.attributes.keterangan || null,
+          panjangM:
+            selectedGraphic.attributes.panjangM ||
+            selectedGraphic.attributes.panjang_m ||
+            null,
+          lebarM:
+            selectedGraphic.attributes.lebarM ||
+            selectedGraphic.attributes.lebar_m ||
+            null,
+        };
+        roadInfoVisible.value = true;
+      }
+
+      // Close search box after selection
+      searchBoxOpen.value = false;
+      searchFocused.value = false;
+      clearSearch();
+
+      console.log(
+        `Zoomed to road: ${result.nama} (highlighted with cyan outline border)`
+      );
+    }
   } catch (error) {
     console.error("Error zooming to search result:", error);
   }
 };
 
-// Function to show all roads again
-const showAllRoads = () => {
-  if (roadsLayer && roadsLayer.graphics) {
-    roadsLayer.graphics.forEach((graphic) => {
-      graphic.visible = true;
-    });
-    selectedRoadName.value = null;
-    console.log("All roads shown");
-  }
+// Close road info box and clear highlight
+const closeRoadInfo = async () => {
+  roadInfoVisible.value = false;
+  selectedRoadInfo.value = null;
+  // Clear cyan outline when info box is closed
+  await clearRoadHighlight();
+};
+
+// Open video popup
+const openVideoPopup = () => {
+  videoPopupVisible.value = true;
+};
+
+// Close video popup
+const closeVideoPopup = () => {
+  videoPopupVisible.value = false;
 };
 
 const clearSearch = () => {
@@ -1737,6 +2281,9 @@ const clearSearch = () => {
   if (searchDebounceTimeout) {
     clearTimeout(searchDebounceTimeout);
   }
+
+  // Close search box when X button is clicked
+  searchBoxOpen.value = false;
 };
 
 // Close search results when clicking outside
@@ -1761,7 +2308,92 @@ const handleLayerChange = (layerData) => {
   // Implement layer visibility and opacity changes
 };
 
-// Measurement handlers
+// Measurement handlers (from sidebar)
+const handleMeasurementTool = async (type) => {
+  console.log("Activating measurement tool:", type);
+
+  if (!view) {
+    console.error("MapView not initialized");
+    return;
+  }
+
+  try {
+    // Import measurement widgets
+    const [DistanceMeasurement2D, AreaMeasurement2D] = await Promise.all([
+      import("@arcgis/core/widgets/DistanceMeasurement2D"),
+      import("@arcgis/core/widgets/AreaMeasurement2D"),
+    ]);
+
+    // Clear existing measurement widgets
+    const existingWidgets = view.ui.find("measurement-widget");
+    if (existingWidgets) {
+      view.ui.remove(existingWidgets);
+    }
+
+    if (type === "distance") {
+      const distanceWidget = new DistanceMeasurement2D.default({
+        view: view,
+        id: "measurement-widget",
+      });
+      view.ui.add(distanceWidget, "top-right");
+      distanceWidget.viewModel.start();
+      console.log("Distance measurement tool activated");
+    } else if (type === "area") {
+      const areaWidget = new AreaMeasurement2D.default({
+        view: view,
+        id: "measurement-widget",
+      });
+      view.ui.add(areaWidget, "top-right");
+      areaWidget.viewModel.start();
+      console.log("Area measurement tool activated");
+    }
+  } catch (error) {
+    console.error("Error activating measurement tool:", error);
+    alert("Gagal mengaktifkan alat ukur");
+  }
+};
+
+const handleClearMeasurement = () => {
+  console.log("Clearing all measurements");
+
+  if (!view) return;
+
+  // Remove ALL measurement widgets (they might have different IDs)
+  // Get all widgets and remove only measurement-related ones
+  const allWidgets = view.ui._components;
+  if (allWidgets) {
+    allWidgets.forEach((widget) => {
+      if (
+        widget.id === "measurement-widget" ||
+        widget.declaredClass === "esri.widgets.DistanceMeasurement2D" ||
+        widget.declaredClass === "esri.widgets.AreaMeasurement2D"
+      ) {
+        view.ui.remove(widget);
+        console.log("Removed measurement widget");
+      }
+    });
+  }
+
+  // Clear measurement graphics from view.graphics (only non-highlight graphics)
+  if (view.graphics) {
+    // Keep track of graphics to remove
+    const graphicsToRemove = [];
+    view.graphics.forEach((graphic) => {
+      // Only remove if it's not a highlight graphic
+      if (!graphic.attributes || !graphic.attributes.isHighlight) {
+        graphicsToRemove.push(graphic);
+      }
+    });
+    view.graphics.removeMany(graphicsToRemove);
+    console.log(
+      `Removed ${graphicsToRemove.length} measurement graphics from view`
+    );
+  }
+
+  console.log("All measurements cleared");
+};
+
+// Measurement handlers (legacy)
 const handleMeasurementStart = async (measurementData) => {
   console.log("Measurement started:", measurementData);
 
@@ -1883,7 +2515,169 @@ const exportMap = () => {
   }
 };
 
-// Drawing tool handlers
+// Shape info state for sidebar
+const shapeInfo = ref(null);
+
+// Calculate shape info (length or area + GeoJSON)
+const calculateShapeInfo = async (graphic) => {
+  console.log("[calculateShapeInfo] Called with graphic:", graphic);
+
+  if (!graphic || !graphic.geometry) {
+    console.log("[calculateShapeInfo] No graphic or geometry");
+    shapeInfo.value = null;
+    return;
+  }
+
+  if (!geometryEngine) {
+    console.error("[calculateShapeInfo] geometryEngine not initialized!");
+    shapeInfo.value = null;
+    return;
+  }
+
+  try {
+    console.log("[calculateShapeInfo] Using geometryEngine:", geometryEngine);
+
+    const geometry = graphic.geometry;
+    console.log("[calculateShapeInfo] Geometry type:", geometry.type);
+
+    let measurement = "";
+    let type = "";
+
+    if (geometry.type === "polyline") {
+      // Calculate geodesic length
+      console.log("[calculateShapeInfo] Calculating polyline length...");
+      const lengthMeters = geometryEngine.geodesicLength(geometry, "meters");
+      console.log("[calculateShapeInfo] Length:", lengthMeters, "meters");
+      type = "polyline";
+
+      if (lengthMeters >= 1000) {
+        measurement = `${(lengthMeters / 1000).toFixed(2)} Km`;
+      } else {
+        measurement = `${lengthMeters.toFixed(2)} M`;
+      }
+    } else if (geometry.type === "polygon") {
+      // Calculate geodesic area
+      console.log("[calculateShapeInfo] Calculating polygon area...");
+      const areaSquareMeters = geometryEngine.geodesicArea(
+        geometry,
+        "square-meters"
+      );
+      console.log("[calculateShapeInfo] Area:", areaSquareMeters, "m²");
+      type = "polygon";
+
+      if (areaSquareMeters >= 10000) {
+        // Convert to hectares if >= 1 ha
+        measurement = `${(areaSquareMeters / 10000).toFixed(2)} Ha`;
+      } else {
+        measurement = `${areaSquareMeters.toFixed(2)} M²`;
+      }
+    } else {
+      console.log("[calculateShapeInfo] Unknown geometry type:", geometry.type);
+      shapeInfo.value = null;
+      return;
+    }
+
+    // Generate GeoJSON
+    console.log("[calculateShapeInfo] Generating GeoJSON...");
+    const geojson = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: {},
+          geometry: geometry.toJSON(),
+        },
+      ],
+    };
+
+    const newInfo = {
+      type: type,
+      measurement: measurement,
+      geojson: JSON.stringify(geojson, null, 2),
+    };
+
+    console.log("[calculateShapeInfo] Setting shapeInfo.value to:", newInfo);
+    shapeInfo.value = newInfo;
+    console.log(
+      "[calculateShapeInfo] shapeInfo.value after set:",
+      shapeInfo.value
+    );
+    console.log(
+      "[calculateShapeInfo] DONE - Shape info successfully calculated!"
+    );
+  } catch (error) {
+    console.error("[calculateShapeInfo] ERROR:", error);
+    console.error("[calculateShapeInfo] Error stack:", error.stack);
+    shapeInfo.value = null;
+  }
+};
+
+// Drawing tool handlers (from sidebar)
+const handleDrawingTool = (tool) => {
+  console.log("Activating drawing tool:", tool);
+
+  // Clear shape info when starting new drawing
+  shapeInfo.value = null;
+
+  if (sketch) {
+    // Cancel any active sketch operation
+    sketch.cancel();
+
+    // Activate the selected drawing tool
+    switch (tool) {
+      case "polyline":
+        sketch.create("polyline");
+        break;
+      case "polygon":
+        sketch.create("polygon");
+        break;
+      case "rectangle":
+        sketch.create("rectangle");
+        break;
+      default:
+        break;
+    }
+
+    console.log(`Drawing tool "${tool}" activated`);
+  } else {
+    console.error("Sketch widget not initialized");
+  }
+};
+
+const handleSelectionMode = () => {
+  console.log("Activating selection mode");
+
+  if (sketch) {
+    // Cancel any active drawing operation
+    sketch.cancel();
+
+    // Enable update mode (selection) - this allows clicking on graphics to select and move them
+    console.log(
+      "Selection mode activated - click on drawn shapes to select and move"
+    );
+  } else {
+    console.error("Sketch widget not initialized");
+  }
+};
+
+const handleClearDrawing = () => {
+  console.log("Clearing all drawings");
+
+  // Clear shape info
+  shapeInfo.value = null;
+
+  if (graphicsLayer) {
+    graphicsLayer.removeAll();
+    console.log("All drawings cleared");
+  }
+
+  // Also cancel any active sketch operation
+  if (sketch) {
+    sketch.cancel();
+  }
+};
+
+// Drawing tool handlers (legacy)
 const handleToolChange = ({ tool, style }) => {
   currentDrawingTool.value = tool;
   currentStyle.value = style;
@@ -2304,5 +3098,31 @@ defineExpose({
 /* Search box absolute positioning to not affect button width */
 .search-box {
   z-index: 9999;
+}
+
+/* Slide up transition for road info box */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease-in-out;
+}
+
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.slide-up-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.slide-up-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
 }
 </style>

@@ -413,33 +413,33 @@ onMounted(() => {
 }
 
 .weather-details {
-  @apply grid grid-cols-1 gap-4 mt-6 pt-6 border-t border-white/10;
+  @apply grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10;
 }
 
 .detail-item {
-  @apply flex items-center space-x-4 bg-white/5 rounded-lg p-3 backdrop-blur-sm;
+  @apply flex flex-col items-center text-center bg-white/5 rounded-lg p-3 backdrop-blur-sm;
   transition: all 0.3s ease;
 }
 
 .detail-item:hover {
   background: rgba(255, 255, 255, 0.15);
-  transform: translateX(5px);
+  transform: translateY(-3px);
 }
 
 .detail-icon {
-  @apply text-white/70;
+  @apply text-white/70 mb-2;
 }
 
 .detail-content {
-  @apply flex-1 flex items-center justify-between;
+  @apply flex flex-col items-center;
 }
 
 .detail-label {
-  @apply text-sm text-white/70;
+  @apply text-xs text-white/70 mb-1;
 }
 
 .detail-value {
-  @apply text-base font-semibold text-white;
+  @apply text-sm font-semibold text-white;
 }
 
 .weather-link {

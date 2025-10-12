@@ -16,27 +16,36 @@
       </div>
 
       <div class="hero-content">
-        <div class="hero-text hero-text-animated">
+        <div class="hero-text">
           <h1 class="hero-title">
-            <span class="title-line-1 animate-slide-in-1"
+            <span
+              class="title-line-1"
+              data-aos="fade-right"
+              data-aos-delay="100"
               >Sistem Informasi</span
             >
-            <span class="title-line-2 animate-slide-in-2"
+            <span
+              class="title-line-2"
+              data-aos="fade-right"
+              data-aos-delay="200"
               >Jalan Lingkungan</span
             >
-            <span class="title-highlight animate-slide-in-3"
+            <span
+              class="title-highlight"
+              data-aos="fade-right"
+              data-aos-delay="300"
               >Kabupaten Kubu Raya</span
             >
           </h1>
 
-          <p class="hero-description animate-fade-in">
+          <p class="hero-description" data-aos="fade-up" data-aos-delay="400">
             Platform GIS terintegrasi untuk pengelolaan dan analisis data jalan
             lingkungan di Kabupaten Kubu Raya dengan teknologi ArcGIS terdepan.
             Monitor, analisis, dan kelola infrastruktur jalan secara real-time.
           </p>
 
-          <div class="hero-buttons animate-fade-in-up">
-            <button @click="scrollToSection('map')" class="btn-primary">
+          <div class="hero-buttons" data-aos="fade-up" data-aos-delay="500">
+            <button @click="openMap" class="btn-primary">
               <div class="btn-icon">
                 <svg
                   class="w-5 h-5"
@@ -82,7 +91,7 @@
           </div>
         </div>
 
-        <div class="hero-visual hero-visual-animated">
+        <div class="hero-visual" data-aos="fade-left" data-aos-delay="600">
           <WeatherWidget />
         </div>
       </div>
@@ -106,8 +115,10 @@
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">5,575</h3>
-            <p class="stat-label">Ruas Jalan</p>
+            <h3 class="stat-number">
+              <span id="roadLengthCounter">0</span> Km
+            </h3>
+            <p class="stat-label">Dipetakan</p>
           </div>
         </div>
 
@@ -134,7 +145,7 @@
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">12</h3>
+            <h3 class="stat-number" id="districtsCounter">0</h3>
             <p class="stat-label">Kecamatan</p>
           </div>
         </div>
@@ -156,7 +167,7 @@
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number">127</h3>
+            <h3 class="stat-number" id="villagesCounter">0</h3>
             <p class="stat-label">Desa/Kelurahan</p>
           </div>
         </div>
@@ -178,7 +189,9 @@
             </svg>
           </div>
           <div class="stat-content">
-            <h3 class="stat-number" id="goodConditionCount">-</h3>
+            <h3 class="stat-number">
+              <span id="goodConditionCounter">0</span> Km
+            </h3>
             <p class="stat-label">Jalan Kondisi Baik</p>
           </div>
         </div>
@@ -187,16 +200,16 @@
 
     <!-- Map Section -->
     <section id="map" class="map-section">
-      <div class="section-header">
+      <div class="section-header" data-aos="fade-up">
         <h2 class="section-title">Peta Interaktif</h2>
         <p class="section-description">
           Eksplorasi data jalan lingkungan dengan peta interaktif yang
           dilengkapi dengan berbagai layer dan alat analisis GIS.
         </p>
       </div>
-      <div class="map-container">
+      <div class="map-container" data-aos="zoom-in" data-aos-delay="200">
         <!-- Map Title Frame -->
-        <div class="map-title-frame">
+        <div id="map-canvas" class="map-title-frame">
           <div class="title-frame-content">
             <h3 class="map-title-text">
               Sistem Informasi Jalan Lingkungan Kab. Kubu Raya
@@ -212,7 +225,7 @@
 
     <!-- Analisis Section -->
     <section id="analisis" class="analisis-section">
-      <div class="section-header">
+      <div class="section-header" data-aos="fade-up">
         <h2 class="section-title">Analisis Kerusakan & Kondisi Jalan</h2>
         <p class="section-description">
           Dashboard analisis komprehensif untuk memahami kerusakan jalan dan
@@ -224,7 +237,7 @@
         <div class="analisis-grid">
           <!-- Material Analysis -->
           <!-- Combined Donut Charts -->
-          <div class="analisis-card">
+          <div class="analisis-card" data-aos="fade-up" data-aos-delay="100">
             <div class="card-header">
               <h3 class="card-title">Analisis Kondisi & Material Jalan</h3>
               <div class="flex items-center gap-3">
@@ -256,8 +269,8 @@
                 <div class="donut-chart">
                   <canvas id="conditionChart" width="200" height="200"></canvas>
                   <div class="chart-center">
-                    <div class="center-number">5,575</div>
-                    <div class="center-label">Jalan</div>
+                    <div class="center-number">0</div>
+                    <div class="center-label">Km</div>
                   </div>
                 </div>
               </div>
@@ -268,8 +281,8 @@
                 <div class="donut-chart">
                   <canvas id="materialChart" width="200" height="200"></canvas>
                   <div class="chart-center">
-                    <div class="center-number">5,575</div>
-                    <div class="center-label">Jalan</div>
+                    <div class="center-number">0</div>
+                    <div class="center-label">Km</div>
                   </div>
                 </div>
               </div>
@@ -277,7 +290,7 @@
           </div>
 
           <!-- District Damage Analysis -->
-          <div class="analisis-card">
+          <div class="analisis-card" data-aos="fade-up" data-aos-delay="200">
             <div class="card-header">
               <h3 class="card-title">Tingkat Kerusakan per Kecamatan</h3>
               <svg
@@ -300,7 +313,7 @@
           </div>
 
           <!-- Condition Assessment -->
-          <div class="analisis-card">
+          <div class="analisis-card" data-aos="fade-up" data-aos-delay="300">
             <div class="card-header">
               <h3 class="card-title">Tingkat Kerusakan per Material</h3>
               <div class="flex items-center gap-3">
@@ -335,7 +348,7 @@
           </div>
 
           <!-- Road Length by District -->
-          <div class="analisis-card">
+          <div class="analisis-card" data-aos="fade-up" data-aos-delay="400">
             <div class="card-header">
               <h3 class="card-title">Panjang Jalan per Kecamatan</h3>
               <svg
@@ -363,176 +376,14 @@
         </div>
       </div>
     </section>
-
-    <!-- Laporan Section -->
-    <section id="laporan" class="laporan-section">
-      <div class="section-header">
-        <h2 class="section-title">Laporan Dinamis</h2>
-        <p class="section-description">
-          Generate laporan komprehensif berdasarkan filter dan parameter yang
-          Anda tentukan.
-        </p>
-      </div>
-      <div class="laporan-content">
-        <div class="laporan-controls">
-          <div class="control-group">
-            <label class="control-label">Jenis Laporan</label>
-            <select class="control-select">
-              <option value="summary">Ringkasan Eksekutif</option>
-              <option value="detail">Laporan Detail</option>
-              <option value="comparison">Perbandingan Kecamatan</option>
-              <option value="trend">Analisis Tren</option>
-            </select>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label">Periode</label>
-            <select class="control-select">
-              <option value="2024">Tahun 2024</option>
-              <option value="2023">Tahun 2023</option>
-              <option value="2022">Tahun 2022</option>
-              <option value="all">Semua Periode</option>
-            </select>
-          </div>
-
-          <div class="control-group">
-            <label class="control-label">Format</label>
-            <select class="control-select">
-              <option value="pdf">PDF</option>
-              <option value="excel">Excel</option>
-              <option value="word">Word</option>
-            </select>
-          </div>
-
-          <button class="generate-btn">
-            <svg
-              class="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              ></path>
-            </svg>
-            Generate Laporan
-          </button>
-        </div>
-
-        <div class="laporan-preview">
-          <div class="preview-header">
-            <h3 class="preview-title">Preview Laporan</h3>
-            <div class="preview-actions">
-              <button class="action-btn">
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  ></path>
-                </svg>
-                Download
-              </button>
-              <button class="action-btn">
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  ></path>
-                </svg>
-                Print
-              </button>
-            </div>
-          </div>
-
-          <div class="preview-content">
-            <div class="report-template">
-              <div class="report-header">
-                <h1 class="report-title">
-                  Laporan Sistem Informasi Jalan Lingkungan
-                </h1>
-                <h2 class="report-subtitle">Kabupaten Kubu Raya</h2>
-                <p class="report-date">Periode: Januari - Desember 2024</p>
-              </div>
-
-              <div class="report-body">
-                <div class="report-section">
-                  <h3 class="section-title">Ringkasan Eksekutif</h3>
-                  <p class="section-content">
-                    Sistem Informasi Jalan Lingkungan Kabupaten Kubu Raya telah
-                    berhasil mengintegrasikan data dari 5,575 ruas jalan yang
-                    tersebar di 12 kecamatan dan 127 desa/kelurahan. Platform
-                    GIS ini memungkinkan monitoring real-time dan analisis
-                    komprehensif kondisi infrastruktur jalan lingkungan.
-                  </p>
-                </div>
-
-                <div class="report-section">
-                  <h3 class="section-title">Statistik Utama</h3>
-                  <div class="stats-grid">
-                    <div class="stat-item">
-                      <span class="stat-label">Total Ruas Jalan</span>
-                      <span class="stat-value">5,575</span>
-                    </div>
-                    <div class="stat-item">
-                      <span class="stat-label">Kondisi Baik</span>
-                      <span class="stat-value">4,890 (87.7%)</span>
-                    </div>
-                    <div class="stat-item">
-                      <span class="stat-label">Kondisi Sedang</span>
-                      <span class="stat-value">485 (8.7%)</span>
-                    </div>
-                    <div class="stat-item">
-                      <span class="stat-label">Kondisi Rusak</span>
-                      <span class="stat-value">200 (3.6%)</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="report-section">
-                  <h3 class="section-title">Rekomendasi</h3>
-                  <ul class="recommendations">
-                    <li>
-                      Prioritaskan perbaikan 200 ruas jalan dengan kondisi rusak
-                    </li>
-                    <li>
-                      Implementasi program pemeliharaan rutin untuk 485 ruas
-                      jalan kondisi sedang
-                    </li>
-                    <li>
-                      Pengembangan sistem monitoring real-time untuk semua ruas
-                      jalan
-                    </li>
-                    <li>Peningkatan kapasitas SDM dalam pengelolaan GIS</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
+import { CountUp } from "countup.js";
+import AOS from "aos";
+import "aos/dist/aos.css";
 // Import components
 import Navbar from "~/components/Navbar.vue";
 import MapView from "~/components/MapView.vue";
@@ -540,6 +391,25 @@ import WeatherWidget from "~/components/WeatherWidget.vue";
 
 // Refs
 const mapViewRef = ref(null);
+
+// Stats refs
+const totalRoadLength = ref(0);
+const totalDistricts = ref(0);
+const totalVillages = ref(0);
+const goodConditionLength = ref(0);
+
+// CountUp instances
+let roadLengthCounter = null;
+let districtsCounter = null;
+let villagesCounter = null;
+let goodConditionCounter = null;
+
+// Flag to track if data is loaded
+const statsLoaded = ref(false);
+
+// Flag to prevent scroll detection during manual scroll
+let isManualScrolling = false;
+let scrollTimeout = null;
 
 // Handle toggle sidebar from navbar
 const handleToggleSidebar = () => {
@@ -556,44 +426,281 @@ const handleGoBackToRTR = () => {
   // navigateTo('/rtr');
 };
 
-// Scroll to section function
-const scrollToSection = (sectionId) => {
-  const element = document.getElementById(sectionId);
+// Open map - scroll directly to the blue map canvas
+const openMap = () => {
+  // Scroll directly to map canvas (the blue part)
+  const element = document.getElementById("map-canvas");
   if (element) {
-    element.scrollIntoView({
+    const elementPosition = element.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - 200;
+
+    window.scrollTo({
+      top: offsetPosition,
       behavior: "smooth",
-      block: "start",
+    });
+  }
+
+  // Optional: You can add interaction with the map here
+  setTimeout(() => {
+    console.log("Map canvas focused");
+  }, 800);
+};
+
+// Initialize CountUp instances
+const initializeCounters = () => {
+  if (typeof window !== "undefined") {
+    roadLengthCounter = new CountUp("roadLengthCounter", 0, {
+      decimal: ".",
+      decimalPlaces: 2,
+      duration: 1.2,
+      useEasing: true,
+      useGrouping: true,
+      separator: ",",
+    });
+
+    districtsCounter = new CountUp("districtsCounter", 0, {
+      duration: 1.2,
+      useEasing: true,
+      useGrouping: true,
+      separator: ",",
+    });
+
+    villagesCounter = new CountUp("villagesCounter", 0, {
+      duration: 1.2,
+      useEasing: true,
+      useGrouping: true,
+      separator: ",",
+    });
+
+    goodConditionCounter = new CountUp("goodConditionCounter", 0, {
+      decimal: ".",
+      decimalPlaces: 2,
+      duration: 1.2,
+      useEasing: true,
+      useGrouping: true,
+      separator: ",",
     });
   }
 };
 
+// Start counter animations sequentially (left to right)
+const startCounters = () => {
+  if (!statsLoaded.value) return;
+
+  // Reset counters to 0 first
+  if (roadLengthCounter) roadLengthCounter.reset();
+  if (districtsCounter) districtsCounter.reset();
+  if (villagesCounter) villagesCounter.reset();
+  if (goodConditionCounter) goodConditionCounter.reset();
+
+  // Start animations sequentially with smooth transitions
+  // Card 1: Start immediately (0ms)
+  setTimeout(() => {
+    if (roadLengthCounter && totalRoadLength.value) {
+      roadLengthCounter.update(parseFloat(totalRoadLength.value));
+    }
+  }, 0);
+
+  // Card 2: Start with slight overlap (700ms)
+  setTimeout(() => {
+    if (districtsCounter && totalDistricts.value) {
+      districtsCounter.update(totalDistricts.value);
+    }
+  }, 700);
+
+  // Card 3: Start with slight overlap (1400ms)
+  setTimeout(() => {
+    if (villagesCounter && totalVillages.value) {
+      villagesCounter.update(totalVillages.value);
+    }
+  }, 1400);
+
+  // Card 4: Start with slight overlap (2100ms)
+  setTimeout(() => {
+    if (goodConditionCounter && goodConditionLength.value) {
+      goodConditionCounter.update(parseFloat(goodConditionLength.value));
+    }
+  }, 2100);
+};
+
+// Load hero stats from API
+const loadHeroStats = async () => {
+  try {
+    // Fetch summary data for total road length and districts
+    const summaryResponse = await fetch(
+      "http://localhost:3001/api/jalan/stats/summary"
+    );
+    if (summaryResponse.ok) {
+      const summaryResult = await summaryResponse.json();
+      if (summaryResult.success && summaryResult.data) {
+        // Calculate total road length in Km (API returns totalLength not totalPanjang)
+        const totalLengthM = summaryResult.data.totalLength || 0;
+        totalRoadLength.value = (totalLengthM / 1000).toFixed(2);
+
+        // Count number of districts from kecamatanStats array
+        if (summaryResult.data.kecamatanStats) {
+          totalDistricts.value = summaryResult.data.kecamatanStats.length;
+        }
+
+        console.log("Total road length loaded:", totalRoadLength.value, "Km");
+        console.log("Total districts loaded:", totalDistricts.value);
+      }
+    }
+
+    // Fetch kondisi data for good condition roads
+    const kondisiResponse = await fetch(
+      "http://localhost:3001/api/jalan/stats/kondisi-material-filtered"
+    );
+    if (kondisiResponse.ok) {
+      const kondisiResult = await kondisiResponse.json();
+      if (
+        kondisiResult.success &&
+        kondisiResult.data &&
+        kondisiResult.data.kondisiStats
+      ) {
+        // Find "Baik" condition and get the sum of panjangM
+        const baikCondition = kondisiResult.data.kondisiStats.find(
+          (stat) => stat.keterangan === "Baik"
+        );
+
+        if (
+          baikCondition &&
+          baikCondition._sum &&
+          baikCondition._sum.panjangM
+        ) {
+          const baikPanjangM = baikCondition._sum.panjangM;
+          goodConditionLength.value = (baikPanjangM / 1000).toFixed(2);
+          console.log(
+            "Good condition road length loaded:",
+            goodConditionLength.value,
+            "Km"
+          );
+        }
+      }
+    }
+
+    // Fetch unique desa/kelurahan count
+    const jalanResponse = await fetch(
+      "http://localhost:3001/api/jalan/stats/summary"
+    );
+    if (jalanResponse.ok) {
+      const jalanResult = await jalanResponse.json();
+      if (jalanResult.success && jalanResult.data) {
+        // For now, we need to count unique desa from the full jalan data
+        // Since the summary endpoint doesn't provide this, we'll need to call a different endpoint
+        // Let's check if there's a filter endpoint for desa
+        try {
+          const desaResponse = await fetch(
+            "http://localhost:3001/api/jalan/filters/desa"
+          );
+          if (desaResponse.ok) {
+            const desaResult = await desaResponse.json();
+            if (desaResult.success && desaResult.data) {
+              totalVillages.value = desaResult.data.length;
+              console.log("Total villages loaded:", totalVillages.value);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching desa count:", err);
+        }
+      }
+    }
+
+    // Mark stats as loaded and start counters
+    statsLoaded.value = true;
+    // Wait a bit for DOM to be ready, then start animation
+    setTimeout(() => {
+      startCounters();
+    }, 100);
+  } catch (error) {
+    console.error("Error loading hero stats:", error);
+  }
+};
+
+// Scroll to section function with proper offset
+const scrollToSection = (sectionId) => {
+  // Disable auto scroll detection temporarily
+  isManualScrolling = true;
+
+  // Clear existing timeout
+  if (scrollTimeout) clearTimeout(scrollTimeout);
+
+  // Get the target element
+  const element = document.getElementById(sectionId);
+  if (!element) return;
+
+  // Calculate exact position
+  const navbarHeight = 80; // Height of navbar
+  const elementTop = element.offsetTop;
+  const scrollPosition = elementTop - navbarHeight;
+
+  // Scroll to the position
+  window.scrollTo({
+    top: scrollPosition,
+    behavior: "smooth",
+  });
+
+  // Re-enable auto detection after scroll completes
+  scrollTimeout = setTimeout(() => {
+    isManualScrolling = false;
+    // Force update active section
+    const event = new CustomEvent("section-change", {
+      detail: { activeSection: sectionId },
+    });
+    window.dispatchEvent(event);
+  }, 1000);
+};
+
 // Scroll detection for navbar
 const handleScroll = () => {
-  const sections = ["hero", "map", "analisis", "laporan"];
-  const scrollPosition = window.scrollY + 100; // Offset for navbar height
+  // Skip auto-detection during manual scrolling
+  if (isManualScrolling) return;
+
+  const sections = ["hero", "map", "analisis"];
+  const scrollPosition = window.scrollY + 150; // Add more offset for better detection
+
+  let activeId = "hero"; // Default to hero
 
   for (const sectionId of sections) {
     const element = document.getElementById(sectionId);
     if (element) {
       const { offsetTop, offsetHeight } = element;
+      // Check if scroll position is within section bounds
       if (
         scrollPosition >= offsetTop &&
         scrollPosition < offsetTop + offsetHeight
       ) {
-        // Emit event to navbar to update active section
-        const event = new CustomEvent("section-change", {
-          detail: { activeSection: sectionId },
-        });
-        window.dispatchEvent(event);
+        activeId = sectionId;
         break;
       }
     }
   }
+
+  // Emit event to update navbar active section
+  const event = new CustomEvent("section-change", {
+    detail: { activeSection: activeId },
+  });
+  window.dispatchEvent(event);
 };
 
 // Add scroll listener on mount
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
+
+  // Initialize AOS
+  AOS.init({
+    duration: 1000,
+    easing: "ease-out-cubic",
+    once: false,
+    mirror: true,
+    offset: 100,
+  });
+
+  // Initialize counters first
+  initializeCounters();
+
+  // Load hero stats from API (animation will run once after data loaded)
+  loadHeroStats();
 });
 
 // Remove scroll listener on unmount
@@ -621,7 +728,9 @@ useHead({
 
 /* Hero Section */
 .hero-section {
-  @apply min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 text-white flex flex-col justify-center relative overflow-hidden pt-10;
+  @apply bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 text-white flex flex-col justify-center relative overflow-hidden;
+  min-height: 100vh;
+  padding-top: 10vh;
 }
 
 .hero-bg-elements {
@@ -657,15 +766,12 @@ useHead({
 }
 
 .hero-content {
-  @apply container mx-auto px-24 py-20 relative z-10 flex items-center justify-between;
+  @apply w-full relative z-10 flex items-center justify-between;
+  padding: 5vh 10vw;
 }
 
 .hero-text {
   @apply flex-1 max-w-2xl;
-}
-
-.hero-text-animated {
-  animation: fadeIn 0.8s ease-out;
 }
 
 .hero-badge {
@@ -801,11 +907,6 @@ useHead({
   @apply flex-1 max-w-lg ml-12;
 }
 
-.hero-visual-animated {
-  animation: fadeInRight 1s ease-out, float 3s ease-in-out infinite;
-  animation-delay: 0s, 1s;
-}
-
 .hero-card {
   @apply bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 shadow-2xl overflow-hidden;
 }
@@ -843,7 +944,8 @@ useHead({
 }
 
 .hero-stats {
-  @apply container mx-auto px-8 py-12 relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
+  @apply w-full relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
+  padding: 3vh 10vw;
 }
 
 .stat-card {
@@ -862,8 +964,9 @@ useHead({
   @apply text-2xl font-bold text-white drop-shadow-lg;
 }
 
-.stat-label {
-  @apply text-white/90 text-sm font-medium drop-shadow-md;
+.hero-stats .stat-label {
+  @apply text-sm font-medium drop-shadow-md;
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 /* Section Headers */
@@ -881,7 +984,9 @@ useHead({
 
 /* Map Section */
 .map-section {
-  @apply py-20 bg-white;
+  @apply py-20;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(to bottom, #f8fafc 0%, #e0e7ff 100%);
 }
 
 .map-container {
@@ -1345,7 +1450,7 @@ useHead({
 }
 
 .center-number {
-  @apply text-3xl font-bold text-gray-900;
+  @apply text-xl font-bold text-gray-900;
 }
 
 .center-label {
@@ -1419,157 +1524,7 @@ useHead({
   @apply font-bold text-gray-900;
 }
 
-/* Laporan Section */
-.laporan-section {
-  @apply py-20 bg-white;
-}
-
-.laporan-content {
-  @apply container mx-auto px-8;
-}
-
-.laporan-controls {
-  @apply bg-gray-50 rounded-xl p-6 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4;
-}
-
-.control-group {
-  @apply space-y-2;
-}
-
-.control-label {
-  @apply block text-sm font-medium text-gray-700;
-}
-
-.control-select {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
-}
-
-.generate-btn {
-  @apply bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-semibold transition-colors flex items-center justify-center;
-}
-
-.laporan-preview {
-  @apply bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden;
-}
-
-.preview-header {
-  @apply bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between;
-}
-
-.preview-title {
-  @apply text-lg font-semibold text-gray-900;
-}
-
-.preview-actions {
-  @apply flex space-x-2;
-}
-
-.action-btn {
-  @apply bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1;
-}
-
-.preview-content {
-  @apply p-6;
-}
-
-.report-template {
-  @apply max-w-4xl mx-auto;
-}
-
-.report-header {
-  @apply text-center mb-8 pb-6 border-b border-gray-200;
-}
-
-.report-title {
-  @apply text-3xl font-bold text-gray-900 mb-2;
-}
-
-.report-subtitle {
-  @apply text-xl text-blue-600 mb-2;
-}
-
-.report-date {
-  @apply text-gray-600;
-}
-
-.report-body {
-  @apply space-y-8;
-}
-
-.report-section {
-  @apply space-y-4;
-}
-
-.report-section .section-title {
-  @apply text-2xl font-semibold text-gray-900 border-b border-gray-200 pb-2;
-}
-
-.section-content {
-  @apply text-gray-700 leading-relaxed;
-}
-
-.stats-grid {
-  @apply grid grid-cols-2 gap-4;
-}
-
-.stat-item {
-  @apply flex justify-between items-center p-4 bg-gray-50 rounded-lg;
-}
-
-.stat-label {
-  @apply text-gray-600;
-}
-
-.stat-value {
-  @apply font-bold text-gray-900;
-}
-
-.recommendations {
-  @apply space-y-2;
-}
-
-.recommendations li {
-  @apply text-gray-700 flex items-start space-x-2;
-}
-
-.recommendations li::before {
-  content: "•";
-  @apply text-blue-600 font-bold;
-}
-
 /* Animations & Keyframes */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInRight {
-  from {
-    opacity: 0;
-    transform: translateX(50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
 @keyframes gradientShift {
   0%,
   100% {
@@ -1580,30 +1535,19 @@ useHead({
   }
 }
 
-.animate-slide-in-1 {
-  animation: fadeIn 0.6s ease-out 0.2s both;
-}
-
-.animate-slide-in-2 {
-  animation: fadeIn 0.6s ease-out 0.4s both;
-}
-
-.animate-slide-in-3 {
-  animation: fadeIn 0.6s ease-out 0.6s both;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.8s ease-out 0.8s both;
-}
-
-.animate-fade-in-up {
-  animation: fadeIn 1s ease-out 1s both;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
+  .hero-section {
+    padding-top: 8vh;
+  }
+
   .hero-content {
-    @apply flex-col text-center px-4;
+    @apply flex-col text-center;
+    padding: 3vh 5vw;
+  }
+
+  .hero-stats {
+    padding: 2vh 5vw;
   }
 
   .hero-visual {
@@ -1647,13 +1591,8 @@ useHead({
     @apply grid-cols-1;
   }
 
-  .hero-stats {
-    @apply px-4;
-  }
-
   .map-container,
-  .analisis-content,
-  .laporan-content {
+  .analisis-content {
     @apply px-4;
   }
 }
@@ -1683,17 +1622,17 @@ export default {
             {
               label: "Sedang",
               data: [452, 158, 125, 24],
-              backgroundColor: "#fbbf24",
+              backgroundColor: "#eab308",
             },
             {
               label: "Rusak Ringan",
               data: [176, 102, 42, 24],
-              backgroundColor: "#f59e0b",
+              backgroundColor: "#f97316",
             },
             {
               label: "Rusak Berat",
               data: [260, 210, 80, 37],
-              backgroundColor: "#ef4444",
+              backgroundColor: "#dc2626",
             },
           ],
         },
@@ -1740,17 +1679,17 @@ export default {
             {
               label: "Sedang",
               data: [806, 242, 3, 4],
-              backgroundColor: "#fbbf24",
+              backgroundColor: "#eab308",
             },
             {
               label: "Rusak Ringan",
               data: [380, 102, 41, 0],
-              backgroundColor: "#f59e0b",
+              backgroundColor: "#f97316",
             },
             {
               label: "Rusak Berat",
               data: [219, 43, 613, 1],
-              backgroundColor: "#ef4444",
+              backgroundColor: "#dc2626",
             },
           ],
         },
@@ -1929,9 +1868,6 @@ export default {
       await this.updateMaterialDamageChart("");
       console.log("Initial chart data loaded");
 
-      // Load good condition road count for hero stats
-      await this.loadGoodConditionCount();
-
       // District Chart - Real Data
       const districtCtx = document.getElementById("districtChart");
       if (districtCtx) {
@@ -1957,21 +1893,21 @@ export default {
           console.log("API result:", result);
 
           if (result.success && result.data) {
-            // Process data for top 8 kecamatan
-            const topKecamatans = result.data.slice(0, 8);
-            const labels = topKecamatans.map((k) => k.kecamatan);
+            // Process data for all kecamatan
+            const allKecamatans = result.data;
+            const labels = allKecamatans.map((k) => k.kecamatan);
 
             // Prepare datasets for each condition
-            const baikData = topKecamatans.map(
+            const baikData = allKecamatans.map(
               (k) => k.conditions.Baik?.count || 0
             );
-            const sedangData = topKecamatans.map(
+            const sedangData = allKecamatans.map(
               (k) => k.conditions.Sedang?.count || 0
             );
-            const rusakRinganData = topKecamatans.map(
+            const rusakRinganData = allKecamatans.map(
               (k) => k.conditions["Rusak Ringan"]?.count || 0
             );
-            const rusakBeratData = topKecamatans.map(
+            const rusakBeratData = allKecamatans.map(
               (k) => k.conditions["Rusak Berat"]?.count || 0
             );
 
@@ -1988,17 +1924,17 @@ export default {
                   {
                     label: "Sedang",
                     data: sedangData,
-                    backgroundColor: "#fbbf24",
+                    backgroundColor: "#eab308",
                   },
                   {
                     label: "Rusak Ringan",
                     data: rusakRinganData,
-                    backgroundColor: "#f59e0b",
+                    backgroundColor: "#f97316",
                   },
                   {
                     label: "Rusak Berat",
                     data: rusakBeratData,
-                    backgroundColor: "#ef4444",
+                    backgroundColor: "#dc2626",
                   },
                 ],
               },
@@ -2164,66 +2100,6 @@ export default {
       // Add event listeners for filters
       this.setupFilterListeners();
     },
-    async loadGoodConditionCount() {
-      try {
-        console.log("Loading good condition road count...");
-        const response = await fetch(
-          "/api/jalan/stats/kondisi-material-filtered",
-          {
-            method: "GET",
-            mode: "cors",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log("Good condition API result:", result);
-
-        if (result.success && result.data && result.data.kondisiStats) {
-          // Find the count for "Baik" condition
-          const baikCondition = result.data.kondisiStats.find(
-            (stat) => stat.keterangan === "Baik"
-          );
-
-          if (baikCondition) {
-            const goodCount = baikCondition._count.keterangan;
-            const goodCountElement =
-              document.getElementById("goodConditionCount");
-            if (goodCountElement) {
-              goodCountElement.textContent = goodCount.toLocaleString();
-            }
-            console.log("Good condition count loaded:", goodCount);
-          } else {
-            console.log("No 'Baik' condition found in data");
-            const goodCountElement =
-              document.getElementById("goodConditionCount");
-            if (goodCountElement) {
-              goodCountElement.textContent = "0";
-            }
-          }
-        } else {
-          console.error("Failed to fetch good condition data");
-          const goodCountElement =
-            document.getElementById("goodConditionCount");
-          if (goodCountElement) {
-            goodCountElement.textContent = "0";
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching good condition count:", error);
-        const goodCountElement = document.getElementById("goodConditionCount");
-        if (goodCountElement) {
-          goodCountElement.textContent = "0";
-        }
-      }
-    },
     setupFilterListeners() {
       // Filter for Analisis Kondisi & Material Jalan
       const kondisiFilter = document.getElementById("kondisiMaterialFilter");
@@ -2294,17 +2170,19 @@ export default {
         window.conditionChart.destroy();
       }
 
-      // Prepare data
+      // Prepare data (convert to km)
       const labels = kondisiStats.map((s) => s.keterangan);
-      const data = kondisiStats.map((s) => s._count.keterangan);
-      const total = data.reduce((a, b) => a + b, 0);
+      const data = kondisiStats.map((s) =>
+        ((s._sum.panjangM || 0) / 1000).toFixed(2)
+      );
+      const total = data.reduce((a, b) => parseFloat(a) + parseFloat(b), 0);
 
-      // Update center text
+      // Update center text (show total km)
       const centerNumber = document.querySelector(
         "#conditionChart + .chart-center .center-number"
       );
       if (centerNumber) {
-        centerNumber.textContent = total.toLocaleString();
+        centerNumber.textContent = total.toFixed(2);
       }
 
       // Create new chart
@@ -2317,9 +2195,9 @@ export default {
               data: data,
               backgroundColor: [
                 "#10b981", // Baik - Green
-                "#fbbf24", // Sedang - Yellow
-                "#ef4444", // Rusak Berat - Red
-                "#f59e0b", // Rusak Ringan - Orange
+                "#eab308", // Sedang - Yellow
+                "#dc2626", // Rusak Berat - Red (bright)
+                "#f97316", // Rusak Ringan - Orange
               ],
               borderWidth: 0,
               hoverOffset: 10,
@@ -2344,15 +2222,19 @@ export default {
               displayColors: true,
               callbacks: {
                 label: function (context) {
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = ((context.parsed / total) * 100).toFixed(
-                    1
+                  const total = context.dataset.data.reduce(
+                    (a, b) => parseFloat(a) + parseFloat(b),
+                    0
                   );
+                  const percentage = (
+                    (parseFloat(context.parsed) / total) *
+                    100
+                  ).toFixed(1);
                   return (
                     context.label +
                     ": " +
-                    context.parsed +
-                    " (" +
+                    parseFloat(context.parsed).toFixed(2) +
+                    " km (" +
                     percentage +
                     "%)"
                   );
@@ -2380,17 +2262,19 @@ export default {
         window.materialChart.destroy();
       }
 
-      // Prepare data
+      // Prepare data (convert to km)
       const labels = materialStats.map((s) => s.kondisi);
-      const data = materialStats.map((s) => s._count.kondisi);
-      const total = data.reduce((a, b) => a + b, 0);
+      const data = materialStats.map((s) =>
+        ((s._sum.panjangM || 0) / 1000).toFixed(2)
+      );
+      const total = data.reduce((a, b) => parseFloat(a) + parseFloat(b), 0);
 
-      // Update center text
+      // Update center text (show total km)
       const centerNumber = document.querySelector(
         "#materialChart + .chart-center .center-number"
       );
       if (centerNumber) {
-        centerNumber.textContent = total.toLocaleString();
+        centerNumber.textContent = total.toFixed(2);
       }
 
       // Create new chart
@@ -2434,15 +2318,19 @@ export default {
               displayColors: true,
               callbacks: {
                 label: function (context) {
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = ((context.parsed / total) * 100).toFixed(
-                    1
+                  const total = context.dataset.data.reduce(
+                    (a, b) => parseFloat(a) + parseFloat(b),
+                    0
                   );
+                  const percentage = (
+                    (parseFloat(context.parsed) / total) *
+                    100
+                  ).toFixed(1);
                   return (
                     context.label +
                     ": " +
-                    context.parsed +
-                    " (" +
+                    parseFloat(context.parsed).toFixed(2) +
+                    " km (" +
                     percentage +
                     "%)"
                   );
@@ -2474,16 +2362,18 @@ export default {
       const topMaterials = materialData.slice(0, 6);
       const labels = topMaterials.map((m) => m.material);
 
-      // Prepare datasets for each condition
-      const baikData = topMaterials.map((m) => m.conditions.Baik?.count || 0);
-      const sedangData = topMaterials.map(
-        (m) => m.conditions.Sedang?.count || 0
+      // Prepare datasets for each condition (convert to km)
+      const baikData = topMaterials.map((m) =>
+        ((m.conditions.Baik?.length || 0) / 1000).toFixed(2)
       );
-      const rusakRinganData = topMaterials.map(
-        (m) => m.conditions["Rusak Ringan"]?.count || 0
+      const sedangData = topMaterials.map((m) =>
+        ((m.conditions.Sedang?.length || 0) / 1000).toFixed(2)
       );
-      const rusakBeratData = topMaterials.map(
-        (m) => m.conditions["Rusak Berat"]?.count || 0
+      const rusakRinganData = topMaterials.map((m) =>
+        ((m.conditions["Rusak Ringan"]?.length || 0) / 1000).toFixed(2)
+      );
+      const rusakBeratData = topMaterials.map((m) =>
+        ((m.conditions["Rusak Berat"]?.length || 0) / 1000).toFixed(2)
       );
 
       // Create new chart
@@ -2502,22 +2392,22 @@ export default {
             {
               label: "Sedang",
               data: sedangData,
-              backgroundColor: "#fbbf24",
-              borderColor: "#f59e0b",
+              backgroundColor: "#eab308",
+              borderColor: "#ca8a04",
               borderWidth: 1,
             },
             {
               label: "Rusak Ringan",
               data: rusakRinganData,
-              backgroundColor: "#f59e0b",
-              borderColor: "#d97706",
+              backgroundColor: "#f97316",
+              borderColor: "#ea580c",
               borderWidth: 1,
             },
             {
               label: "Rusak Berat",
               data: rusakBeratData,
-              backgroundColor: "#ef4444",
-              borderColor: "#dc2626",
+              backgroundColor: "#dc2626",
+              borderColor: "#b91c1c",
               borderWidth: 1,
             },
           ],
@@ -2541,7 +2431,10 @@ export default {
               callbacks: {
                 label: function (context) {
                   return (
-                    context.dataset.label + ": " + context.parsed.x + " jalan"
+                    context.dataset.label +
+                    ": " +
+                    parseFloat(context.parsed.x).toFixed(2) +
+                    " km"
                   );
                 },
               },
@@ -2552,7 +2445,7 @@ export default {
               beginAtZero: true,
               ticks: {
                 callback: function (value) {
-                  return value + " jalan";
+                  return value + " km";
                 },
               },
             },
