@@ -11,6 +11,7 @@ const { PrismaClient } = require("@prisma/client");
 // Import routes
 const jalanRoutes = require("./routes/jalan");
 const authRoutes = require("./routes/auth");
+const aduanRoutes = require("./routes/aduan");
 
 const app = express();
 const prisma = new PrismaClient();
@@ -67,6 +68,7 @@ app.get("/health", (req, res) => {
 
 // API routes
 app.use("/api/jalan", jalanRoutes);
+app.use("/api/aduan", aduanRoutes);
 app.use("/api/auth", authRoutes);
 
 // Error handling middleware

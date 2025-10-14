@@ -645,6 +645,20 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Button Laporkan Aduan (dipindah ke footer statis di bawah) -->
+            </div>
+            <div
+              class="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+            >
+              <button
+                @click="openAduanForm"
+                class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                title="Laporkan kondisi jalan ini"
+              >
+                <i class="fas fa-exclamation-triangle"></i>
+                <span class="text-sm font-semibold">Laporkan Aduan Jalan</span>
+              </button>
             </div>
           </div>
         </transition>
@@ -675,9 +689,167 @@
             </div>
           </div>
         </transition>
+
+        <!-- Aduan Modal -->
+        <transition name="fade">
+          <div
+            v-if="aduanModalVisible"
+            @click="aduanModalVisible = false"
+            class="absolute inset-0 bg-black bg-opacity-60 z-[10000] flex items-center justify-center p-4"
+          >
+            <div
+              @click.stop
+              class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col max-h-[75vh]"
+            >
+              <div
+                class="bg-blue-600 text-white px-4 py-3 flex items-center justify-between"
+              >
+                <h3 class="font-bold">
+                  Form Aduan Ruas {{ aduanForm.nomorRuas || "-" }}
+                </h3>
+                <button
+                  @click="aduanModalVisible = false"
+                  class="text-white hover:text-gray-200 transition-colors"
+                  title="Tutup"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              <div class="p-4 space-y-4 overflow-y-auto">
+                <div
+                  class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700"
+                >
+                  <div>
+                    <label
+                      class="block text-sm text-gray-600 dark:text-gray-300"
+                      >Nama Pelapor</label
+                    >
+                    <input
+                      type="text"
+                      v-model="aduanForm.namaPelapor"
+                      :disabled="aduanForm.anonim"
+                      class="mt-1 w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Boleh kosong bila anonim"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-sm text-gray-600 dark:text-gray-300"
+                      >Email <span class="text-red-500">*</span></label
+                    >
+                    <input
+                      type="email"
+                      v-model="aduanForm.email"
+                      class="mt-1 w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="email@contoh.com"
+                    />
+                  </div>
+                </div>
+
+                <div
+                  class="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700"
+                >
+                  <label
+                    class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
+                  >
+                    <input
+                      type="radio"
+                      value="false"
+                      v-model="aduanForm.anonimString"
+                    />
+                    <span>Tidak Anonim</span>
+                  </label>
+                  <label
+                    class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
+                  >
+                    <input
+                      type="radio"
+                      value="true"
+                      v-model="aduanForm.anonimString"
+                    />
+                    <span>Anonim</span>
+                  </label>
+                </div>
+
+                <div
+                  class="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700"
+                >
+                  <label class="block text-sm text-gray-600 dark:text-gray-300"
+                    >Keterangan</label
+                  >
+                  <textarea
+                    v-model="aduanForm.keterangan"
+                    rows="3"
+                    class="mt-1 w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Tuliskan keterangan aduan"
+                  ></textarea>
+                </div>
+
+                <div
+                  class="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700"
+                >
+                  <label
+                    class="block text-sm text-gray-600 dark:text-gray-300 mb-1"
+                    >Foto (bisa banyak)</label
+                  >
+                  <input
+                    type="file"
+                    multiple
+                    @change="onSelectFiles"
+                    accept="image/*"
+                  />
+                  <div
+                    v-if="aduanForm.files.length"
+                    class="mt-2 text-xs text-gray-600 dark:text-gray-300 space-y-1"
+                  >
+                    <div>
+                      <strong>{{ aduanForm.files.length }}</strong> file
+                      dipilih:
+                    </div>
+                    <ul class="list-disc list-inside max-h-24 overflow-auto">
+                      <li v-for="(f, idx) in aduanForm.files" :key="idx">
+                        {{ f.name }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    @click="aduanModalVisible = false"
+                    class="px-3 py-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    @click="submitAduan"
+                    :disabled="submitLoading"
+                    class="px-3 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60"
+                  >
+                    <span v-if="!submitLoading">Kirim Aduan</span>
+                    <span v-else>Mengirim...</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
       </div>
     </div>
   </div>
+
+  <!-- Toast Notifications -->
+  <Toast />
 </template>
 
 <script setup>
@@ -696,9 +868,13 @@ import LegendPanel from "./LegendPanel.vue";
 import MeasurementTools from "./MeasurementTools.vue";
 import SearchPanel from "./SearchPanel.vue";
 import SidebarPanel from "./SidebarPanel.vue";
+import Toast from "./Toast.vue";
+import { useApiService } from "~/composables/useApiService";
+import { useToast } from "~/composables/useToast";
 
 // API Service
 const { fetchRoadsGeoJSON } = useApiService();
+const toast = useToast();
 
 // Function to calculate optimal bounds for Kubu Raya district
 const calculateAllDataBounds = () => {
@@ -801,6 +977,21 @@ const legendVisible = ref(false);
 
 // Video popup state
 const videoPopupVisible = ref(false);
+
+// Aduan modal state
+const aduanModalVisible = ref(false);
+const submitLoading = ref(false);
+const aduanForm = reactive({
+  nomorRuas: "",
+  namaPelapor: "",
+  anonimString: "false",
+  get anonim() {
+    return this.anonimString === "true";
+  },
+  keterangan: "",
+  email: "",
+  files: [],
+});
 
 // Calculate optimal view for all road data
 const optimalView = calculateAllDataBounds();
@@ -1594,6 +1785,8 @@ onMounted(async () => {
                 graphic.attributes.lebarM || graphic.attributes.lebar_m || null,
             };
             roadInfoVisible.value = true;
+            // Prefill nomor ruas ke form aduan
+            aduanForm.nomorRuas = selectedRoadInfo.value.nomorRuas || "";
           }
         } else {
           // Click on empty area - close info box (which also clears highlight)
@@ -2274,6 +2467,61 @@ const openVideoPopup = () => {
 // Close video popup
 const closeVideoPopup = () => {
   videoPopupVisible.value = false;
+};
+
+// Open aduan modal
+const openAduanForm = () => {
+  // Prefill nomor ruas bila tersedia
+  if (selectedRoadInfo.value?.nomorRuas) {
+    aduanForm.nomorRuas = selectedRoadInfo.value.nomorRuas;
+  }
+  aduanModalVisible.value = true;
+};
+
+const onSelectFiles = (e) => {
+  const files = Array.from(e.target.files || []);
+  aduanForm.files = files;
+};
+
+const { postAduan } = useApiService();
+const submitAduan = async () => {
+  if (!aduanForm.nomorRuas?.trim()) {
+    toast.warning("Nomor ruas wajib diisi");
+    return;
+  }
+  if (!aduanForm.email?.trim()) {
+    toast.warning("Email wajib diisi");
+    return;
+  }
+  submitLoading.value = true;
+  try {
+    const resp = await postAduan({
+      nomorRuas: aduanForm.nomorRuas,
+      namaPelapor: aduanForm.namaPelapor,
+      anonim: aduanForm.anonim,
+      keterangan: aduanForm.keterangan,
+      email: aduanForm.email,
+      files: aduanForm.files,
+    });
+    if (!resp.success) throw new Error(resp.error || "Gagal mengirim aduan");
+    toast.success(
+      "Aduan berhasil terkirim! Email notifikasi telah dikirim ke " +
+        aduanForm.email,
+      5000
+    );
+    aduanModalVisible.value = false;
+    // reset form ringan (biarkan nomor ruas tetap terisi)
+    aduanForm.namaPelapor = "";
+    aduanForm.anonimString = "false";
+    aduanForm.keterangan = "";
+    aduanForm.email = "";
+    aduanForm.files = [];
+  } catch (e) {
+    console.error(e);
+    toast.error(e.message || "Gagal mengirim aduan");
+  } finally {
+    submitLoading.value = false;
+  }
 };
 
 const clearSearch = () => {

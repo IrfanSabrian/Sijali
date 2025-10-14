@@ -38,11 +38,6 @@
             class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
             >Analisis</a
           >
-          <a
-            href="#laporan"
-            class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-            >Laporan</a
-          >
         </nav>
       </div>
 

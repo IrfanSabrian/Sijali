@@ -188,6 +188,96 @@ export const useApiService = () => {
     }
   };
 
+  // Kirim aduan jalan dengan upload multi-foto (multipart/form-data)
+  const postAduan = async ({
+    nomorRuas,
+    namaPelapor,
+    anonim,
+    keterangan,
+    email,
+    files = [],
+  }) => {
+    try {
+      const form = new FormData();
+      form.append("nomor_ruas", nomorRuas || "");
+      if (namaPelapor) form.append("nama_pelapor", namaPelapor);
+      form.append("anonim", anonim ? "true" : "false");
+      if (keterangan) form.append("description", keterangan);
+      if (email) form.append("email", email);
+
+      // Tambahkan banyak file
+      files.forEach((file) => form.append("photos", file));
+
+      const response = await $fetch(`${apiUrl}/aduan`, {
+        method: "POST",
+        body: form,
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || "Gagal mengirim aduan");
+      }
+
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error("Error postAduan:", error);
+      return { success: false, error: error.message || "Gagal mengirim aduan" };
+    }
+  };
+
+  // Fetch daftar aduan (untuk admin)
+  const fetchAduan = async (params = {}) => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params.page) queryParams.append("page", params.page);
+      if (params.limit) queryParams.append("limit", params.limit);
+      if (params.status) queryParams.append("status", params.status);
+
+      const url = `${apiUrl}/aduan${
+        queryParams.toString() ? "?" + queryParams.toString() : ""
+      }`;
+
+      const response = await $fetch(url);
+
+      if (!response.success) {
+        throw new Error(response.error || "Gagal mengambil data aduan");
+      }
+
+      return {
+        success: true,
+        data: response.data,
+        pagination: response.pagination,
+      };
+    } catch (error) {
+      console.error("Error fetchAduan:", error);
+      return {
+        success: false,
+        error: error.message || "Gagal mengambil data aduan",
+      };
+    }
+  };
+
+  // Update status aduan (untuk admin)
+  const updateAduanStatus = async (id, { status, description }) => {
+    try {
+      const response = await $fetch(`${apiUrl}/aduan/${id}/status`, {
+        method: "PATCH",
+        body: { status, description },
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || "Gagal update status aduan");
+      }
+
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error("Error updateAduanStatus:", error);
+      return {
+        success: false,
+        error: error.message || "Gagal update status aduan",
+      };
+    }
+  };
+
   return {
     fetchRoads,
     fetchRoadStats,
@@ -195,5 +285,8 @@ export const useApiService = () => {
     fetchRoadGeometry,
     convertRoadsToGeoJSON,
     fetchRoadsGeoJSON,
+    postAduan,
+    fetchAduan,
+    updateAduanStatus,
   };
 };

@@ -30,15 +30,12 @@
           <div class="flex justify-center">
             <div class="relative">
               <div
-                class="absolute inset-0 bg-blue-500 rounded-full blur-xl opacity-50 animate-pulse"
-              ></div>
-              <div
-                class="relative bg-gradient-to-br from-blue-500 to-indigo-600 p-4 rounded-2xl shadow-lg transform transition-transform duration-300 hover:scale-110"
+                class="relative transform transition-transform duration-300 hover:scale-110"
               >
                 <img
                   src="~/assets/images/sijali-logo.svg"
                   alt="SIJALI Logo"
-                  class="h-12 w-12"
+                  class="h-20 w-20"
                 />
               </div>
             </div>
