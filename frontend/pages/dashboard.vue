@@ -42,7 +42,7 @@
             <img
               src="~/assets/images/sijali-logo.svg"
               alt="SIJALI Logo"
-              class="h-10 w-10 animate-pulse"
+              class="h-10 w-10"
             />
             <div class="hidden sm:block">
               <h1
@@ -166,20 +166,102 @@
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
             ]"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg class="w-5 h-5" viewBox="0 0 256 256" fill="currentColor">
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                d="M147.6,141v-0.5l-3.1-41.5c-0.1-1.1-0.6-2.1-1.4-2.9c-0.9-0.8-1.9-1.2-3-1.2h-24.1c-1.1,0-2.1,0.4-3,1.2c-0.9,0.8-1.3,1.8-1.4,2.9l-3.1,41.5v0.5c-0.1,1,0.3,1.9,1,2.6c0.8,0.7,1.7,1,2.7,1h31.6c1,0,1.9-0.3,2.7-1C147.3,142.9,147.7,142,147.6,141L147.6,141z M246,201.5c0,6.3-2,9.5-6,9.5h-91.3c1.1,0,2.1-0.4,2.8-1.2c0.8-0.8,1.1-1.8,1-2.9l-2.6-33.2c-0.1-1.1-0.6-2.1-1.4-2.9c-0.9-0.8-1.9-1.2-3-1.2h-35.3c-1.1,0-2.1,0.4-3,1.2c-0.9,0.8-1.3,1.8-1.4,2.9l-2.6,33.2c-0.1,1.1,0.3,2.1,1,2.9c0.8,0.8,1.7,1.2,2.8,1.2H16c-4,0-6-3.2-6-9.5c0-4.7,1.1-9.7,3.4-15.1L67.4,51.1c0.7-1.6,1.8-3.1,3.4-4.3c1.6-1.2,3.2-1.8,4.9-1.8h43.9c-1.1,0-2.1,0.4-3,1.2c-0.9,0.8-1.3,1.8-1.4,2.9l-1.9,24.9c-0.1,1.2,0.3,2.2,1,3c0.8,0.8,1.7,1.2,2.8,1.2h21.5c1.1,0,2.1-0.4,2.8-1.2c0.8-0.8,1.1-1.8,1-3l-2-24.9c-0.1-1.1-0.6-2.1-1.4-2.9s-1.9-1.2-3-1.2h44c1.7,0,3.4,0.6,4.9,1.8c1.6,1.2,2.7,2.6,3.4,4.3l54.1,135.4C244.9,191.9,246,196.9,246,201.5L246,201.5z"
               />
             </svg>
-            <span class="font-medium">Data Jalan</span>
+            <span class="font-medium">Jalan Lingkungan</span>
+          </button>
+
+          <button
+            @click="
+              activeTab = 'jembatan';
+              sidebarOpen = false;
+            "
+            :class="[
+              'w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200',
+              activeTab === 'jembatan'
+                ? 'bg-gradient-to-r from-cyan-500 to-cyan-600 text-white shadow-lg'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+            ]"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 256 256" fill="currentColor">
+              <path
+                d="M238.6,201.7c-1,0-5.3,0-7.4,0h-19.9c-12.2-34.4-44.8-59-83.4-59c-38.5,0-71.2,24.7-83.4,59H24.8c-2.1,0-6.4,0-7.4,0c-4.1,0-7.4-3.3-7.4-7.4V187v-73.7c0-8.1,6.6-14.8,14.8-14.8h7.4V69H17.4c-4.1,0-7.4-3.3-7.4-7.4c0-4.1,3.3-7.4,7.4-7.4h221.2c4.1,0,7.4,3.3,7.4,7.4c0,4.1-3.3,7.4-7.4,7.4h-14.7v29.5h7.4c8.1,0,14.8,6.6,14.8,14.8V187v7.4C246,198.4,242.7,201.7,238.6,201.7z M76.4,69H46.9v29.5h29.5V69z M120.6,69H91.1v29.5h29.5V69z M164.9,69h-29.5v29.5h29.5V69z M209.1,69h-29.5v29.5h29.5V69z"
+              />
+            </svg>
+            <span class="font-medium">Jembatan Lingkungan</span>
+          </button>
+
+          <button
+            @click="
+              activeTab = 'drainase';
+              sidebarOpen = false;
+            "
+            :class="[
+              'w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200',
+              activeTab === 'drainase'
+                ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-lg'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+            ]"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 256 256" fill="currentColor">
+              <path d="M10,210.5h236v16.8H10V210.5L10,210.5z" />
+              <path
+                d="M90.8,28.8H18v9.9h60.1v70.4H18v9.9h72.8L90.8,28.8L90.8,28.8z"
+              />
+              <path
+                d="M106.2,119.1c-0.4,20.8,0,87.4,0,87.4h67c0,0-2.2-76.5-9.5-96.9c-7.3-20.4-28.8-59.7-69.6-65.5v60.4C94.1,104.5,106.9,105.2,106.2,119.1z"
+              />
+            </svg>
+            <span class="font-medium">Drainase Lingkungan</span>
+          </button>
+
+          <button
+            @click="
+              activeTab = 'kawasan';
+              sidebarOpen = false;
+            "
+            :class="[
+              'w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200',
+              activeTab === 'kawasan'
+                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+            ]"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 256 256" fill="currentColor">
+              <path
+                d="M127,60.7c-1.2,0.5-71.2,53.6-71.2,54c0,0.7,2.2,1,9.5,1h7.3v38.7v38.8l1.2,1.2c1.1,1.1,1.5,1.2,5.5,1.2h4.3v-25.9c0-25.4,0-25.9,1-27.2l1-1.3h16.5c14.1,0,16.6,0.1,17.5,0.8l1.1,0.7v26.5v26.4H151h30.4l1.2-1.2l1.2-1.2v-38.8v-38.7h7.8c4.4,0,8.1-0.2,8.5-0.5c0.9-0.6,1.5-0.1-14.8-12.4l-12.6-9.5l0-14.9c0-11-0.2-15.2-0.6-16.1l-0.6-1.2L160,60.9c-10.1-0.1-11.6,0-12.4,0.7c-0.7,0.7-0.9,1.7-1,6.3l-0.1,5.4l-8.3-6.2C130.2,61,128.5,60.1,127,60.7z M171.7,142.4c1,1.2,1,1.9,1,13v11.7l-1.2,1.2l-1.2,1.2h-16.4c-15.7,0-16.4,0-17.3-1c-0.9-0.9-1-1.6-1-13.4c0-12.4,0-12.5,1.1-13.2c0.9-0.7,3.4-0.8,17.5-0.8h16.5L171.7,142.4z"
+              />
+              <path
+                d="M29.3,106.9C18.7,115,10,121.8,10,122.1s2,0.5,4.4,0.6l4.3,0.1v21.5c0,12.7,0.2,21.8,0.5,22.2c0.4,0.6,3.6,0.7,24.4,0.7h24l0.1-23.7l0.1-23.7H55.1c-10.8,0-12.7-0.1-12.7-0.7c0-0.4,4.8-4.4,10.6-9c5.8-4.6,10.4-8.5,10.3-8.7c-0.7-1.2-12.5-9.5-13.4-9.5C49.3,92.1,40.1,98.7,29.3,106.9z"
+              />
+              <path
+                d="M198.7,96.7c-3.3,2.5-6.1,4.7-6.2,4.8c0,0,4.8,3.9,10.7,8.6c6,4.7,10.8,8.9,10.8,9.2c0,0.6-2,0.7-12.7,0.7h-12.7l0.1,23.7l0.1,23.7l23,0.1c15.3,0,23.3,0,23.9-0.4c0.9-0.5,1-1.2,1-22.4v-21.9h4.5c2.5,0,4.7-0.2,4.8-0.4c0.4-0.6-38.7-30.1-40.1-30.2C205,92.1,203.2,93.2,198.7,96.7z"
+              />
+            </svg>
+            <span class="font-medium">Kawasan Permukiman</span>
+          </button>
+
+          <button
+            @click="
+              activeTab = 'rumah';
+              sidebarOpen = false;
+            "
+            :class="[
+              'w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200',
+              activeTab === 'rumah'
+                ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+            ]"
+          >
+            <svg class="w-5 h-5" viewBox="0 -32 576 576" fill="currentColor">
+              <path
+                d="M288 114.96L69.47 307.71c-1.62 1.46-3.69 2.14-5.47 3.35V496c0 8.84 7.16 16 16 16h149.23L192 439.19l104.11-64-60.16-119.22L384 392.75l-104.11 64L319.81 512H496c8.84 0 16-7.16 16-16V311.1c-1.7-1.16-3.72-1.82-5.26-3.2L288 114.96zm282.69 121.32L512 184.45V48c0-8.84-7.16-16-16-16h-64c-8.84 0-16 7.16-16 16v51.69L314.75 10.31C307.12 3.45 297.56.01 288 0s-19.1 3.41-26.7 10.27L5.31 236.28c-6.57 5.91-7.12 16.02-1.21 22.6l21.4 23.82c5.9 6.57 16.02 7.12 22.6 1.21L277.42 81.63c6.05-5.33 15.12-5.33 21.17 0L527.91 283.9c6.57 5.9 16.69 5.36 22.6-1.21l21.4-23.82c5.9-6.57 5.36-16.69-1.22-22.59z"
+              />
+            </svg>
+            <span class="font-medium">Rumah Layak Tidak Hunian</span>
           </button>
 
           <!-- Menu Laporan & Analisis -->
@@ -297,6 +379,7 @@
         <div class="sm:px-0 max-w-full">
           <!-- Welcome Card -->
           <div
+            v-if="isDashboardTab"
             class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 mb-6 text-white transform hover:scale-[1.01] transition-transform duration-200"
           >
             <div class="flex items-center justify-between">
@@ -325,7 +408,7 @@
 
           <!-- Statistics Cards -->
           <div
-            v-if="loading"
+            v-if="isDashboardTab && loading"
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6"
           >
             <div
@@ -335,7 +418,7 @@
             ></div>
           </div>
           <div
-            v-else
+            v-else-if="isDashboardTab"
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6"
           >
             <!-- Total Jalan Card -->
@@ -344,7 +427,7 @@
             >
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                  Total Jalan
+                  Total Panjang Jalan
                 </h3>
                 <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
                   <svg
@@ -363,10 +446,10 @@
                 </div>
               </div>
               <p class="text-4xl font-bold text-gray-900 dark:text-white">
-                {{ stats.totalRoads?.toLocaleString() || 0 }}
+                {{ (stats.totalLength / 1000)?.toFixed(2) || 0 }} km
               </p>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                Total {{ (stats.totalLength / 1000)?.toFixed(2) || 0 }} km
+                Total {{ stats.totalRoads?.toLocaleString() || 0 }} jalan
               </p>
             </div>
 
@@ -376,7 +459,7 @@
             >
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                  Kondisi Baik
+                  Panjang Kondisi Baik
                 </h3>
                 <div class="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
                   <svg
@@ -395,11 +478,12 @@
                 </div>
               </div>
               <p class="text-4xl font-bold text-gray-900 dark:text-white">
-                {{ conditionStats.baik || 0 }}
+                {{ ((conditionStats.baikLength || 0) / 1000)?.toFixed(2) }} km
               </p>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                {{ getPercentage(conditionStats.baik, stats.totalRoads) }}% dari
-                total
+                {{
+                  getPercentage(conditionStats.baikLength, stats.totalLength)
+                }}% dari total
               </p>
             </div>
 
@@ -409,7 +493,7 @@
             >
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                  Perlu Perbaikan
+                  Panjang Perlu Perbaikan
                 </h3>
                 <div class="p-3 bg-red-100 dark:bg-red-900 rounded-lg">
                   <svg
@@ -428,11 +512,12 @@
                 </div>
               </div>
               <p class="text-4xl font-bold text-gray-900 dark:text-white">
-                {{ conditionStats.rusak || 0 }}
+                {{ ((conditionStats.rusakLength || 0) / 1000)?.toFixed(2) }} km
               </p>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                {{ getPercentage(conditionStats.rusak, stats.totalRoads) }}%
-                dari total
+                {{
+                  getPercentage(conditionStats.rusakLength, stats.totalLength)
+                }}% dari total
               </p>
             </div>
           </div>
@@ -444,7 +529,7 @@
               <AduanList />
             </div>
 
-            <!-- Data Jalan Section -->
+            <!-- Jalan Lingkungan Section -->
             <div v-show="activeTab === 'jalan'" class="space-y-6">
               <div
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6"
@@ -453,23 +538,43 @@
                   <h3
                     class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white"
                   >
-                    Data Jalan Lingkungan
+                    Jalan Lingkungan
                   </h3>
                 </div>
 
-                <!-- Search and Filter -->
-                <div
-                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4"
-                >
-                  <input
-                    v-model="searchQuery"
-                    type="text"
-                    placeholder="Cari nama jalan..."
-                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  />
+                <!-- Search, Filter and Actions -->
+                <div class="mb-4 flex flex-col lg:flex-row gap-4">
+                  <!-- Search Input with Icon -->
+                  <div class="flex-1 relative">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                    >
+                      <svg
+                        class="h-5 w-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                      </svg>
+                    </div>
+                    <input
+                      v-model="searchQuery"
+                      type="text"
+                      placeholder="Cari nama jalan atau nomor ruas..."
+                      class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    />
+                  </div>
+
+                  <!-- Filter Kecamatan -->
                   <select
                     v-model="filterKecamatan"
-                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white min-w-[200px]"
                   >
                     <option value="">Semua Kecamatan</option>
                     <option
@@ -480,38 +585,111 @@
                       {{ kec }}
                     </option>
                   </select>
-                  <select
-                    v-model="filterKondisi"
-                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="">Semua Kondisi</option>
-                    <option
-                      v-for="kondisi in kondisiList"
-                      :key="kondisi"
-                      :value="kondisi"
+
+                  <!-- Action Buttons -->
+                  <div class="flex gap-2">
+                    <button
+                      @click="showGeoJSONImportModal = true"
+                      class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 min-w-[140px]"
                     >
-                      {{ kondisi }}
-                    </option>
-                  </select>
-                  <button
-                    @click="showAddModal = true"
-                    class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                  >
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
+                        />
+                      </svg>
+                      <span>Import GeoJSON</span>
+                    </button>
+                    <button
+                      @click="toggleSelectMode"
+                      :class="[
+                        'px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 min-w-[100px]',
+                        selectMode
+                          ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                          : 'bg-gradient-to-r from-gray-500 to-gray-600 text-white hover:from-gray-600 hover:to-gray-700',
+                      ]"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 4v16m8-8H4"
-                      />
-                    </svg>
-                    <span>Tambah Data</span>
-                  </button>
+                      <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span>{{ selectMode ? "Kembali" : "Select" }}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Select Mode Info and Actions -->
+                <div
+                  v-if="selectMode"
+                  class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                      <span
+                        class="text-sm font-medium text-blue-800 dark:text-blue-200"
+                      >
+                        {{ selectedRoadsCount }} data dipilih
+                      </span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <button
+                        v-if="hasSelectedRoads"
+                        @click="exportSelectedRoads"
+                        class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors flex items-center space-x-1"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                        <span>Export GeoJSON</span>
+                      </button>
+                      <button
+                        v-if="hasSelectedRoads"
+                        @click="deleteSelectedRoads"
+                        class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors flex items-center space-x-1"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                        <span>Hapus</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Roads Table -->
@@ -520,9 +698,22 @@
                 >
                   <table
                     class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                    style="table-layout: fixed"
                   >
                     <thead class="bg-gray-50 dark:bg-gray-700">
                       <tr>
+                        <th
+                          v-if="selectMode"
+                          class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap sticky left-0 bg-gray-50 dark:bg-gray-700 z-10"
+                          style="width: 50px; min-width: 50px"
+                        >
+                          <input
+                            type="checkbox"
+                            :checked="isAllSelected"
+                            @change="toggleSelectAll"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        </th>
                         <th
                           class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
                         >
@@ -643,11 +834,6 @@
                         >
                           Keterangan
                         </th>
-                        <th
-                          class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider sticky right-0 bg-gray-50 dark:bg-gray-700 z-10"
-                        >
-                          Aksi
-                        </th>
                       </tr>
                     </thead>
                     <tbody
@@ -680,8 +866,37 @@
                         v-else
                         v-for="(road, index) in paginatedRoads"
                         :key="road.id"
-                        class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        @click="
+                          selectMode
+                            ? toggleRoadSelection(road.id)
+                            : viewRoad(road)
+                        "
+                        :class="[
+                          'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors',
+                          selectMode ? 'cursor-pointer' : 'cursor-pointer',
+                          selectedRoads.has(road.id)
+                            ? 'bg-blue-50 dark:bg-blue-900/20'
+                            : '',
+                        ]"
                       >
+                        <!-- Checkbox -->
+                        <td
+                          v-if="selectMode"
+                          :class="[
+                            'px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 sticky left-0 z-10',
+                            selectedRoads.has(road.id)
+                              ? 'bg-blue-50 dark:bg-blue-900/20'
+                              : 'bg-white dark:bg-gray-800',
+                          ]"
+                          style="width: 50px; min-width: 50px"
+                        >
+                          <input
+                            type="checkbox"
+                            :checked="selectedRoads.has(road.id)"
+                            @click.stop="toggleRoadSelection(road.id)"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        </td>
                         <!-- No -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 font-medium"
@@ -692,49 +907,59 @@
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"
                         >
-                          {{ road.fid || "-" }}
+                          {{
+                            road.fid !== undefined && road.fid !== null
+                              ? road.fid
+                              : "-"
+                          }}
                         </td>
                         <!-- No Ruas -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"
                         >
-                          {{ road.noRuas || "-" }}
+                          {{ road.No_Ruas || road.noRuas || "-" }}
                         </td>
                         <!-- No Prov -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-center"
                         >
-                          {{ road.noProv || "-" }}
+                          {{ road.No_Prov || road.noProv || "-" }}
                         </td>
                         <!-- No Kab -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-center"
                         >
-                          {{ road.noKab || "-" }}
+                          {{ road.No_Kab || road.noKab || "-" }}
                         </td>
                         <!-- No Kec -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-center"
                         >
-                          {{ road.noKec || "-" }}
+                          {{ road.No_Kec || road.noKec || "-" }}
                         </td>
                         <!-- No Desa -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-center"
                         >
-                          {{ road.noDesa || "-" }}
+                          {{ road.No_Desa || road.noDesa || "-" }}
                         </td>
                         <!-- No Jalan -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"
                         >
-                          {{ road.noJalan || "-" }}
+                          {{ road.No_Jalan || road.noJalan || "-" }}
                         </td>
                         <!-- Nama Jalan -->
                         <td
                           class="px-3 py-3 text-sm text-gray-900 dark:text-gray-300 font-medium"
                         >
-                          {{ road.namaJalan || road.nama || "-" }}
+                          {{
+                            road.Nama_Jalan ||
+                            road.namaJalan ||
+                            road.Nama ||
+                            road.nama ||
+                            "-"
+                          }}
                         </td>
                         <!-- Kecamatan -->
                         <td
@@ -752,151 +977,134 @@
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right"
                         >
-                          {{ road.panjangM?.toFixed(2) || "-" }}
+                          {{
+                            road.Panjang_M?.toFixed(2) ||
+                            road.panjangM?.toFixed(2) ||
+                            "-"
+                          }}
                         </td>
                         <!-- Lebar -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right"
                         >
-                          {{ road.lebarM?.toFixed(2) || "-" }}
+                          {{
+                            road.Lebar_m_?.toFixed(2) ||
+                            road.lebarM?.toFixed(2) ||
+                            "-"
+                          }}
                         </td>
                         <!-- Tahun -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-center"
                         >
-                          {{ road.tahun || "-" }}
+                          {{ road.Tahun || road.tahun || "-" }}
                         </td>
                         <!-- Kondisi -->
                         <td class="px-3 py-3 whitespace-nowrap">
                           <span
                             :class="
-                              getKondisiBadge(road.kondisi || road.keterangan)
+                              getKondisiBadge(
+                                road.Kondisi ||
+                                  road.kondisi ||
+                                  road.Keterangan ||
+                                  road.keterangan
+                              )
                             "
                             class="px-2 py-1 text-xs font-semibold rounded-full"
                           >
-                            {{ road.kondisi || road.keterangan || "-" }}
+                            {{
+                              road.Kondisi ||
+                              road.kondisi ||
+                              road.Keterangan ||
+                              road.keterangan ||
+                              "-"
+                            }}
                           </span>
                         </td>
                         <!-- Nilai -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right"
                         >
-                          {{ road.nilai?.toFixed(2) || "-" }}
+                          {{
+                            road.Nilai?.toFixed(2) ||
+                            road.nilai?.toFixed(2) ||
+                            "-"
+                          }}
                         </td>
                         <!-- Bobot -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-center"
                         >
-                          {{ road.bobot || "-" }}
+                          {{ road.Bobot || road.bobot || "-" }}
                         </td>
                         <!-- UTM X Awal -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right font-mono"
                         >
-                          {{ road.utmXAwal?.toFixed(4) || "-" }}
+                          {{
+                            road.UTM_X_AWAL?.toFixed(4) ||
+                            road.utmXAwal?.toFixed(4) ||
+                            "-"
+                          }}
                         </td>
                         <!-- UTM Y Awal -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right font-mono"
                         >
-                          {{ road.utmYAwal?.toFixed(4) || "-" }}
+                          {{
+                            road.UTM_Y_AWAL?.toFixed(4) ||
+                            road.utmYAwal?.toFixed(4) ||
+                            "-"
+                          }}
                         </td>
                         <!-- Penanganan Awal -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"
                         >
-                          {{ road.pngnlAwal || "-" }}
+                          {{ road.Pngnl_Awal || road.pngnlAwal || "-" }}
                         </td>
                         <!-- UTM X Akhir -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right font-mono"
                         >
-                          {{ road.utmXAkhi?.toFixed(4) || "-" }}
+                          {{
+                            road.UTM_X_AKHI?.toFixed(4) ||
+                            road.utmXAkhi?.toFixed(4) ||
+                            "-"
+                          }}
                         </td>
                         <!-- UTM Y Akhir -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 text-right font-mono"
                         >
-                          {{ road.utmYAkhi?.toFixed(4) || "-" }}
+                          {{
+                            road.UTM_Y_AKHI?.toFixed(4) ||
+                            road.utmYAkhi?.toFixed(4) ||
+                            "-"
+                          }}
                         </td>
                         <!-- Penanganan Akhir -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"
                         >
-                          {{ road.pngnlAkhi || "-" }}
+                          {{ road.Pngnl_Akhi || road.pngnlAkhi || "-" }}
                         </td>
                         <!-- Keterangan -->
-                        <td
-                          class="px-3 py-3 text-sm text-gray-900 dark:text-gray-300 max-w-xs"
-                        >
-                          <div class="truncate" :title="road.keterangan || '-'">
-                            {{ road.keterangan || "-" }}
-                          </div>
-                        </td>
-                        <!-- Aksi -->
-                        <td
-                          class="px-3 py-3 whitespace-nowrap text-sm space-x-2 sticky right-0 bg-white dark:bg-gray-800 z-10"
-                        >
-                          <button
-                            @click="viewRoad(road)"
-                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                        <td class="px-3 py-3 whitespace-nowrap">
+                          <span
+                            v-if="road.Keterangan || road.keterangan"
+                            :class="
+                              getKondisiBadge(
+                                road.Keterangan || road.keterangan
+                              )
+                            "
+                            class="px-2 py-1 text-xs font-semibold rounded-full"
                           >
-                            <svg
-                              class="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                              />
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                              />
-                            </svg>
-                          </button>
-                          <button
-                            @click="editRoad(road)"
-                            class="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 transition-colors"
+                            {{ road.Keterangan || road.keterangan }}
+                          </span>
+                          <span v-else class="text-gray-500 dark:text-gray-400"
+                            >-</span
                           >
-                            <svg
-                              class="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                              />
-                            </svg>
-                          </button>
-                          <button
-                            @click="deleteRoad(road)"
-                            class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-                          >
-                            <svg
-                              class="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          </button>
                         </td>
                       </tr>
                     </tbody>
@@ -932,190 +1140,184 @@
               </div>
             </div>
 
-            <!-- User Management Section (Admin Only) -->
-            <div
-              v-show="activeTab === 'users' && user?.role === 'ADMIN'"
-              class="space-y-6"
-            >
+            <!-- Jembatan Lingkungan Section -->
+            <div v-show="activeTab === 'jembatan'" class="space-y-6">
               <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden p-4 sm:p-6"
+                class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center"
               >
-                <div
-                  class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4"
-                >
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                    Manajemen User
-                  </h3>
-                  <button
-                    @click="openAddUserModal"
-                    class="px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                <div class="max-w-md mx-auto">
+                  <div
+                    class="p-4 bg-cyan-100 dark:bg-cyan-900/20 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center"
                   >
                     <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      class="w-10 h-10 text-cyan-600 dark:text-cyan-400"
+                      viewBox="0 0 256 256"
+                      fill="currentColor"
                     >
                       <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                        d="M238.6,201.7c-1,0-5.3,0-7.4,0h-19.9c-12.2-34.4-44.8-59-83.4-59c-38.5,0-71.2,24.7-83.4,59H24.8c-2.1,0-6.4,0-7.4,0c-4.1,0-7.4-3.3-7.4-7.4V187v-73.7c0-8.1,6.6-14.8,14.8-14.8h7.4V69H17.4c-4.1,0-7.4-3.3-7.4-7.4c0-4.1,3.3-7.4,7.4-7.4h221.2c4.1,0,7.4,3.3,7.4,7.4c0,4.1-3.3,7.4-7.4,7.4h-14.7v29.5h7.4c8.1,0,14.8,6.6,14.8,14.8V187v7.4C246,198.4,242.7,201.7,238.6,201.7z M76.4,69H46.9v29.5h29.5V69z M120.6,69H91.1v29.5h29.5V69z M164.9,69h-29.5v29.5h29.5V69z M209.1,69h-29.5v29.5h29.5V69z"
                       />
                     </svg>
-                    <span>Tambah User</span>
-                  </button>
-                </div>
-
-                <!-- Users Table -->
-                <div
-                  class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700"
-                >
-                  <table
-                    class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                  </div>
+                  <h3
+                    class="text-2xl font-bold text-gray-900 dark:text-white mb-4"
                   >
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                      <tr>
-                        <th
-                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        >
-                          No
-                        </th>
-                        <th
-                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        >
-                          Username
-                        </th>
-                        <th
-                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        >
-                          Email
-                        </th>
-                        <th
-                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        >
-                          Role
-                        </th>
-                        <th
-                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        >
-                          Dibuat
-                        </th>
-                        <th
-                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        >
-                          Aksi
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody
-                      class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
+                    Jembatan Lingkungan
+                  </h3>
+                  <p class="text-gray-600 dark:text-gray-400 mb-6">
+                    Fitur ini akan segera tersedia untuk mengelola data jembatan
+                    lingkungan di Kabupaten Kubu Raya.
+                  </p>
+                  <div
+                    class="bg-cyan-50 dark:bg-cyan-900/10 border border-cyan-200 dark:border-cyan-800 rounded-lg p-4"
+                  >
+                    <p class="text-sm text-cyan-700 dark:text-cyan-300">
+                      <strong>Fitur yang akan tersedia:</strong><br />
+                      • Data jembatan lingkungan<br />
+                      • Kondisi dan status jembatan<br />
+                      • Peta lokasi jembatan<br />
+                      • Laporan kondisi jembatan
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Drainase Lingkungan Section -->
+            <div v-show="activeTab === 'drainase'" class="space-y-6">
+              <div
+                class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center"
+              >
+                <div class="max-w-md mx-auto">
+                  <div
+                    class="p-4 bg-teal-100 dark:bg-teal-900/20 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-10 h-10 text-teal-600 dark:text-teal-400"
+                      viewBox="0 0 256 256"
+                      fill="currentColor"
                     >
-                      <tr v-if="loadingUsers">
-                        <td
-                          colspan="6"
-                          class="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
-                        >
-                          <div
-                            class="flex items-center justify-center space-x-2"
-                          >
-                            <div
-                              class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"
-                            ></div>
-                            <span>Memuat data...</span>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr v-else-if="users.length === 0">
-                        <td
-                          colspan="6"
-                          class="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
-                        >
-                          Tidak ada user
-                        </td>
-                      </tr>
-                      <tr
-                        v-else
-                        v-for="(userItem, index) in users"
-                        :key="userItem.id"
-                        class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                      >
-                        <td
-                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"
-                        >
-                          {{ index + 1 }}
-                        </td>
-                        <td
-                          class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-300"
-                        >
-                          {{ userItem.username }}
-                        </td>
-                        <td
-                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"
-                        >
-                          {{ userItem.email || "-" }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <span
-                            :class="
-                              userItem.role === 'ADMIN'
-                                ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
-                                : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                            "
-                            class="px-2 py-1 text-xs font-semibold rounded-full"
-                          >
-                            {{ userItem.role }}
-                          </span>
-                        </td>
-                        <td
-                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"
-                        >
-                          {{ formatDate(userItem.createdAt) }}
-                        </td>
-                        <td
-                          class="px-6 py-4 whitespace-nowrap text-sm space-x-2"
-                        >
-                          <button
-                            @click="editUser(userItem)"
-                            class="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 transition-colors"
-                          >
-                            <svg
-                              class="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                              />
-                            </svg>
-                          </button>
-                          <button
-                            @click="deleteUser(userItem)"
-                            :disabled="userItem.id === user?.id"
-                            class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <svg
-                              class="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                      <path d="M10,210.5h236v16.8H10V210.5L10,210.5z" />
+                      <path
+                        d="M90.8,28.8H18v9.9h60.1v70.4H18v9.9h72.8L90.8,28.8L90.8,28.8z"
+                      />
+                      <path
+                        d="M106.2,119.1c-0.4,20.8,0,87.4,0,87.4h67c0,0-2.2-76.5-9.5-96.9c-7.3-20.4-28.8-59.7-69.6-65.5v60.4C94.1,104.5,106.9,105.2,106.2,119.1z"
+                      />
+                    </svg>
+                  </div>
+                  <h3
+                    class="text-2xl font-bold text-gray-900 dark:text-white mb-4"
+                  >
+                    Drainase Lingkungan
+                  </h3>
+                  <p class="text-gray-600 dark:text-gray-400 mb-6">
+                    Fitur ini akan segera tersedia untuk mengelola data drainase
+                    lingkungan di Kabupaten Kubu Raya.
+                  </p>
+                  <div
+                    class="bg-teal-50 dark:bg-teal-900/10 border border-teal-200 dark:border-teal-800 rounded-lg p-4"
+                  >
+                    <p class="text-sm text-teal-700 dark:text-teal-300">
+                      <strong>Fitur yang akan tersedia:</strong><br />
+                      • Data drainase lingkungan<br />
+                      • Kondisi dan status drainase<br />
+                      • Peta jaringan drainase<br />
+                      • Laporan kondisi drainase
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kawasan Permukiman Section -->
+            <div v-show="activeTab === 'kawasan'" class="space-y-6">
+              <div
+                class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center"
+              >
+                <div class="max-w-md mx-auto">
+                  <div
+                    class="p-4 bg-emerald-100 dark:bg-emerald-900/20 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-10 h-10 text-emerald-600 dark:text-emerald-400"
+                      viewBox="0 0 256 256"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M127,60.7c-1.2,0.5-71.2,53.6-71.2,54c0,0.7,2.2,1,9.5,1h7.3v38.7v38.8l1.2,1.2c1.1,1.1,1.5,1.2,5.5,1.2h4.3v-25.9c0-25.4,0-25.9,1-27.2l1-1.3h16.5c14.1,0,16.6,0.1,17.5,0.8l1.1,0.7v26.5v26.4H151h30.4l1.2-1.2l1.2-1.2v-38.8v-38.7h7.8c4.4,0,8.1-0.2,8.5-0.5c0.9-0.6,1.5-0.1-14.8-12.4l-12.6-9.5l0-14.9c0-11-0.2-15.2-0.6-16.1l-0.6-1.2L160,60.9c-10.1-0.1-11.6,0-12.4,0.7c-0.7,0.7-0.9,1.7-1,6.3l-0.1,5.4l-8.3-6.2C130.2,61,128.5,60.1,127,60.7z M171.7,142.4c1,1.2,1,1.9,1,13v11.7l-1.2,1.2l-1.2,1.2h-16.4c-15.7,0-16.4,0-17.3-1c-0.9-0.9-1-1.6-1-13.4c0-12.4,0-12.5,1.1-13.2c0.9-0.7,3.4-0.8,17.5-0.8h16.5L171.7,142.4z"
+                      />
+                      <path
+                        d="M29.3,106.9C18.7,115,10,121.8,10,122.1s2,0.5,4.4,0.6l4.3,0.1v21.5c0,12.7,0.2,21.8,0.5,22.2c0.4,0.6,3.6,0.7,24.4,0.7h24l0.1-23.7l0.1-23.7H55.1c-10.8,0-12.7-0.1-12.7-0.7c0-0.4,4.8-4.4,10.6-9c5.8-4.6,10.4-8.5,10.3-8.7c-0.7-1.2-12.5-9.5-13.4-9.5C49.3,92.1,40.1,98.7,29.3,106.9z"
+                      />
+                      <path
+                        d="M198.7,96.7c-3.3,2.5-6.1,4.7-6.2,4.8c0,0,4.8,3.9,10.7,8.6c6,4.7,10.8,8.9,10.8,9.2c0,0.6-2,0.7-12.7,0.7h-12.7l0.1,23.7l0.1,23.7l23,0.1c15.3,0,23.3,0,23.9-0.4c0.9-0.5,1-1.2,1-22.4v-21.9h4.5c2.5,0,4.7-0.2,4.8-0.4c0.4-0.6-38.7-30.1-40.1-30.2C205,92.1,203.2,93.2,198.7,96.7z"
+                      />
+                    </svg>
+                  </div>
+                  <h3
+                    class="text-2xl font-bold text-gray-900 dark:text-white mb-4"
+                  >
+                    Kawasan Permukiman
+                  </h3>
+                  <p class="text-gray-600 dark:text-gray-400 mb-6">
+                    Fitur ini akan segera tersedia untuk mengelola data kawasan
+                    permukiman di Kabupaten Kubu Raya.
+                  </p>
+                  <div
+                    class="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4"
+                  >
+                    <p class="text-sm text-emerald-700 dark:text-emerald-300">
+                      <strong>Fitur yang akan tersedia:</strong><br />
+                      • Data kawasan permukiman<br />
+                      • Status dan kondisi kawasan<br />
+                      • Peta zonasi permukiman<br />
+                      • Laporan perkembangan kawasan
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rumah Layak Tidak Hunian Section -->
+            <div v-show="activeTab === 'rumah'" class="space-y-6">
+              <div
+                class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center"
+              >
+                <div class="max-w-md mx-auto">
+                  <div
+                    class="p-4 bg-rose-100 dark:bg-rose-900/20 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-10 h-10 text-rose-600 dark:text-rose-400"
+                      viewBox="0 -32 576 576"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M288 114.96L69.47 307.71c-1.62 1.46-3.69 2.14-5.47 3.35V496c0 8.84 7.16 16 16 16h149.23L192 439.19l104.11-64-60.16-119.22L384 392.75l-104.11 64L319.81 512H496c8.84 0 16-7.16 16-16V311.1c-1.7-1.16-3.72-1.82-5.26-3.2L288 114.96zm282.69 121.32L512 184.45V48c0-8.84-7.16-16-16-16h-64c-8.84 0-16 7.16-16 16v51.69L314.75 10.31C307.12 3.45 297.56.01 288 0s-19.1 3.41-26.7 10.27L5.31 236.28c-6.57 5.91-7.12 16.02-1.21 22.6l21.4 23.82c5.9 6.57 16.02 7.12 22.6 1.21L277.42 81.63c6.05-5.33 15.12-5.33 21.17 0L527.91 283.9c6.57 5.9 16.69 5.36 22.6-1.21l21.4-23.82c5.9-6.57 5.36-16.69-1.22-22.59z"
+                      />
+                    </svg>
+                  </div>
+                  <h3
+                    class="text-2xl font-bold text-gray-900 dark:text-white mb-4"
+                  >
+                    Rumah Layak Tidak Hunian
+                  </h3>
+                  <p class="text-gray-600 dark:text-gray-400 mb-6">
+                    Fitur ini akan segera tersedia untuk mengelola data rumah
+                    layak tidak hunian di Kabupaten Kubu Raya.
+                  </p>
+                  <div
+                    class="bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-800 rounded-lg p-4"
+                  >
+                    <p class="text-sm text-rose-700 dark:text-rose-300">
+                      <strong>Fitur yang akan tersedia:</strong><br />
+                      • Data rumah layak tidak hunian<br />
+                      • Status dan kondisi rumah<br />
+                      • Peta distribusi rumah<br />
+                      • Laporan statistik perumahan
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1306,22 +1508,27 @@
               </div>
             </div>
 
-            <!-- Analisis Section -->
-            <div v-show="activeTab === 'analisis'" class="space-y-6">
+            <!-- Users Management Section -->
+            <div v-show="activeTab === 'users'" class="space-y-6">
               <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden p-4 sm:p-6"
+                class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
               >
                 <div
-                  class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+                  class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700"
                 >
-                  <h3
-                    class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white"
-                  >
-                    Analisis Data Jalan
-                  </h3>
+                  <div>
+                    <h3
+                      class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white"
+                    >
+                      Manajemen User
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Kelola data pengguna sistem SIJALI
+                    </p>
+                  </div>
                   <button
-                    @click="initCharts"
-                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm font-medium flex items-center space-x-2"
+                    @click="openAddUserModal"
+                    class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center space-x-2"
                   >
                     <svg
                       class="w-4 h-4"
@@ -1333,271 +1540,184 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
                       />
                     </svg>
-                    <span>Refresh Charts</span>
+                    <span>Tambah User</span>
                   </button>
                 </div>
 
-                <!-- Charts Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                  <!-- Chart 1 - Kondisi Jalan (Pie Chart) -->
-                  <div
-                    class="border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 bg-white dark:bg-gray-800"
+                <!-- Users Table -->
+                <div class="overflow-x-auto">
+                  <table
+                    class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
                   >
-                    <h4
-                      class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        >
+                          Username
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        >
+                          Email
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        >
+                          Role
+                        </th>
+                        <th
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        >
+                          Dibuat
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody
+                      class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
                     >
-                      Distribusi Kondisi Jalan
-                    </h4>
-                    <div class="h-64 relative">
-                      <canvas ref="kondisiChart"></canvas>
-                    </div>
-                  </div>
+                      <!-- Loading State -->
+                      <tr v-if="loadingUsers">
+                        <td
+                          colspan="4"
+                          class="px-4 py-8 text-center text-gray-500 dark:text-gray-400"
+                        >
+                          <div
+                            class="flex items-center justify-center space-x-2"
+                          >
+                            <svg
+                              class="animate-spin h-5 w-5 text-purple-600"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                              ></circle>
+                              <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            <span>Memuat data user...</span>
+                          </div>
+                        </td>
+                      </tr>
 
-                  <!-- Chart 2 - Jalan per Kecamatan (Bar Chart) -->
-                  <div
-                    class="border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 bg-white dark:bg-gray-800"
-                  >
-                    <h4
-                      class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
-                    >
-                      Jalan per Kecamatan
-                    </h4>
-                    <div class="h-64 relative">
-                      <canvas ref="kecamatanChart"></canvas>
-                    </div>
-                  </div>
+                      <!-- No Data State -->
+                      <tr v-else-if="users.length === 0">
+                        <td
+                          colspan="4"
+                          class="px-4 py-8 text-center text-gray-500 dark:text-gray-400"
+                        >
+                          <div class="flex flex-col items-center space-y-2">
+                            <svg
+                              class="w-12 h-12 text-gray-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                              />
+                            </svg>
+                            <p class="text-sm">Belum ada data user</p>
+                            <p class="text-xs text-gray-400">
+                              Klik "Tambah User" untuk menambah user pertama
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
 
-                  <!-- Chart 3 - Panjang Jalan per Kecamatan (Bar Chart) -->
-                  <div
-                    class="border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 bg-white dark:bg-gray-800"
-                  >
-                    <h4
-                      class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
-                    >
-                      Total Panjang Jalan per Kecamatan
-                    </h4>
-                    <div class="h-64 relative">
-                      <canvas ref="panjangChart"></canvas>
-                    </div>
-                  </div>
-
-                  <!-- Chart 4 - Kondisi per Kecamatan (Stacked Bar) -->
-                  <div
-                    class="border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 bg-white dark:bg-gray-800"
-                  >
-                    <h4
-                      class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
-                    >
-                      Perbandingan Kondisi per Kecamatan
-                    </h4>
-                    <div class="h-64 relative">
-                      <canvas ref="stackedChart"></canvas>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Summary Stats -->
-                <div
-                  class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-                >
-                  <div
-                    class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
-                  >
-                    <p class="text-sm text-blue-600 dark:text-blue-400 mb-1">
-                      Rata-rata Panjang Jalan
-                    </p>
-                    <p
-                      class="text-2xl font-bold text-blue-900 dark:text-blue-100"
-                    >
-                      {{
-                        stats.totalRoads
-                          ? (stats.totalLength / stats.totalRoads).toFixed(2)
-                          : 0
-                      }}
-                      m
-                    </p>
-                  </div>
-                  <div
-                    class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4"
-                  >
-                    <p class="text-sm text-green-600 dark:text-green-400 mb-1">
-                      Persentase Baik
-                    </p>
-                    <p
-                      class="text-2xl font-bold text-green-900 dark:text-green-100"
-                    >
-                      {{
-                        getPercentage(conditionStats.baik, stats.totalRoads)
-                      }}%
-                    </p>
-                  </div>
-                  <div
-                    class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4"
-                  >
-                    <p
-                      class="text-sm text-yellow-600 dark:text-yellow-400 mb-1"
-                    >
-                      Persentase Sedang
-                    </p>
-                    <p
-                      class="text-2xl font-bold text-yellow-900 dark:text-yellow-100"
-                    >
-                      {{
-                        getPercentage(conditionStats.sedang, stats.totalRoads)
-                      }}%
-                    </p>
-                  </div>
-                  <div
-                    class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
-                  >
-                    <p class="text-sm text-red-600 dark:text-red-400 mb-1">
-                      Persentase Rusak
-                    </p>
-                    <p
-                      class="text-2xl font-bold text-red-900 dark:text-red-100"
-                    >
-                      {{
-                        getPercentage(conditionStats.rusak, stats.totalRoads)
-                      }}%
-                    </p>
-                  </div>
+                      <!-- Users Data -->
+                      <tr
+                        v-else
+                        v-for="user in users"
+                        :key="user.id"
+                        @click="openEditUserModal(user)"
+                        class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                      >
+                        <td class="px-4 py-4 whitespace-nowrap">
+                          <div class="flex items-center">
+                            <div
+                              class="flex-shrink-0 h-8 w-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center"
+                            >
+                              <span
+                                class="text-sm font-medium text-purple-600 dark:text-purple-300"
+                              >
+                                {{ users.indexOf(user) + 1 }}
+                              </span>
+                            </div>
+                            <div class="ml-3">
+                              <div
+                                class="text-sm font-medium text-gray-900 dark:text-white"
+                              >
+                                {{ user.username || "-" }}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap">
+                          <div class="text-sm text-gray-900 dark:text-white">
+                            {{ user.email || "-" }}
+                          </div>
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap">
+                          <span
+                            :class="[
+                              'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                              user.role === 'ADMIN'
+                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+                            ]"
+                          >
+                            {{ user.role || "USER" }}
+                          </span>
+                        </td>
+                        <td
+                          class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
+                        >
+                          {{
+                            user.createdAt
+                              ? new Date(user.createdAt).toLocaleDateString(
+                                  "id-ID"
+                                )
+                              : "-"
+                          }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
+            </div>
+
+            <!-- Analisis Section -->
+            <div v-show="activeTab === 'analisis'" class="space-y-6">
+              <AnalysisDashboard
+                :stats="stats"
+                :condition-stats="conditionStats"
+                :kecamatan-stats="kecamatanStats"
+                :year-stats="yearStats"
+                :material-stats="materialStats"
+                :kecamatan-list="kecamatanList"
+              />
             </div>
           </div>
         </div>
       </main>
     </div>
-
-    <!-- Footer -->
-    <footer
-      class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-6"
-    >
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- About -->
-          <div>
-            <div class="flex items-center space-x-2 mb-3">
-              <img
-                src="~/assets/images/sijali-logo.svg"
-                alt="SIJALI Logo"
-                class="h-8 w-8"
-              />
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                SIJALI
-              </h3>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-              Sistem Informasi Jalan Lingkungan Kabupaten Kubu Raya
-            </p>
-          </div>
-
-          <!-- Quick Links -->
-          <div>
-            <h4
-              class="text-sm font-semibold text-gray-900 dark:text-white mb-3 uppercase tracking-wider"
-            >
-              Menu
-            </h4>
-            <ul class="space-y-2">
-              <li>
-                <button
-                  @click="
-                    activeTab = 'jalan';
-                    sidebarOpen = false;
-                  "
-                  class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Data Jalan
-                </button>
-              </li>
-              <li>
-                <button
-                  @click="
-                    activeTab = 'laporan';
-                    sidebarOpen = false;
-                  "
-                  class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Laporan
-                </button>
-              </li>
-              <li>
-                <button
-                  @click="
-                    activeTab = 'analisis';
-                    sidebarOpen = false;
-                  "
-                  class="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Analisis
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Contact Info -->
-          <div>
-            <h4
-              class="text-sm font-semibold text-gray-900 dark:text-white mb-3 uppercase tracking-wider"
-            >
-              Kontak
-            </h4>
-            <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li class="flex items-start space-x-2">
-                <svg
-                  class="w-5 h-5 mt-0.5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <span>Kabupaten Kubu Raya, Kalimantan Barat</span>
-              </li>
-              <li class="flex items-center space-x-2">
-                <svg
-                  class="w-5 h-5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-                <span>info@kuburayakab.go.id</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Copyright -->
-        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <p class="text-center text-sm text-gray-500 dark:text-gray-400">
-            © {{ new Date().getFullYear() }} SIJALI - Sistem Informasi Jalan
-            Lingkungan. All rights reserved.
-          </p>
-        </div>
-      </div>
-    </footer>
 
     <!-- Modals -->
     <!-- Add/Edit Road Modal -->
@@ -1623,7 +1743,11 @@
               class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4"
             >
               <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                {{ showAddModal ? "Tambah Data Jalan" : "Edit Data Jalan" }}
+                {{
+                  showAddModal
+                    ? "Tambah Jalan Lingkungan"
+                    : "Edit Jalan Lingkungan"
+                }}
               </h3>
               <form @submit.prevent="saveRoad" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1710,9 +1834,10 @@
                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                     >
                       <option value="">Pilih Kondisi</option>
-                      <option v-for="k in kondisiList" :key="k" :value="k">
-                        {{ k }}
-                      </option>
+                      <option value="Baik">Baik</option>
+                      <option value="Rusak Ringan">Rusak Ringan</option>
+                      <option value="Rusak Sedang">Rusak Sedang</option>
+                      <option value="Rusak Berat">Rusak Berat</option>
                     </select>
                   </div>
                   <div>
@@ -1837,196 +1962,36 @@
       </div>
     </Teleport>
 
-    <!-- Add/Edit User Modal -->
-    <Teleport to="body">
-      <div
-        v-if="showAddUserModal || showEditUserModal"
-        :key="modalKey"
-        class="fixed inset-0 z-50 overflow-y-auto"
-        aria-labelledby="modal-title"
-        role="dialog"
-        aria-modal="true"
-      >
-        <div
-          class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
-        >
-          <div
-            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-            @click="closeUserModal"
-          ></div>
-          <div
-            class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-          >
-            <div
-              class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4"
-            >
-              <div class="flex items-center space-x-3 mb-4">
-                <div
-                  :class="[
-                    'p-2 rounded-lg',
-                    showAddUserModal
-                      ? 'bg-purple-100 dark:bg-purple-900'
-                      : 'bg-yellow-100 dark:bg-yellow-900',
-                  ]"
-                >
-                  <svg
-                    v-if="showAddUserModal"
-                    class="w-6 h-6 text-purple-600 dark:text-purple-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-                    />
-                  </svg>
-                  <svg
-                    v-else
-                    class="w-6 h-6 text-yellow-600 dark:text-yellow-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ showAddUserModal ? "Tambah User Baru" : "Edit User" }}
-                  </h3>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{
-                      showAddUserModal
-                        ? "Isi form di bawah untuk menambah user baru"
-                        : "Update informasi user"
-                    }}
-                  </p>
-                </div>
-              </div>
+    <!-- User Detail Modal -->
+    <UserDetailModal
+      :visible="showAddUserModal || showEditUserModal"
+      :user="selectedUserForEdit"
+      :isEditMode="showEditUserModal"
+      @close="closeUserModal"
+      @save="handleUserSave"
+    />
 
-              <!-- Required Fields Info -->
-              <div
-                class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4"
-              >
-                <p class="text-xs text-blue-800 dark:text-blue-300">
-                  <span class="font-semibold">ℹ️ Informasi:</span> Field yang
-                  ditandai dengan (*) wajib diisi
-                </p>
-              </div>
+    <!-- Road Detail Modal -->
+    <RoadDetailModal
+      :visible="showRoadDetailModal"
+      :road="selectedRoad"
+      @close="showRoadDetailModal = false"
+      @save="handleRoadSave"
+      @update="handleRoadUpdate"
+    />
 
-              <form
-                @submit.prevent="saveUser"
-                class="space-y-4"
-                autocomplete="off"
-              >
-                <div>
-                  <label
-                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >Username *</label
-                  >
-                  <input
-                    v-model="userForm.username"
-                    type="text"
-                    required
-                    autocomplete="off"
-                    placeholder="Masukkan username (contoh: johndoe)"
-                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-                  />
-                </div>
-                <div>
-                  <label
-                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >Email</label
-                  >
-                  <input
-                    v-model="userForm.email"
-                    type="email"
-                    autocomplete="off"
-                    placeholder="Masukkan email (contoh: user@sijali.com)"
-                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-                  />
-                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Email bersifat opsional
-                  </p>
-                </div>
-                <div>
-                  <label
-                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                  >
-                    Password
-                    {{
-                      showEditUserModal ? "(kosongkan jika tidak diubah)" : "*"
-                    }}
-                  </label>
-                  <input
-                    v-model="userForm.password"
-                    type="password"
-                    :required="showAddUserModal"
-                    autocomplete="new-password"
-                    :placeholder="
-                      showEditUserModal
-                        ? 'Kosongkan jika tidak ingin mengubah password'
-                        : 'Masukkan password (minimal 6 karakter)'
-                    "
-                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-                  />
-                </div>
-                <div>
-                  <label
-                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >Role *</label
-                  >
-                  <select
-                    v-model="userForm.role"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="USER">
-                      USER - Akses terbatas (hanya lihat data)
-                    </option>
-                    <option value="ADMIN">
-                      ADMIN - Akses penuh (kelola data & user)
-                    </option>
-                  </select>
-                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Pilih role sesuai hak akses yang diinginkan
-                  </p>
-                </div>
-                <div class="flex justify-end space-x-3 mt-6">
-                  <button
-                    type="button"
-                    @click="closeUserModal"
-                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    type="submit"
-                    class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                  >
-                    {{ showAddUserModal ? "Tambah" : "Simpan" }}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <!-- GeoJSON Import Modal -->
+    <GeoJSONImportModal
+      :visible="showGeoJSONImportModal"
+      @close="showGeoJSONImportModal = false"
+      @import="handleGeoJSONImport"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import {
   Chart,
   ArcElement,
@@ -2036,8 +2001,13 @@ import {
   Title,
   Tooltip,
   Legend,
+  DoughnutController,
 } from "chart.js";
 import AduanList from "~/components/AduanList.vue";
+import RoadDetailModal from "~/components/RoadDetailModal.vue";
+import UserDetailModal from "~/components/UserDetailModal.vue";
+import GeoJSONImportModal from "~/components/GeoJSONImportModal.vue";
+import AnalysisDashboard from "~/components/AnalysisDashboard.vue";
 
 // Register Chart.js components
 Chart.register(
@@ -2047,7 +2017,8 @@ Chart.register(
   LinearScale,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  DoughnutController
 );
 
 // Set page title
@@ -2062,20 +2033,14 @@ useHead({
 });
 
 const router = useRouter();
+const route = useRoute();
 const config = useRuntimeConfig();
+
+// Check if we're on the dashboard tab
+const isDashboardTab = computed(() => {
+  return activeTab.value === "dashboard";
+});
 const API_BASE = config.public.apiBaseUrl || "http://localhost:3001";
-
-// Chart refs
-const kondisiChart = ref(null);
-const kecamatanChart = ref(null);
-const panjangChart = ref(null);
-const stackedChart = ref(null);
-
-// Chart instances
-let kondisiChartInstance = null;
-let kecamatanChartInstance = null;
-let panjangChartInstance = null;
-let stackedChartInstance = null;
 
 // User state
 const user = ref(null);
@@ -2094,12 +2059,13 @@ const conditionStats = ref({});
 const roads = ref([]);
 const users = ref([]);
 const kecamatanList = ref([]);
-const kondisiList = ref([]);
+const kecamatanStats = ref([]);
+const yearStats = ref([]);
+const materialStats = ref([]);
 
 // Filter state
 const searchQuery = ref("");
 const filterKecamatan = ref("");
-const filterKondisi = ref("");
 
 // Pagination
 const currentPage = ref(1);
@@ -2109,9 +2075,25 @@ const itemsPerPage = ref(10);
 const showAddModal = ref(false);
 const showEditModal = ref(false);
 const showViewModal = ref(false);
+const showRoadDetailModal = ref(false);
+const showGeoJSONImportModal = ref(false);
 const showAddUserModal = ref(false);
 const showEditUserModal = ref(false);
 const modalKey = ref(0);
+
+// Select mode state
+const selectMode = ref(false);
+const selectedRoads = ref(new Set());
+
+// Computed properties for select mode
+const selectedRoadsCount = computed(() => selectedRoads.value.size);
+const isAllSelected = computed(() => {
+  return (
+    roads.value.length > 0 &&
+    roads.value.every((road) => selectedRoads.value.has(road.id))
+  );
+});
+const hasSelectedRoads = computed(() => selectedRoads.value.size > 0);
 
 // Form state
 const roadForm = ref({
@@ -2136,6 +2118,7 @@ const userForm = ref({
 const selectedRoad = ref(null);
 const editingRoadId = ref(null);
 const editingUserId = ref(null);
+const selectedUser = ref(null);
 
 // Computed
 const filteredRoads = computed(() => {
@@ -2145,21 +2128,20 @@ const filteredRoads = computed(() => {
     const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(
       (road) =>
-        road.namaJalan?.toLowerCase().includes(query) ||
-        road.nama?.toLowerCase().includes(query) ||
-        road.noRuas?.toLowerCase().includes(query)
+        (road.Nama_Jalan || road.namaJalan || road.Nama || road.nama || "")
+          .toLowerCase()
+          .includes(query) ||
+        (road.No_Ruas || road.noRuas || "").toLowerCase().includes(query) ||
+        (road.Kecamatan || road.kecamatan || "")
+          .toLowerCase()
+          .includes(query) ||
+        (road.Desa || road.desa || "").toLowerCase().includes(query)
     );
   }
 
   if (filterKecamatan.value) {
     filtered = filtered.filter(
-      (road) => road.kecamatan === filterKecamatan.value
-    );
-  }
-
-  if (filterKondisi.value) {
-    filtered = filtered.filter(
-      (road) => (road.kondisi || road.keterangan) === filterKondisi.value
+      (road) => road.Kecamatan === filterKecamatan.value
     );
   }
 
@@ -2174,6 +2156,10 @@ const paginatedRoads = computed(() => {
 
 const totalPages = computed(() => {
   return Math.ceil(filteredRoads.value.length / itemsPerPage.value);
+});
+
+const selectedUserForEdit = computed(() => {
+  return selectedUser.value;
 });
 
 // Methods
@@ -2229,16 +2215,52 @@ const fetchStats = async () => {
       // Process condition stats - check both kondisi and conditionStats
       const conditions = data.data.conditionStats || [];
 
-      // Try to find stats from kondisi field first
-      let baik =
-        conditions.find((c) => c.kondisi?.toUpperCase() === "BAIK")?._count
-          ?.kondisi || 0;
-      let sedang =
-        conditions.find((c) => c.kondisi?.toUpperCase() === "SEDANG")?._count
-          ?.kondisi || 0;
-      let rusak =
-        conditions.find((c) => c.kondisi?.toUpperCase() === "RUSAK")?._count
-          ?.kondisi || 0;
+      // Try to find stats from kondisi field first using flexible matching
+      let baik = 0;
+      let sedang = 0;
+      let rusak = 0;
+      let baikLength = 0;
+      let sedangLength = 0;
+      let rusakLength = 0;
+
+      conditions.forEach((c) => {
+        const kondisiUpper = c.kondisi?.toUpperCase() || "";
+        const count = c._count?.kondisi || 0;
+        const length = c._sum?.panjangM || 0;
+
+        // Match using the same logic as getKondisiBadge
+        if (kondisiUpper.includes("BAIK") || kondisiUpper.includes("BAGUS")) {
+          baik += count;
+          baikLength += length;
+        } else if (
+          kondisiUpper.includes("RUSAK") ||
+          kondisiUpper.includes("BURUK")
+        ) {
+          rusak += count;
+          rusakLength += length;
+        } else if (
+          kondisiUpper.includes("SEDANG") ||
+          kondisiUpper.includes("CUKUP")
+        ) {
+          sedang += count;
+          sedangLength += length;
+        } else if (kondisiUpper === "BAIK") {
+          baik += count;
+          baikLength += length;
+        } else if (kondisiUpper === "RUSAK") {
+          rusak += count;
+          rusakLength += length;
+        } else if (kondisiUpper === "SEDANG") {
+          sedang += count;
+          sedangLength += length;
+        }
+      });
+
+      // Separate rusak into rusakRingan and rusakBerat
+      let rusakRingan = 0;
+      let rusakBerat = 0;
+      let rusakRinganLength = 0;
+      let rusakBeratLength = 0;
 
       // If no data from kondisi, fetch from keterangan stats
       if (baik === 0 && sedang === 0 && rusak === 0) {
@@ -2252,14 +2274,42 @@ const fetchStats = async () => {
             const keteranganStats = keteranganData.data || [];
 
             // Map keterangan to kondisi categories
+            console.log("Processing keterangan stats:", keteranganStats);
             keteranganStats.forEach((stat) => {
               const ket = stat.keterangan?.toUpperCase() || "";
+              const count = stat._count.keterangan || 0;
+              const length = stat._sum?.panjangM || 0;
+
+              console.log("Processing keterangan:", { ket, count, length });
+
               if (ket.includes("BAIK") || ket.includes("BAGUS")) {
-                baik += stat._count.keterangan || 0;
+                baik += count;
+                baikLength += length;
+              } else if (ket.includes("RUSAK RINGAN")) {
+                console.log("Found RUSAK RINGAN in keterangan:", {
+                  count,
+                  length,
+                });
+                rusakRingan += count;
+                rusakRinganLength += length;
+              } else if (ket.includes("RUSAK BERAT")) {
+                console.log("Found RUSAK BERAT in keterangan:", {
+                  count,
+                  length,
+                });
+                rusakBerat += count;
+                rusakBeratLength += length;
               } else if (ket.includes("RUSAK") || ket.includes("BURUK")) {
-                rusak += stat._count.keterangan || 0;
+                // If just "RUSAK" without specification, assume it's rusak ringan
+                console.log(
+                  "Found generic RUSAK in keterangan (assuming ringan):",
+                  { count, length }
+                );
+                rusakRingan += count;
+                rusakRinganLength += length;
               } else if (ket.includes("SEDANG") || ket.includes("CUKUP")) {
-                sedang += stat._count.keterangan || 0;
+                sedang += count;
+                sedangLength += length;
               }
             });
           }
@@ -2268,10 +2318,67 @@ const fetchStats = async () => {
         }
       }
 
+      // Process conditions from kondisi field
+      console.log("Processing conditions from kondisi field:", conditions);
+      conditions.forEach((condition) => {
+        const kondisi = condition.kondisi || condition.keterangan || "";
+        const count =
+          condition._count.kondisi || condition._count.keterangan || 0;
+        const length = condition._sum.panjangM || 0;
+
+        const kondisiUpper = kondisi.toUpperCase();
+        console.log("Processing condition:", {
+          kondisi,
+          kondisiUpper,
+          count,
+          length,
+        });
+
+        if (kondisiUpper.includes("RUSAK RINGAN")) {
+          console.log("Found RUSAK RINGAN:", { count, length });
+          rusakRingan += count;
+          rusakRinganLength += length;
+        } else if (kondisiUpper.includes("RUSAK BERAT")) {
+          console.log("Found RUSAK BERAT:", { count, length });
+          rusakBerat += count;
+          rusakBeratLength += length;
+        } else if (
+          kondisiUpper.includes("RUSAK") &&
+          !kondisiUpper.includes("RINGAN") &&
+          !kondisiUpper.includes("BERAT")
+        ) {
+          // If just "RUSAK" without specification, assume it's rusak ringan
+          console.log("Found generic RUSAK (assuming ringan):", {
+            count,
+            length,
+          });
+          rusakRingan += count;
+          rusakRinganLength += length;
+        }
+      });
+
+      console.log("Final condition stats:", {
+        baik,
+        sedang,
+        rusakRingan,
+        rusakBerat,
+        baikLength,
+        sedangLength,
+        rusakRinganLength,
+        rusakBeratLength,
+      });
+
       conditionStats.value = {
         baik,
         sedang,
-        rusak,
+        rusak: rusakRingan + rusakBerat, // Total rusak for backward compatibility
+        rusakRingan,
+        rusakBerat,
+        baikLength,
+        sedangLength,
+        rusakLength: rusakRinganLength + rusakBeratLength, // Total rusak length
+        rusakRinganLength,
+        rusakBeratLength,
       };
     }
   } catch (error) {
@@ -2297,18 +2404,43 @@ const fetchRoads = async () => {
 
 const fetchFilterOptions = async () => {
   try {
-    const [kecResponse, kondisiResponse] = await Promise.all([
-      fetch(`${API_BASE}/api/jalan/filters/kecamatan`),
-      fetch(`${API_BASE}/api/jalan/filters/kondisi`),
-    ]);
-
+    const kecResponse = await fetch(`${API_BASE}/api/jalan/filters/kecamatan`);
     const kecData = await kecResponse.json();
-    const kondisiData = await kondisiResponse.json();
 
     if (kecData.success) kecamatanList.value = kecData.data;
-    if (kondisiData.success) kondisiList.value = kondisiData.data;
   } catch (error) {
     console.error("Error fetching filter options:", error);
+  }
+};
+
+const fetchAnalysisData = async () => {
+  try {
+    // Fetch kecamatan stats
+    const kecamatanResponse = await fetch(
+      `${API_BASE}/api/jalan/stats/kecamatan-kondisi`
+    );
+    const kecamatanData = await kecamatanResponse.json();
+    if (kecamatanData.success) {
+      kecamatanStats.value = kecamatanData.data;
+    }
+
+    // Fetch year stats
+    const yearResponse = await fetch(`${API_BASE}/api/jalan/stats/summary`);
+    const yearData = await yearResponse.json();
+    if (yearData.success) {
+      yearStats.value = yearData.data.yearStats || [];
+    }
+
+    // Fetch material stats
+    const materialResponse = await fetch(
+      `${API_BASE}/api/jalan/stats/material-kondisi`
+    );
+    const materialData = await materialResponse.json();
+    if (materialData.success) {
+      materialStats.value = materialData.data;
+    }
+  } catch (error) {
+    console.error("Error fetching analysis data:", error);
   }
 };
 
@@ -2341,17 +2473,17 @@ const fetchUsers = async () => {
 // CRUD Operations - Roads
 const viewRoad = (road) => {
   selectedRoad.value = road;
-  showViewModal.value = true;
+  showRoadDetailModal.value = true;
 };
 
 const editRoad = (road) => {
   editingRoadId.value = road.id;
   roadForm.value = { ...road };
-  showEditModal.value = true;
 };
 
 const deleteRoad = async (road) => {
-  if (!confirm(`Hapus data jalan "${road.namaJalan || road.nama}"?`)) return;
+  if (!confirm(`Hapus jalan lingkungan "${road.namaJalan || road.nama}"?`))
+    return;
 
   try {
     const response = await fetch(`${API_BASE}/api/jalan/${road.id}`, {
@@ -2427,28 +2559,6 @@ const closeRoadModal = () => {
 };
 
 // CRUD Operations - Users
-const editUser = (userItem) => {
-  // Tutup modal yang terbuka
-  showAddUserModal.value = false;
-  showEditUserModal.value = false;
-
-  // Set data user yang akan diedit
-  editingUserId.value = userItem.id;
-  userForm.value = {
-    username: userItem.username,
-    email: userItem.email || "",
-    password: "",
-    role: userItem.role,
-  };
-
-  // Ubah modalKey untuk force re-render
-  modalKey.value += 1;
-
-  // Buka modal edit
-  nextTick(() => {
-    showEditUserModal.value = true;
-  });
-};
 
 const deleteUser = async (userItem) => {
   if (!confirm(`Hapus user "${userItem.username}"?`)) return;
@@ -2475,7 +2585,7 @@ const deleteUser = async (userItem) => {
   }
 };
 
-const saveUser = async () => {
+const handleUserSave = async (userData) => {
   try {
     const url = showEditUserModal.value
       ? `${API_BASE}/api/auth/users/${editingUserId.value}`
@@ -2484,7 +2594,7 @@ const saveUser = async () => {
     const method = showEditUserModal.value ? "PUT" : "POST";
 
     // Only send password if it's filled
-    const payload = { ...userForm.value };
+    const payload = { ...userData };
     if (showEditUserModal.value && !payload.password) {
       delete payload.password;
     }
@@ -2517,20 +2627,251 @@ const saveUser = async () => {
   }
 };
 
+const handleRoadSave = async (roadData) => {
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/jalan/${selectedRoad.value.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.value}`,
+        },
+        body: JSON.stringify(roadData),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      alert("Data jalan berhasil diupdate!");
+      showRoadDetailModal.value = false;
+      await fetchRoads();
+      await fetchStats();
+    } else {
+      alert("Gagal menyimpan data jalan: " + data.message);
+    }
+  } catch (error) {
+    console.error("Error saving road:", error);
+    alert("Terjadi kesalahan saat menyimpan data jalan");
+  }
+};
+
+const handleRoadUpdate = async (updatedRoad) => {
+  try {
+    // Update the selected road data with new GeoJSON information
+    selectedRoad.value = updatedRoad;
+    alert("Data berhasil diperbarui dari GeoJSON!");
+  } catch (error) {
+    console.error("Error updating road:", error);
+    alert("Terjadi kesalahan saat memperbarui data");
+  }
+};
+
+const handleGeoJSONImport = async (importedData) => {
+  try {
+    const config = useRuntimeConfig();
+    const API_BASE = config.public.apiBaseUrl || "http://localhost:3001";
+    const token = localStorage.getItem("token");
+
+    // Convert GeoJSON features to road data format
+    const roadsData = importedData.map((feature) => ({
+      No_Ruas: feature.No_Ruas || feature.noRuas || "",
+      Nama_Jalan:
+        feature.Nama_Jalan ||
+        feature.namaJalan ||
+        feature.Nama ||
+        feature.nama ||
+        "",
+      Kecamatan: feature.Kecamatan || feature.kecamatan || "",
+      Desa: feature.Desa || feature.desa || "",
+      Panjang_M: feature.Panjang_M || feature.panjangM || 0,
+      Lebar_m_: feature.Lebar_m_ || feature.lebarM || 0,
+      Kondisi: feature.Kondisi || feature.kondisi || "",
+      Keterangan: feature.Keterangan || feature.keterangan || "",
+      No_Jalan: feature.No_Jalan || feature.noJalan || "",
+      Tahun: feature.Tahun || feature.tahun || new Date().getFullYear(),
+      Nilai: feature.Nilai || feature.nilai || 0,
+      Bobot: feature.Bobot || feature.bobot || 0,
+      No_Prov: feature.No_Prov || feature.noProv || "",
+      No_Kab: feature.No_Kab || feature.noKab || "",
+      No_Kec: feature.No_Kec || feature.noKec || "",
+      No_Desa: feature.No_Desa || feature.noDesa || "",
+      FID: feature.FID || feature.fid || "",
+      Shape_Leng: feature.Shape_Leng || feature.shapeLeng || 0,
+      Pngnl_Awal: feature.Pngnl_Awal || feature.pngnlAwal || "",
+      Pngnl_Akhi: feature.Pngnl_Akhi || feature.pngnlAkhi || "",
+      geometry: feature.geometry,
+      coordinates: feature.coordinates,
+    }));
+
+    // Send to API
+    const response = await fetch(`${API_BASE}/api/jalan/bulk-import`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ roads: roadsData }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      alert(`Berhasil mengimport ${importedData.length} data jalan!`);
+      showGeoJSONImportModal.value = false;
+      await fetchRoads();
+      await fetchStats();
+    } else {
+      alert("Gagal mengimport data: " + data.message);
+    }
+  } catch (error) {
+    console.error("Error importing GeoJSON:", error);
+    alert("Terjadi kesalahan saat mengimport data GeoJSON");
+  }
+};
+
+// Select mode functions
+const toggleSelectMode = () => {
+  selectMode.value = !selectMode.value;
+  if (!selectMode.value) {
+    selectedRoads.value.clear();
+  }
+};
+
+const toggleRoadSelection = (roadId) => {
+  if (selectedRoads.value.has(roadId)) {
+    selectedRoads.value.delete(roadId);
+  } else {
+    selectedRoads.value.add(roadId);
+  }
+};
+
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    // Unselect all
+    selectedRoads.value.clear();
+  } else {
+    // Select all
+    roads.value.forEach((road) => selectedRoads.value.add(road.id));
+  }
+};
+
+const exportSelectedRoads = async () => {
+  if (!hasSelectedRoads.value) return;
+
+  try {
+    const selectedRoadsList = roads.value.filter((road) =>
+      selectedRoads.value.has(road.id)
+    );
+
+    // Convert to GeoJSON format
+    const geojson = {
+      type: "FeatureCollection",
+      features: selectedRoadsList.map((road) => ({
+        type: "Feature",
+        properties: {
+          No_Ruas: road.No_Ruas || road.noRuas,
+          Nama_Jalan:
+            road.Nama_Jalan || road.namaJalan || road.Nama || road.nama,
+          Kecamatan: road.Kecamatan || road.kecamatan,
+          Desa: road.Desa || road.desa,
+          Panjang_M: road.Panjang_M || road.panjangM,
+          Lebar_m_: road.Lebar_m_ || road.lebarM,
+          Kondisi: road.Kondisi || road.kondisi,
+          Keterangan: road.Keterangan || road.keterangan,
+          No_Jalan: road.No_Jalan || road.noJalan,
+          Tahun: road.Tahun || road.tahun,
+          Nilai: road.Nilai || road.nilai,
+          Bobot: road.Bobot || road.bobot,
+          No_Prov: road.No_Prov || road.noProv,
+          No_Kab: road.No_Kab || road.noKab,
+          No_Kec: road.No_Kec || road.noKec,
+          No_Desa: road.No_Desa || road.noDesa,
+          FID: road.FID || road.fid,
+          Shape_Leng: road.Shape_Leng || road.shapeLeng,
+          Pngnl_Awal: road.Pngnl_Awal || road.pngnlAwal,
+          Pngnl_Akhi: road.Pngnl_Akhi || road.pngnlAkhi,
+        },
+        geometry: road.geometry || {
+          type: "LineString",
+          coordinates: road.coordinates || [],
+        },
+      })),
+    };
+
+    // Download as file
+    const dataStr = JSON.stringify(geojson, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `roads_export_${
+      new Date().toISOString().split("T")[0]
+    }.geojson`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    alert(`Berhasil mengexport ${selectedRoadsList.length} data jalan!`);
+  } catch (error) {
+    console.error("Error exporting roads:", error);
+    alert("Terjadi kesalahan saat mengexport data");
+  }
+};
+
+const deleteSelectedRoads = async () => {
+  if (!hasSelectedRoads.value) return;
+
+  const selectedRoadsList = roads.value.filter((road) =>
+    selectedRoads.value.has(road.id)
+  );
+  const roadNames = selectedRoadsList
+    .map(
+      (road) => road.No_Ruas || road.noRuas || road.Nama_Jalan || road.namaJalan
+    )
+    .join(", ");
+
+  if (!confirm(`Anda yakin ingin hapus data (${roadNames})?`)) return;
+
+  try {
+    const config = useRuntimeConfig();
+    const API_BASE = config.public.apiBaseUrl || "http://localhost:3001";
+    const token = localStorage.getItem("token");
+
+    // Delete each selected road
+    for (const roadId of selectedRoads.value) {
+      const response = await fetch(`${API_BASE}/api/jalan/${roadId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete road ${roadId}`);
+      }
+    }
+
+    alert(`Berhasil menghapus ${selectedRoads.value.size} data jalan!`);
+    selectedRoads.value.clear();
+    await fetchRoads();
+    await fetchStats();
+  } catch (error) {
+    console.error("Error deleting roads:", error);
+    alert("Terjadi kesalahan saat menghapus data");
+  }
+};
+
 const openAddUserModal = () => {
   // Tutup modal terlebih dahulu jika ada yang terbuka
   showAddUserModal.value = false;
   showEditUserModal.value = false;
 
-  // Reset form dengan nilai kosong yang baru
-  userForm.value = {
-    username: "",
-    email: "",
-    password: "",
-    role: "USER",
-  };
-
+  // Clear all user-related data
   editingUserId.value = null;
+  selectedUser.value = null;
 
   // Ubah modalKey untuk force re-render
   modalKey.value += 1;
@@ -2541,18 +2882,29 @@ const openAddUserModal = () => {
   });
 };
 
+const openEditUserModal = (userItem) => {
+  // Tutup modal terlebih dahulu jika ada yang terbuka
+  showAddUserModal.value = false;
+  showEditUserModal.value = false;
+
+  // Set data user yang akan diedit
+  editingUserId.value = userItem.id;
+  selectedUser.value = { ...userItem }; // Store a copy of the user data
+
+  // Ubah modalKey untuk force re-render
+  modalKey.value += 1;
+
+  // Gunakan nextTick untuk memastikan DOM sudah terupdate
+  nextTick(() => {
+    showEditUserModal.value = true;
+  });
+};
+
 const closeUserModal = () => {
   showAddUserModal.value = false;
   showEditUserModal.value = false;
   editingUserId.value = null;
-
-  // Reset form
-  userForm.value = {
-    username: "",
-    email: "",
-    password: "",
-    role: "USER",
-  };
+  selectedUser.value = null; // Clear selected user
 
   // Ubah modalKey untuk force re-render saat dibuka lagi
   modalKey.value += 1;
@@ -2562,26 +2914,6 @@ const handleLogout = () => {
   localStorage.removeItem("sijali_token");
   localStorage.removeItem("sijali_user");
   router.push("/login");
-};
-
-// Chart Functions
-const destroyCharts = () => {
-  if (kondisiChartInstance) {
-    kondisiChartInstance.destroy();
-    kondisiChartInstance = null;
-  }
-  if (kecamatanChartInstance) {
-    kecamatanChartInstance.destroy();
-    kecamatanChartInstance = null;
-  }
-  if (panjangChartInstance) {
-    panjangChartInstance.destroy();
-    panjangChartInstance = null;
-  }
-  if (stackedChartInstance) {
-    stackedChartInstance.destroy();
-    stackedChartInstance = null;
-  }
 };
 
 const initCharts = () => {
@@ -2830,10 +3162,8 @@ watch(activeTab, async (newTab) => {
   if (newTab === "users" && user.value?.role === "ADMIN") {
     await fetchUsers();
   } else if (newTab === "analisis") {
-    // Initialize charts when switching to analisis tab
-    setTimeout(() => {
-      initCharts();
-    }, 100);
+    // Refresh analysis data when switching to analisis tab
+    await fetchAnalysisData();
   }
 });
 
@@ -2854,7 +3184,12 @@ onMounted(async () => {
 
   // Load data
   loading.value = true;
-  await Promise.all([fetchStats(), fetchRoads(), fetchFilterOptions()]);
+  await Promise.all([
+    fetchStats(),
+    fetchRoads(),
+    fetchFilterOptions(),
+    fetchAnalysisData(),
+  ]);
 
   if (user.value?.role === "ADMIN") {
     await fetchUsers();
@@ -2863,9 +3198,9 @@ onMounted(async () => {
   loading.value = false;
 });
 
-// Cleanup charts on unmount
+// Cleanup on unmount
 onUnmounted(() => {
-  destroyCharts();
+  // Cleanup if needed
 });
 </script>
 

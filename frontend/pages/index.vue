@@ -1,9 +1,6 @@
 <template>
   <div class="app">
-    <Navbar
-      @toggle-sidebar="handleToggleSidebar"
-      @go-back-to-rtr="handleGoBackToRTR"
-    />
+    <Navbar @toggle-sidebar="handleToggleSidebar" />
 
     <!-- Hero Section -->
     <section id="hero" class="hero-section">
@@ -423,14 +420,6 @@ const handleToggleSidebar = () => {
   if (mapViewRef.value && mapViewRef.value.toggleMainSidebar) {
     mapViewRef.value.toggleMainSidebar();
   }
-};
-
-// Handle go back to RTR
-const handleGoBackToRTR = () => {
-  // Navigate to RTR page or show alert for now
-  alert("Navigasi ke halaman RTR");
-  // You can implement actual navigation here
-  // navigateTo('/rtr');
 };
 
 // Open map - scroll directly to the blue map canvas

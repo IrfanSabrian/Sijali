@@ -569,7 +569,7 @@ router.get("/stats/kecamatan-kondisi", async (req, res) => {
 // GET /api/jalan/stats/material-kondisi - Get road condition statistics by material
 router.get("/stats/material-kondisi", async (req, res) => {
   try {
-    const { kecamatan } = req.query;
+    const { kecamatan, desa } = req.query;
 
     // Build where clause
     const where = {
@@ -584,6 +584,11 @@ router.get("/stats/material-kondisi", async (req, res) => {
     // Add kecamatan filter if provided
     if (kecamatan) {
       where.kecamatan = kecamatan;
+    }
+
+    // Add desa filter if provided
+    if (desa) {
+      where.desa = desa;
     }
 
     const materialKondisiStats = await prisma.jalanLingkunganKubuRaya.groupBy({

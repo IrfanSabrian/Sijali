@@ -14,9 +14,11 @@ const serializeBigInt = (obj) => {
   if (typeof obj === "bigint") return obj.toString();
   if (Array.isArray(obj)) return obj.map(serializeBigInt);
   if (typeof obj === "object") {
-    return Object.fromEntries(
-      Object.entries(obj).map(([k, v]) => [k, serializeBigInt(v)])
-    );
+    const result = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = serializeBigInt(value);
+    }
+    return result;
   }
   return obj;
 };
@@ -49,6 +51,22 @@ const sendStatusEmail = async ({ to, nomorRuas, status, description }) => {
   if (!transporter) {
     console.warn("⚠️  SMTP not configured, skipping email send");
     return;
+  }
+
+  // Fetch road details from jalan_lingkungan_kubu_raya table
+  let roadDetails = null;
+  try {
+    const roadRows = await prisma.$queryRaw(
+      Prisma.sql`
+        SELECT nama_jalan, kecamatan, desa 
+        FROM jalan_lingkungan_kubu_raya 
+        WHERE no_ruas = ${nomorRuas}
+        LIMIT 1
+      `
+    );
+    roadDetails = roadRows && roadRows[0] ? roadRows[0] : null;
+  } catch (error) {
+    console.warn("⚠️  Could not fetch road details:", error.message);
   }
 
   const subject = `SIJALI - Status Aduan Ruas ${nomorRuas}: ${status}`;
@@ -87,8 +105,9 @@ const sendStatusEmail = async ({ to, nomorRuas, status, description }) => {
               <!-- Header -->
               <tr>
                 <td style="background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);padding:30px 40px;text-align:center">
+                  <!-- Title and subtitle -->
                   <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:bold;letter-spacing:2px">SIJALI</h1>
-                  <p style="margin:8px 0 0 0;color:#dbeafe;font-size:14px">Sistem Informasi Jalan Lingkungan - Kab. Kubu Raya</p>
+                  <p style="margin:8px 0 0 0;color:#dbeafe;font-size:14px;font-weight:400">Sistem Informasi Jalan Lingkungan - Kab. Kubu Raya</p>
                 </td>
               </tr>
               <!-- Content -->
@@ -111,6 +130,28 @@ const sendStatusEmail = async ({ to, nomorRuas, status, description }) => {
                           <tr>
                             <td style="color:#111827;font-size:16px;font-weight:600;padding-bottom:16px">${nomorRuas}</td>
                           </tr>
+                          ${
+                            roadDetails
+                              ? `
+                          <tr>
+                            <td style="color:#6b7280;font-size:13px;padding-bottom:8px">Nama Jalan</td>
+                          </tr>
+                          <tr>
+                            <td style="color:#111827;font-size:16px;font-weight:600;padding-bottom:16px">${
+                              roadDetails.nama_jalan || "Tidak tersedia"
+                            }</td>
+                          </tr>
+                          <tr>
+                            <td style="color:#6b7280;font-size:13px;padding-bottom:8px">Lokasi</td>
+                          </tr>
+                          <tr>
+                            <td style="color:#111827;font-size:16px;font-weight:600;padding-bottom:16px">${
+                              roadDetails.kecamatan || "Tidak tersedia"
+                            }, ${roadDetails.desa || "Tidak tersedia"}</td>
+                          </tr>
+                          `
+                              : ""
+                          }
                           <tr>
                             <td style="color:#6b7280;font-size:13px;padding-bottom:8px">Status Laporan</td>
                           </tr>
@@ -201,29 +242,37 @@ router.get("/", async (req, res) => {
     const offset = (page - 1) * limit;
     const status = req.query.status || null;
 
-    let whereClause = Prisma.empty;
-    if (status) {
-      whereClause = Prisma.sql`WHERE status = ${status}`;
-    }
-
-    const rows = await prisma.$queryRaw(
-      Prisma.sql`
+    const [rows, total] = await Promise.all([
+      prisma.$queryRaw`
         SELECT * FROM aduan
-        ${whereClause}
+        ${status ? Prisma.sql`WHERE status = ${status}` : Prisma.empty}
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
-      `
-    );
+      `,
+      prisma.$queryRaw`
+        SELECT COUNT(*)::int as total FROM aduan
+        ${status ? Prisma.sql`WHERE status = ${status}` : Prisma.empty}
+      `,
+    ]);
 
-    const countResult = await prisma.$queryRaw(
-      Prisma.sql`SELECT COUNT(*)::int as total FROM aduan ${whereClause}`
+    const totalCount = total && total[0] ? total[0].total : 0;
+
+    // Use JSON.stringify with replacer to handle BigInt serialization
+    const serializedData = JSON.parse(
+      JSON.stringify(rows || [], (key, value) =>
+        typeof value === "bigint" ? value.toString() : value
+      )
     );
-    const total = countResult && countResult[0] ? countResult[0].total : 0;
 
     return res.json({
       success: true,
-      data: serializeBigInt(rows || []),
-      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      data: serializedData,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
     });
   } catch (err) {
     console.error("GET /api/aduan error:", err);

@@ -993,6 +993,16 @@ const aduanForm = reactive({
   files: [],
 });
 
+// Watch for anonim changes to clear name field
+watch(
+  () => aduanForm.anonimString,
+  (newValue) => {
+    if (newValue === "true") {
+      aduanForm.namaPelapor = "";
+    }
+  }
+);
+
 // Calculate optimal view for all road data
 const optimalView = calculateAllDataBounds();
 
@@ -2505,8 +2515,7 @@ const submitAduan = async () => {
     });
     if (!resp.success) throw new Error(resp.error || "Gagal mengirim aduan");
     toast.success(
-      "Aduan berhasil terkirim! Email notifikasi telah dikirim ke " +
-        aduanForm.email,
+      "Aduan berhasil terkirim! Aduan Anda akan segera diproses. Terima kasih telah melapor.",
       5000
     );
     aduanModalVisible.value = false;

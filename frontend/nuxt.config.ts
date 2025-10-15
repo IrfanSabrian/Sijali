@@ -35,6 +35,16 @@ export default defineNuxtConfig({
           rel: "stylesheet",
           href: "https://js.arcgis.com/4.28/esri/themes/light/main.css",
         },
+        {
+          rel: "stylesheet",
+          href: "https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css",
+        },
+      ],
+      script: [
+        {
+          src: "https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js",
+          defer: true,
+        },
       ],
     },
   },

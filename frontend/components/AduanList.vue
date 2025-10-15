@@ -126,116 +126,13 @@
       </div>
     </div>
 
-    <!-- Modal Detail -->
-    <transition name="fade">
-      <div
-        v-if="detailModalVisible"
-        @click="detailModalVisible = false"
-        class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4"
-      >
-        <div
-          @click.stop
-          class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
-        >
-          <div
-            class="bg-blue-600 text-white px-4 py-3 flex items-center justify-between"
-          >
-            <h3 class="font-bold">
-              Detail Aduan #{{ selectedAduan?.id }} - Ruas
-              {{ selectedAduan?.nomor_ruas }}
-            </h3>
-            <button
-              @click="detailModalVisible = false"
-              class="text-white hover:text-gray-200 transition-colors"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
-          <div class="p-6 space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="text-sm text-gray-600 dark:text-gray-300"
-                  >Pelapor</label
-                >
-                <p class="text-gray-900 dark:text-white font-medium">
-                  {{
-                    selectedAduan?.nama_pelapor ||
-                    (selectedAduan?.anonim ? "Anonim" : "-")
-                  }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm text-gray-600 dark:text-gray-300"
-                  >Email</label
-                >
-                <p class="text-gray-900 dark:text-white font-medium">
-                  {{ selectedAduan?.email || "-" }}
-                </p>
-              </div>
-            </div>
-            <div>
-              <label class="text-sm text-gray-600 dark:text-gray-300"
-                >Keterangan</label
-              >
-              <p class="text-gray-900 dark:text-white">
-                {{ selectedAduan?.description || "-" }}
-              </p>
-            </div>
-            <div v-if="selectedAduan?.photos && selectedAduan.photos.length">
-              <label class="text-sm text-gray-600 dark:text-gray-300"
-                >Foto ({{ selectedAduan.photos.length }})</label
-              >
-              <div class="grid grid-cols-3 gap-2 mt-2">
-                <img
-                  v-for="(photo, idx) in selectedAduan.photos"
-                  :key="idx"
-                  :src="`/aduan/${selectedAduan.nomor_ruas}/${photo}`"
-                  :alt="`Foto ${idx + 1}`"
-                  class="w-full h-24 object-cover rounded border border-gray-300 dark:border-gray-600"
-                />
-              </div>
-            </div>
-
-            <!-- Ubah Status -->
-            <div
-              class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
-            >
-              <label class="block text-sm text-gray-600 dark:text-gray-300 mb-2"
-                >Ubah Status</label
-              >
-              <div class="flex gap-2">
-                <select
-                  v-model="newStatus"
-                  class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="diajukan">Diajukan</option>
-                  <option value="ditinjau">Ditinjau</option>
-                  <option value="selesai">Selesai</option>
-                  <option value="ditolak">Ditolak</option>
-                </select>
-                <button
-                  @click="updateStatus"
-                  :disabled="updateLoading"
-                  class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {{ updateLoading ? "..." : "Update" }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </transition>
+    <!-- Detail Modal -->
+    <AduanDetailModal
+      :visible="detailModalVisible"
+      :aduan="selectedAduan"
+      @close="detailModalVisible = false"
+      @updated="handleAduanUpdated"
+    />
   </div>
 
   <!-- Toast Notifications -->
@@ -247,6 +144,7 @@ import { ref, onMounted } from "vue";
 import { useApiService } from "~/composables/useApiService";
 import { useToast } from "~/composables/useToast";
 import Toast from "./Toast.vue";
+import AduanDetailModal from "./AduanDetailModal.vue";
 
 const { fetchAduan, updateAduanStatus } = useApiService();
 const toast = useToast();
@@ -260,8 +158,6 @@ const currentPage = ref(1);
 
 const detailModalVisible = ref(false);
 const selectedAduan = ref(null);
-const newStatus = ref("");
-const updateLoading = ref(false);
 
 const loadAduan = async () => {
   loading.value = true;
@@ -275,6 +171,7 @@ const loadAduan = async () => {
       params.status = selectedStatus.value;
     }
     const result = await fetchAduan(params);
+
     if (result.success) {
       aduanList.value = result.data;
       pagination.value = result.pagination;
@@ -295,34 +192,11 @@ const changePage = (page) => {
 
 const openDetail = (aduan) => {
   selectedAduan.value = aduan;
-  newStatus.value = aduan.status;
   detailModalVisible.value = true;
 };
 
-const updateStatus = async () => {
-  if (!selectedAduan.value || !newStatus.value) return;
-  updateLoading.value = true;
-  try {
-    const result = await updateAduanStatus(selectedAduan.value.id, {
-      status: newStatus.value,
-    });
-    if (result.success) {
-      toast.success(
-        `Status berhasil diupdate menjadi "${getStatusLabel(
-          newStatus.value
-        )}"! Email notifikasi telah dikirim.`,
-        5000
-      );
-      detailModalVisible.value = false;
-      await loadAduan();
-    } else {
-      toast.error("Gagal update status: " + result.error);
-    }
-  } catch (e) {
-    toast.error("Gagal update status: " + e.message);
-  } finally {
-    updateLoading.value = false;
-  }
+const handleAduanUpdated = async () => {
+  await loadAduan();
 };
 
 const getStatusLabel = (status) => {
@@ -349,14 +223,26 @@ const getStatusClass = (status) => {
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("id-ID", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+
+  try {
+    // Handle PostgreSQL timestamp format: "2025-10-15 13:00:11.656273+07"
+    const d = new Date(dateStr);
+
+    if (isNaN(d.getTime())) {
+      return "-";
+    }
+
+    return d.toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "-";
+  }
 };
 
 onMounted(() => {
