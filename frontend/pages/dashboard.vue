@@ -282,7 +282,7 @@
             :class="[
               'w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200',
               activeTab === 'laporan'
-                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
+                ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
             ]"
           >
@@ -572,19 +572,30 @@
                   </div>
 
                   <!-- Filter Kecamatan -->
-                  <select
-                    v-model="filterKecamatan"
-                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white min-w-[200px]"
-                  >
-                    <option value="">Semua Kecamatan</option>
-                    <option
-                      v-for="kec in kecamatanList"
-                      :key="kec"
-                      :value="kec"
+                  <div class="relative min-w-[200px]">
+                    <select
+                      v-model="filterKecamatan"
+                      class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white w-full"
+                      :disabled="!kecamatanList.length"
                     >
-                      {{ kec }}
-                    </option>
-                  </select>
+                      <option value="">Semua Kecamatan</option>
+                      <option
+                        v-for="kec in kecamatanList"
+                        :key="kec"
+                        :value="kec"
+                      >
+                        {{ kec }}
+                      </option>
+                    </select>
+                    <div
+                      v-if="!kecamatanList.length"
+                      class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg"
+                    >
+                      <div
+                        class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"
+                      ></div>
+                    </div>
+                  </div>
 
                   <!-- Action Buttons -->
                   <div class="flex gap-2">
@@ -1176,7 +1187,6 @@
                       • Data jembatan lingkungan<br />
                       • Kondisi dan status jembatan<br />
                       • Peta lokasi jembatan<br />
-                      • Laporan kondisi jembatan
                     </p>
                   </div>
                 </div>
@@ -1324,188 +1334,14 @@
 
             <!-- Laporan Section -->
             <div v-show="activeTab === 'laporan'" class="space-y-6">
-              <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden p-4 sm:p-6"
-              >
-                <div class="flex justify-between items-center mb-6">
-                  <h3
-                    class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white"
-                  >
-                    Laporan Jalan Lingkungan
-                  </h3>
-                </div>
-
-                <!-- Laporan Options -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                  <!-- Laporan Per Kecamatan -->
-                  <div
-                    class="border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:shadow-lg transition-all duration-200 hover:border-green-500"
-                  >
-                    <div class="flex items-start space-x-4">
-                      <div
-                        class="p-3 bg-green-100 dark:bg-green-900 rounded-lg"
-                      >
-                        <svg
-                          class="w-6 h-6 text-green-600 dark:text-green-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                          />
-                        </svg>
-                      </div>
-                      <div class="flex-1">
-                        <h4
-                          class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
-                        >
-                          Laporan Per Kecamatan
-                        </h4>
-                        <p
-                          class="text-sm text-gray-600 dark:text-gray-400 mb-4"
-                        >
-                          Lihat statistik dan detail jalan berdasarkan kecamatan
-                        </p>
-                        <button
-                          class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
-                        >
-                          Lihat Laporan
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Laporan Kondisi Jalan -->
-                  <div
-                    class="border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:shadow-lg transition-all duration-200 hover:border-green-500"
-                  >
-                    <div class="flex items-start space-x-4">
-                      <div
-                        class="p-3 bg-green-100 dark:bg-green-900 rounded-lg"
-                      >
-                        <svg
-                          class="w-6 h-6 text-green-600 dark:text-green-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                          />
-                        </svg>
-                      </div>
-                      <div class="flex-1">
-                        <h4
-                          class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
-                        >
-                          Laporan Kondisi Jalan
-                        </h4>
-                        <p
-                          class="text-sm text-gray-600 dark:text-gray-400 mb-4"
-                        >
-                          Rekap kondisi jalan (Baik, Sedang, Rusak)
-                        </p>
-                        <button
-                          class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
-                        >
-                          Lihat Laporan
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Laporan Tahunan -->
-                  <div
-                    class="border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:shadow-lg transition-all duration-200 hover:border-green-500"
-                  >
-                    <div class="flex items-start space-x-4">
-                      <div
-                        class="p-3 bg-green-100 dark:bg-green-900 rounded-lg"
-                      >
-                        <svg
-                          class="w-6 h-6 text-green-600 dark:text-green-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div>
-                      <div class="flex-1">
-                        <h4
-                          class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
-                        >
-                          Laporan Tahunan
-                        </h4>
-                        <p
-                          class="text-sm text-gray-600 dark:text-gray-400 mb-4"
-                        >
-                          Laporan lengkap berdasarkan tahun
-                        </p>
-                        <button
-                          class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
-                        >
-                          Lihat Laporan
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Export Data -->
-                  <div
-                    class="border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:shadow-lg transition-all duration-200 hover:border-green-500"
-                  >
-                    <div class="flex items-start space-x-4">
-                      <div
-                        class="p-3 bg-green-100 dark:bg-green-900 rounded-lg"
-                      >
-                        <svg
-                          class="w-6 h-6 text-green-600 dark:text-green-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                      </div>
-                      <div class="flex-1">
-                        <h4
-                          class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
-                        >
-                          Export Data
-                        </h4>
-                        <p
-                          class="text-sm text-gray-600 dark:text-gray-400 mb-4"
-                        >
-                          Download data dalam format Excel atau PDF
-                        </p>
-                        <button
-                          class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
-                        >
-                          Export
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <!-- Report Generator -->
+              <ReportGenerator
+                :stats="stats"
+                :condition-stats="conditionStats"
+                :kecamatan-stats="kecamatanStats"
+                :material-stats="materialStats"
+                @download-report="handleDownloadReport"
+              />
             </div>
 
             <!-- Users Management Section -->
@@ -1712,6 +1548,15 @@
                 :year-stats="yearStats"
                 :material-stats="materialStats"
                 :kecamatan-list="kecamatanList"
+              />
+
+              <!-- Report Generator -->
+              <ReportGenerator
+                :stats="stats"
+                :condition-stats="conditionStats"
+                :kecamatan-stats="kecamatanStats"
+                :material-stats="materialStats"
+                @download-report="handleDownloadReport"
               />
             </div>
           </div>
@@ -2008,6 +1853,8 @@ import RoadDetailModal from "~/components/RoadDetailModal.vue";
 import UserDetailModal from "~/components/UserDetailModal.vue";
 import GeoJSONImportModal from "~/components/GeoJSONImportModal.vue";
 import AnalysisDashboard from "~/components/AnalysisDashboard.vue";
+import ReportGenerator from "~/components/ReportGenerator.vue";
+import { useReportGenerator } from "~/composables/useReportGenerator.js";
 
 // Register Chart.js components
 Chart.register(
@@ -2081,6 +1928,9 @@ const showAddUserModal = ref(false);
 const showEditUserModal = ref(false);
 const modalKey = ref(0);
 
+// Report state
+const { downloadReport } = useReportGenerator();
+
 // Select mode state
 const selectMode = ref(false);
 const selectedRoads = ref(new Set());
@@ -2122,6 +1972,11 @@ const selectedUser = ref(null);
 
 // Computed
 const filteredRoads = computed(() => {
+  // Ensure roads data is loaded
+  if (!roads.value || !Array.isArray(roads.value)) {
+    return [];
+  }
+
   let filtered = roads.value;
 
   if (searchQuery.value) {
@@ -2140,9 +1995,29 @@ const filteredRoads = computed(() => {
   }
 
   if (filterKecamatan.value) {
-    filtered = filtered.filter(
-      (road) => road.Kecamatan === filterKecamatan.value
-    );
+    filtered = filtered.filter((road) => {
+      const roadKecamatan = road.Kecamatan || road.kecamatan || "";
+      const filterValue = filterKecamatan.value || "";
+
+      // Handle both exact match and partial match for better compatibility
+      const exactMatch =
+        roadKecamatan.toLowerCase() === filterValue.toLowerCase();
+      const partialMatch = roadKecamatan
+        .toLowerCase()
+        .includes(filterValue.toLowerCase());
+
+      // Debug logging for troubleshooting
+      if (process.client && !exactMatch && !partialMatch && roadKecamatan) {
+        console.log("Kecamatan filter mismatch:", {
+          roadKecamatan,
+          filterValue,
+          exactMatch,
+          partialMatch,
+        });
+      }
+
+      return exactMatch || partialMatch;
+    });
   }
 
   return filtered;
@@ -2407,7 +2282,9 @@ const fetchFilterOptions = async () => {
     const kecResponse = await fetch(`${API_BASE}/api/jalan/filters/kecamatan`);
     const kecData = await kecResponse.json();
 
-    if (kecData.success) kecamatanList.value = kecData.data;
+    if (kecData.success) {
+      kecamatanList.value = kecData.data;
+    }
   } catch (error) {
     console.error("Error fetching filter options:", error);
   }
@@ -3157,6 +3034,34 @@ const initCharts = () => {
   });
 };
 
+// Report methods
+
+const handleDownloadReport = async (reportInfo) => {
+  try {
+    // Show loading state
+    console.log("Sedang memproses laporan...");
+
+    const reportData = {
+      reportInfo: reportInfo,
+      data: reportInfo.data,
+    };
+
+    const result = await downloadReport(reportData, reportInfo.format);
+
+    if (result.success) {
+      // Show success message
+      console.log(`Laporan berhasil didownload: ${result.filename}`);
+      alert("Laporan berhasil didownload!");
+    } else {
+      console.error("Error downloading report:", result.error);
+      alert("Gagal mendownload laporan. Silakan coba lagi.");
+    }
+  } catch (error) {
+    console.error("Error handling download:", error);
+    alert("Terjadi kesalahan saat mendownload laporan.");
+  }
+};
+
 // Watch for tab changes
 watch(activeTab, async (newTab) => {
   if (newTab === "users" && user.value?.role === "ADMIN") {
@@ -3184,12 +3089,10 @@ onMounted(async () => {
 
   // Load data
   loading.value = true;
-  await Promise.all([
-    fetchStats(),
-    fetchRoads(),
-    fetchFilterOptions(),
-    fetchAnalysisData(),
-  ]);
+
+  // Load filter options first, then other data
+  await fetchFilterOptions();
+  await Promise.all([fetchStats(), fetchRoads(), fetchAnalysisData()]);
 
   if (user.value?.role === "ADMIN") {
     await fetchUsers();

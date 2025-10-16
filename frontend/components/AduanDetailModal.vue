@@ -588,33 +588,110 @@ const loadRoadInfo = async () => {
     const config = useRuntimeConfig();
     const API_BASE = config.public.apiBaseUrl || "http://localhost:3001";
 
-    // First get basic road info
-    const response = await fetch(
-      `${API_BASE}/api/jalan?noRuas=${props.aduan.nomor_ruas}`
-    );
-    const data = await response.json();
+    console.log("🔍 Loading road info for nomor_ruas:", props.aduan.nomor_ruas);
 
-    if (data.success && data.data.length > 0) {
-      roadInfo.value = data.data[0];
+    // Get road info by nomor_ruas - try multiple approaches
+    let response;
+    let data;
 
-      // Then get geometry data from GeoJSON endpoint
-      const geoResponse = await fetch(`${API_BASE}/api/jalan/geojson`);
-      const geoData = await geoResponse.json();
+    // First try with exact search
+    try {
+      response = await fetch(
+        `${API_BASE}/api/jalan?search=${props.aduan.nomor_ruas}`
+      );
+      data = await response.json();
+      console.log("🔍 Search response:", data);
 
-      if (geoData.success && geoData.data.features) {
-        // Find the road with matching noRuas
-        const roadFeature = geoData.data.features.find(
-          (feature) => feature.properties.noRuas === props.aduan.nomor_ruas
+      // If search returns no results, try getting all roads and filter client-side
+      if (!data.success || !data.data || data.data.length === 0) {
+        console.log("🔍 Search returned no results, trying to get all roads");
+        response = await fetch(`${API_BASE}/api/jalan`);
+        data = await response.json();
+        console.log("🔍 All roads response:", data);
+      }
+    } catch (searchError) {
+      console.error("Search failed, trying without search param:", searchError);
+      // If search fails, try to get all roads and filter client-side
+      response = await fetch(`${API_BASE}/api/jalan`);
+      data = await response.json();
+    }
+
+    console.log("🔍 API Response:", data);
+
+    if (data.success && data.data && data.data.length > 0) {
+      console.log("🔍 Found roads:", data.data.length);
+      console.log("🔍 First road data:", data.data[0]);
+      console.log("🔍 Looking for nomor_ruas:", props.aduan.nomor_ruas);
+
+      // Find the road with exact nomor_ruas match - try multiple comparison methods
+      let road = data.data.find((r) => {
+        console.log("🔍 Comparing:", r.noRuas, "with", props.aduan.nomor_ruas);
+        return (
+          r.noRuas === props.aduan.nomor_ruas ||
+          r.noRuas === String(props.aduan.nomor_ruas) ||
+          String(r.noRuas) === String(props.aduan.nomor_ruas) ||
+          r.noRuas == props.aduan.nomor_ruas ||
+          String(r.noRuas).includes(String(props.aduan.nomor_ruas)) ||
+          String(props.aduan.nomor_ruas).includes(String(r.noRuas))
+        );
+      });
+
+      console.log("🔍 Exact match found:", road);
+
+      if (road) {
+        roadInfo.value = {
+          namaJalan: road.namaJalan || road.nama || "-",
+          kecamatan: road.kecamatan || "-",
+          desa: road.desa || "-",
+          noRuas: road.noRuas,
+          kondisi: road.kondisi,
+          keterangan: road.keterangan,
+          panjangM: road.panjangM,
+          lebarM: road.lebarM,
+          tahun: road.tahun,
+        };
+        console.log("✅ Road info set:", roadInfo.value);
+      } else {
+        // Fallback to first result if exact match not found
+        console.log("⚠️ No exact match, using first result");
+        console.log(
+          "🔍 Available noRuas values:",
+          data.data.slice(0, 5).map((r) => r.noRuas)
         );
 
-        if (roadFeature) {
-          // Add geometry to road info
-          roadInfo.value.geometry = JSON.stringify(roadFeature.geometry);
-        }
+        roadInfo.value = {
+          namaJalan: data.data[0].namaJalan || data.data[0].nama || "-",
+          kecamatan: data.data[0].kecamatan || "-",
+          desa: data.data[0].desa || "-",
+          noRuas: data.data[0].noRuas,
+          kondisi: data.data[0].kondisi,
+          keterangan: data.data[0].keterangan,
+          panjangM: data.data[0].panjangM,
+          lebarM: data.data[0].lebarM,
+          tahun: data.data[0].tahun,
+        };
+        console.log("✅ Road info set (fallback):", roadInfo.value);
       }
+    } else {
+      console.log("❌ No roads found in API response");
+      console.log("🔍 Response structure:", data);
+      // Set default values if no data found
+      roadInfo.value = {
+        namaJalan: "-",
+        kecamatan: "-",
+        desa: "-",
+        noRuas: props.aduan.nomor_ruas,
+      };
     }
   } catch (error) {
     console.error("Error loading road info:", error);
+    // Set default values if API fails
+    roadInfo.value = {
+      namaJalan: "-",
+      kecamatan: "-",
+      desa: "-",
+      noRuas: props.aduan.nomor_ruas,
+    };
   }
 };
 
@@ -624,6 +701,9 @@ const initMap = async () => {
   mapLoading.value = true;
 
   try {
+    // Load road info first to get location data
+    await loadRoadInfo();
+
     // Load ArcGIS modules
     const [
       Map,
@@ -660,18 +740,22 @@ const initMap = async () => {
     // Create layers
     const batasKabupatenLayer = new GraphicsLayer.default({
       title: "Batas Kabupaten",
+      visible: true,
     });
 
     const batasKecamatanLayer = new GraphicsLayer.default({
       title: "Batas Kecamatan",
+      visible: true,
     });
 
     const batasDesaLayer = new GraphicsLayer.default({
       title: "Batas Desa",
+      visible: true,
     });
 
     roadsLayer = new GraphicsLayer.default({
       title: "Roads",
+      visible: true,
     });
 
     map.add(batasKabupatenLayer);
@@ -721,8 +805,8 @@ const loadAllMapData = async (
         data.data.features.slice(0, 3).map((f) => f.properties.noRuas)
       );
 
-      // Find and show only the specific road
-      const targetRoad = data.data.features.find(
+      // Find and show ALL roads with the same nomor_ruas
+      const targetRoads = data.data.features.filter(
         (feature) =>
           feature.properties.noRuas === props.aduan.nomor_ruas ||
           feature.properties.noRuas === String(props.aduan.nomor_ruas) ||
@@ -730,16 +814,16 @@ const loadAllMapData = async (
           String(feature.properties.noRuas) === String(props.aduan.nomor_ruas)
       );
 
-      console.log("🔍 Target road found:", targetRoad);
+      console.log("🔍 Target roads found:", targetRoads.length);
 
-      if (targetRoad) {
-        console.log("✅ Adding road to map and zooming");
-        // Add only the specific road to the map
-        await addSpecificRoadToMap(targetRoad, roadsLayer);
-        await zoomToRoad(targetRoad);
+      if (targetRoads.length > 0) {
+        console.log("✅ Adding all roads with same nomor_ruas to map");
+        // Add all roads with the same nomor_ruas to the map
+        await addMultipleRoadsToMap(targetRoads, roadsLayer);
+        await zoomToMultipleRoads(targetRoads);
       } else {
         // Try alternative property names with robust comparison
-        const alternativeRoad = data.data.features.find(
+        const alternativeRoads = data.data.features.filter(
           (feature) =>
             feature.properties.nomor_ruas === props.aduan.nomor_ruas ||
             feature.properties.NOMOR_RUAS === props.aduan.nomor_ruas ||
@@ -752,12 +836,12 @@ const loadAllMapData = async (
               String(props.aduan.nomor_ruas)
         );
 
-        if (alternativeRoad) {
-          console.log("✅ Found road with alternative property");
-          await addSpecificRoadToMap(alternativeRoad, roadsLayer);
-          await zoomToRoad(alternativeRoad);
+        if (alternativeRoads.length > 0) {
+          console.log("✅ Found roads with alternative property");
+          await addMultipleRoadsToMap(alternativeRoads, roadsLayer);
+          await zoomToMultipleRoads(alternativeRoads);
         } else {
-          console.log("❌ No road found, showing all roads for debugging");
+          console.log("❌ No roads found, showing all roads for debugging");
           await addAllRoadsToMap(data.data, roadsLayer);
         }
       }
@@ -766,21 +850,13 @@ const loadAllMapData = async (
     // Always load kabupaten boundary first
     await loadKabupatenBoundary(batasKabupatenLayer);
 
-    // Load boundary data based on road location
-    if (roadInfo.value) {
-      await loadRelevantBoundaries(
-        batasKabupatenLayer,
-        batasKecamatanLayer,
-        batasDesaLayer
-      );
-    } else {
-      // Load all boundaries as fallback
-      await loadAllBoundaries(
-        batasKabupatenLayer,
-        batasKecamatanLayer,
-        batasDesaLayer
-      );
-    }
+    // Always load relevant boundaries (kabupaten + specific kecamatan/desa)
+    console.log("Loading relevant boundaries for aduan");
+    await loadRelevantBoundaries(
+      batasKabupatenLayer,
+      batasKecamatanLayer,
+      batasDesaLayer
+    );
   } catch (error) {
     console.error("Error loading map data:", error);
   }
@@ -828,6 +904,45 @@ const addSpecificRoadToMap = async (roadFeature, roadsLayer) => {
     console.log("✅ Road graphic added to layer");
   } catch (error) {
     console.error("Error adding specific road to map:", error);
+  }
+};
+
+const addMultipleRoadsToMap = async (roadFeatures, roadsLayer) => {
+  try {
+    console.log("🛣️ Adding multiple roads to map:", roadFeatures.length);
+
+    const [Graphic, Polyline, SimpleLineSymbol] = await Promise.all([
+      import("@arcgis/core/Graphic"),
+      import("@arcgis/core/geometry/Polyline"),
+      import("@arcgis/core/symbols/SimpleLineSymbol"),
+    ]);
+
+    const graphics = roadFeatures.map((roadFeature) => {
+      const polyline = new Polyline.default({
+        paths: [roadFeature.geometry.coordinates],
+        spatialReference: { wkid: 4326 },
+      });
+
+      const colorHex = getRoadColor(roadFeature);
+      const color = hexToRgba(colorHex);
+
+      const symbol = new SimpleLineSymbol.default({
+        color: color,
+        width: 4, // Make it thicker to highlight the specific roads
+        style: "solid",
+      });
+
+      return new Graphic.default({
+        geometry: polyline,
+        symbol: symbol,
+        attributes: roadFeature.properties,
+      });
+    });
+
+    roadsLayer.addMany(graphics);
+    console.log(`✅ ${graphics.length} road graphics added to layer`);
+  } catch (error) {
+    console.error("Error adding multiple roads to map:", error);
   }
 };
 
@@ -1014,57 +1129,311 @@ const zoomToRoad = async (roadFeature) => {
   }
 };
 
+const zoomToMultipleRoads = async (roadFeatures) => {
+  try {
+    console.log("🔍 Zooming to multiple roads:", roadFeatures.length);
+
+    if (roadFeatures.length === 0) return;
+
+    const [Polyline, geometryEngine] = await Promise.all([
+      import("@arcgis/core/geometry/Polyline"),
+      import("@arcgis/core/geometry/geometryEngine"),
+    ]);
+
+    // Create polylines for all roads
+    const polylines = roadFeatures.map((roadFeature) => {
+      return new Polyline.default({
+        paths: [roadFeature.geometry.coordinates],
+        spatialReference: { wkid: 4326 },
+      });
+    });
+
+    // If only one road, zoom to it directly
+    if (polylines.length === 1) {
+      await view.goTo(
+        {
+          target: polylines[0],
+          zoom: 16,
+        },
+        {
+          duration: 1000,
+          easing: "ease-in-out",
+        }
+      );
+      return;
+    }
+
+    // For multiple roads, create a union geometry to zoom to all of them
+    let unionGeometry = polylines[0];
+
+    for (let i = 1; i < polylines.length; i++) {
+      try {
+        unionGeometry = geometryEngine.default.union(
+          unionGeometry,
+          polylines[i]
+        );
+      } catch (unionError) {
+        console.warn(
+          "Error creating union geometry, using first road:",
+          unionError
+        );
+        unionGeometry = polylines[0];
+        break;
+      }
+    }
+
+    console.log("🔍 Union geometry created for multiple roads");
+
+    // Zoom to the union geometry
+    await view.goTo(
+      {
+        target: unionGeometry,
+        zoom: 14, // Slightly less zoom to show all roads
+      },
+      {
+        duration: 1000,
+        easing: "ease-in-out",
+      }
+    );
+
+    console.log("✅ Zoom to multiple roads completed");
+  } catch (error) {
+    console.error("Error zooming to multiple roads:", error);
+    // Fallback: zoom to first road
+    if (roadFeatures.length > 0) {
+      await zoomToRoad(roadFeatures[0]);
+    }
+  }
+};
+
 const loadKabupatenBoundary = async (batasKabupatenLayer) => {
   try {
+    console.log("=== LOADING KABUPATEN BOUNDARY ===");
+    console.log("Kabupaten layer:", batasKabupatenLayer);
+
+    // Clear existing graphics first
+    batasKabupatenLayer.removeAll();
+
     const kabupatenResponse = await fetch(
       "/geojson/Batas Kabupaten Kubu Raya.geojson"
     );
     const kabupatenData = await kabupatenResponse.json();
 
+    console.log(
+      "Kabupaten data loaded:",
+      kabupatenData.features?.length,
+      "features"
+    );
+
     if (kabupatenData.features && kabupatenData.features.length > 0) {
-      console.log("Adding kabupaten boundary");
-      await addBoundaryToLayer(
-        kabupatenData.features[0],
-        batasKabupatenLayer,
-        [239, 68, 68, 1], // Red - same as homepage
-        1.5
+      console.log("Adding kabupaten boundary using homepage method");
+
+      // Import required modules
+      const [Graphic, Polygon, SimpleFillSymbol, SimpleLineSymbol] =
+        await Promise.all([
+          import("@arcgis/core/Graphic"),
+          import("@arcgis/core/geometry/Polygon"),
+          import("@arcgis/core/symbols/SimpleFillSymbol"),
+          import("@arcgis/core/symbols/SimpleLineSymbol"),
+        ]);
+
+      // Create graphics from GeoJSON features (same as homepage)
+      const graphics = kabupatenData.features.map((feature) => {
+        // Convert MultiPolygon to Polygon
+        let rings = [];
+        if (feature.geometry.type === "MultiPolygon") {
+          // Flatten MultiPolygon to single array of rings
+          feature.geometry.coordinates.forEach((polygon) => {
+            rings.push(...polygon);
+          });
+        } else if (feature.geometry.type === "Polygon") {
+          rings = feature.geometry.coordinates;
+        }
+
+        const polygon = new Polygon.default({
+          rings: rings,
+          spatialReference: { wkid: 4326 },
+        });
+
+        // Style for kabupaten boundary - same as homepage
+        const symbol = new SimpleFillSymbol.default({
+          color: [0, 0, 0, 0], // Transparent fill (no fill)
+          outline: new SimpleLineSymbol.default({
+            color: [59, 130, 246, 1], // Blue - same as homepage
+            width: 1.25,
+            style: "solid",
+          }),
+        });
+
+        return new Graphic.default({
+          geometry: polygon,
+          symbol: symbol,
+          attributes: feature.properties,
+        });
+      });
+
+      // Add graphics to layer and make visible
+      batasKabupatenLayer.addMany(graphics);
+      batasKabupatenLayer.visible = true;
+      console.log(`Displayed ${graphics.length} kabupaten boundary`);
+      console.log("Kabupaten layer visibility:", batasKabupatenLayer.visible);
+      console.log(
+        "Kabupaten graphics count:",
+        batasKabupatenLayer.graphics.length
       );
+    } else {
+      console.log("No kabupaten features found");
     }
   } catch (error) {
     console.error("Error loading kabupaten boundary:", error);
   }
 };
 
-const loadRelevantBoundaries = async (
-  batasKabupatenLayer,
-  batasKecamatanLayer,
-  batasDesaLayer
+// Filter and display Batas Kecamatan based on selected kecamatan (like homepage)
+const filterAndDisplayBatasKecamatan = async (
+  kecamatanName,
+  batasKecamatanLayer
 ) => {
-  if (!roadInfo.value) return;
+  if (!batasKecamatanLayer) return;
+
+  // Clear existing graphics
+  batasKecamatanLayer.removeAll();
+
+  // If no kecamatan selected, hide the layer
+  if (!kecamatanName) {
+    batasKecamatanLayer.visible = false;
+    return;
+  }
 
   try {
+    // Import required modules
+    const [Graphic, Polygon, SimpleFillSymbol, SimpleLineSymbol] =
+      await Promise.all([
+        import("@arcgis/core/Graphic"),
+        import("@arcgis/core/geometry/Polygon"),
+        import("@arcgis/core/symbols/SimpleFillSymbol"),
+        import("@arcgis/core/symbols/SimpleLineSymbol"),
+      ]);
+
     // Load district boundaries
     const districtResponse = await fetch(
       "/geojson/Batas Kecamatan Kubu Raya.geojson"
     );
     const districtData = await districtResponse.json();
 
-    // Filter to show only the district where the road is located
-    const relevantDistrict = districtData.features.find(
-      (feature) => feature.properties.NAMOBJ === roadInfo.value.kecamatan
+    // Debug: Log the data we're searching for and available data
+    console.log("=== KECAMATAN FILTER DEBUG ===");
+    console.log("Searching for kecamatan:", kecamatanName);
+    console.log(
+      "Available kecamatan in GeoJSON:",
+      districtData.features.slice(0, 3).map((f) => ({
+        WADMKC: f.properties.WADMKC,
+        NAMOBJ: f.properties.NAMOBJ,
+        allProps: Object.keys(f.properties),
+      }))
     );
 
-    if (relevantDistrict) {
-      console.log("Adding district boundary for:", roadInfo.value.kecamatan);
-      await addBoundaryToLayer(
-        relevantDistrict,
-        batasKecamatanLayer,
-        [59, 130, 246, 1], // Blue - same as homepage
-        1.25
+    // Filter features by kecamatan name (same as homepage)
+    const filteredFeatures = districtData.features.filter(
+      (feature) => feature.properties.WADMKC === kecamatanName
+    );
+
+    if (filteredFeatures.length === 0) {
+      console.log(`No boundary found for kecamatan: ${kecamatanName}`);
+      console.log("Trying alternative search methods...");
+
+      // Try alternative search methods
+      const alternativeFeatures = districtData.features.filter(
+        (feature) =>
+          feature.properties.NAMOBJ === kecamatanName ||
+          feature.properties.WADMKC?.toLowerCase() ===
+            kecamatanName?.toLowerCase() ||
+          feature.properties.NAMOBJ?.toLowerCase() ===
+            kecamatanName?.toLowerCase() ||
+          feature.properties.WADMKC?.includes(kecamatanName) ||
+          feature.properties.NAMOBJ?.includes(kecamatanName)
       );
-    } else {
-      console.log("District not found for:", roadInfo.value.kecamatan);
+
+      if (alternativeFeatures.length > 0) {
+        console.log(
+          "Found with alternative search:",
+          alternativeFeatures[0].properties
+        );
+        filteredFeatures.push(...alternativeFeatures);
+      } else {
+        console.log("No boundary found with any search method");
+        batasKecamatanLayer.visible = false;
+        return;
+      }
     }
+
+    // Create graphics from filtered GeoJSON features (same as homepage)
+    const graphics = filteredFeatures.map((feature) => {
+      let rings = [];
+      if (feature.geometry.type === "MultiPolygon") {
+        // Flatten MultiPolygon to single array of rings
+        feature.geometry.coordinates.forEach((polygon) => {
+          rings.push(...polygon);
+        });
+      } else if (feature.geometry.type === "Polygon") {
+        rings = feature.geometry.coordinates;
+      }
+
+      const polygon = new Polygon.default({
+        rings: rings,
+        spatialReference: { wkid: 4326 },
+      });
+
+      // Style for kecamatan boundary - same as homepage
+      const symbol = new SimpleFillSymbol.default({
+        color: [0, 0, 0, 0], // Transparent fill (no fill)
+        outline: new SimpleLineSymbol.default({
+          color: [236, 72, 153, 1], // Pink - same as homepage
+          width: 1,
+          style: "solid",
+        }),
+      });
+
+      return new Graphic.default({
+        geometry: polygon,
+        symbol: symbol,
+        attributes: feature.properties,
+      });
+    });
+
+    // Add graphics to layer and make visible
+    batasKecamatanLayer.addMany(graphics);
+    batasKecamatanLayer.visible = true;
+    console.log(
+      `Displayed ${graphics.length} kecamatan boundary for: ${kecamatanName}`
+    );
+  } catch (error) {
+    console.error("Error filtering and displaying batas kecamatan:", error);
+  }
+};
+
+// Filter and display Batas Desa based on selected desa (like homepage)
+const filterAndDisplayBatasDesa = async (desaName, batasDesaLayer) => {
+  if (!batasDesaLayer) return;
+
+  // Clear existing graphics
+  batasDesaLayer.removeAll();
+
+  // If no desa selected, hide the layer
+  if (!desaName) {
+    batasDesaLayer.visible = false;
+    return;
+  }
+
+  try {
+    // Import required modules
+    const [Graphic, Polygon, SimpleFillSymbol, SimpleLineSymbol] =
+      await Promise.all([
+        import("@arcgis/core/Graphic"),
+        import("@arcgis/core/geometry/Polygon"),
+        import("@arcgis/core/symbols/SimpleFillSymbol"),
+        import("@arcgis/core/symbols/SimpleLineSymbol"),
+      ]);
 
     // Load village boundaries
     const villageResponse = await fetch(
@@ -1072,24 +1441,134 @@ const loadRelevantBoundaries = async (
     );
     const villageData = await villageResponse.json();
 
-    // Filter to show only the village where the road is located
-    const relevantVillage = villageData.features.find(
-      (feature) => feature.properties.NAMOBJ === roadInfo.value.desa
+    // Debug: Log the data we're searching for and available data
+    console.log("=== DESA FILTER DEBUG ===");
+    console.log("Searching for desa:", desaName);
+    console.log(
+      "Available desa in GeoJSON:",
+      villageData.features.slice(0, 3).map((f) => ({
+        WADMKD: f.properties.WADMKD,
+        NAMOBJ: f.properties.NAMOBJ,
+        allProps: Object.keys(f.properties),
+      }))
     );
 
-    if (relevantVillage) {
-      console.log("Adding village boundary for:", roadInfo.value.desa);
-      await addBoundaryToLayer(
-        relevantVillage,
-        batasDesaLayer,
-        [168, 85, 247, 1], // Purple - same as homepage
-        0.9
+    // Filter features by desa name (same as homepage)
+    const filteredFeatures = villageData.features.filter(
+      (feature) => feature.properties.WADMKD === desaName
+    );
+
+    if (filteredFeatures.length === 0) {
+      console.log(`No boundary found for desa: ${desaName}`);
+      console.log("Trying alternative search methods...");
+
+      // Try alternative search methods
+      const alternativeFeatures = villageData.features.filter(
+        (feature) =>
+          feature.properties.NAMOBJ === desaName ||
+          feature.properties.WADMKD?.toLowerCase() ===
+            desaName?.toLowerCase() ||
+          feature.properties.NAMOBJ?.toLowerCase() ===
+            desaName?.toLowerCase() ||
+          feature.properties.WADMKD?.includes(desaName) ||
+          feature.properties.NAMOBJ?.includes(desaName)
       );
-    } else {
-      console.log("Village not found for:", roadInfo.value.desa);
+
+      if (alternativeFeatures.length > 0) {
+        console.log(
+          "Found with alternative search:",
+          alternativeFeatures[0].properties
+        );
+        filteredFeatures.push(...alternativeFeatures);
+      } else {
+        console.log("No boundary found with any search method");
+        batasDesaLayer.visible = false;
+        return;
+      }
     }
+
+    // Create graphics from filtered GeoJSON features (same as homepage)
+    const graphics = filteredFeatures.map((feature) => {
+      let rings = [];
+      if (feature.geometry.type === "MultiPolygon") {
+        // Flatten MultiPolygon to single array of rings
+        feature.geometry.coordinates.forEach((polygon) => {
+          rings.push(...polygon);
+        });
+      } else if (feature.geometry.type === "Polygon") {
+        rings = feature.geometry.coordinates;
+      }
+
+      const polygon = new Polygon.default({
+        rings: rings,
+        spatialReference: { wkid: 4326 },
+      });
+
+      // Style for desa boundary - same as homepage
+      const symbol = new SimpleFillSymbol.default({
+        color: [0, 0, 0, 0], // Transparent fill (no fill)
+        outline: new SimpleLineSymbol.default({
+          color: [168, 85, 247, 1], // Purple - same as homepage
+          width: 1,
+          style: "solid",
+        }),
+      });
+
+      return new Graphic.default({
+        geometry: polygon,
+        symbol: symbol,
+        attributes: feature.properties,
+      });
+    });
+
+    // Add graphics to layer and make visible
+    batasDesaLayer.addMany(graphics);
+    batasDesaLayer.visible = true;
+    console.log(`Displayed ${graphics.length} desa boundary for: ${desaName}`);
   } catch (error) {
-    console.error("Error loading relevant boundaries:", error);
+    console.error("Error filtering and displaying batas desa:", error);
+  }
+};
+
+// Load relevant boundaries based on road location (like homepage filter)
+const loadRelevantBoundaries = async (
+  batasKabupatenLayer,
+  batasKecamatanLayer,
+  batasDesaLayer
+) => {
+  if (!roadInfo.value) return;
+
+  console.log("=== LOADING BOUNDARIES FOR ROAD ===");
+  console.log("Road info:", roadInfo.value);
+
+  // Always load kabupaten boundary first (Kubu Raya)
+  console.log("Step 1: Loading kabupaten boundary...");
+  await loadKabupatenBoundary(batasKabupatenLayer);
+  console.log("Step 1 completed: Kabupaten boundary loaded");
+
+  // Ensure kabupaten layer is always visible
+  batasKabupatenLayer.visible = true;
+  console.log("Kabupaten layer forced visible:", batasKabupatenLayer.visible);
+
+  // Load ONLY the specific kecamatan from the road data
+  if (roadInfo.value.kecamatan) {
+    console.log("Loading kecamatan boundary for:", roadInfo.value.kecamatan);
+    await filterAndDisplayBatasKecamatan(
+      roadInfo.value.kecamatan,
+      batasKecamatanLayer
+    );
+    // Ensure kabupaten layer remains visible even when kecamatan is loaded
+    batasKabupatenLayer.visible = true;
+    console.log(
+      "Kabupaten layer kept visible after kecamatan load:",
+      batasKabupatenLayer.visible
+    );
+  }
+
+  // Load ONLY the specific desa from the road data
+  if (roadInfo.value.desa) {
+    console.log("Loading desa boundary for:", roadInfo.value.desa);
+    await filterAndDisplayBatasDesa(roadInfo.value.desa, batasDesaLayer);
   }
 };
 
@@ -1109,7 +1588,7 @@ const loadAllBoundaries = async (
       await addBoundaryToLayer(
         feature,
         batasKecamatanLayer,
-        [59, 130, 246, 1], // Blue - same as homepage
+        [236, 72, 153, 1], // Pink - kecamatan should be pink
         1.25
       );
     }

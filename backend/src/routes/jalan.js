@@ -65,6 +65,16 @@ router.get("/", async (req, res) => {
             mode: "insensitive",
           },
         },
+        {
+          noRuas: {
+            equals: search,
+          },
+        },
+        {
+          noRuas: {
+            equals: parseInt(search),
+          },
+        },
       ];
     }
 
@@ -216,7 +226,7 @@ router.get("/geojson", async (req, res) => {
             properties: {
               id: road.id,
               fid: road.fid,
-              noRuas: road.no_ruas,
+              noRuas: road.no_ruas, // Use camelCase to match API regular format
               nama: road.nama,
               namaJalan: road.nama_jalan,
               panjangM: road.panjang_m,
@@ -834,6 +844,176 @@ router.get("/:id/geometry", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Failed to fetch road geometry",
+    });
+  }
+});
+
+// GET /api/jalan/locations - Get available kecamatan and desa for filtering
+router.get("/locations", async (req, res) => {
+  try {
+    // Get unique kecamatan
+    const kecamatanList = await prisma.jalanLingkunganKubuRaya.findMany({
+      select: {
+        kecamatan: true,
+      },
+      distinct: ["kecamatan"],
+      where: {
+        kecamatan: {
+          not: null,
+        },
+      },
+      orderBy: {
+        kecamatan: "asc",
+      },
+    });
+
+    // Get unique desa
+    const desaList = await prisma.jalanLingkunganKubuRaya.findMany({
+      select: {
+        desa: true,
+        kecamatan: true,
+      },
+      distinct: ["desa", "kecamatan"],
+      where: {
+        desa: {
+          not: null,
+        },
+      },
+      orderBy: [{ kecamatan: "asc" }, { desa: "asc" }],
+    });
+
+    // Group desa by kecamatan
+    const desaByKecamatan = {};
+    desaList.forEach((item) => {
+      if (!desaByKecamatan[item.kecamatan]) {
+        desaByKecamatan[item.kecamatan] = [];
+      }
+      desaByKecamatan[item.kecamatan].push(item.desa);
+    });
+
+    res.json({
+      success: true,
+      data: {
+        kecamatan: kecamatanList.map((k) => k.kecamatan).filter(Boolean),
+        desa: desaByKecamatan,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching locations:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch locations",
+    });
+  }
+});
+
+// GET /api/jalan/report - Get detailed road report data for specific kecamatan/desa
+router.get("/report", async (req, res) => {
+  try {
+    const { kecamatan, desa } = req.query;
+
+    // Build WHERE clause
+    let where = {};
+
+    if (kecamatan) {
+      where.kecamatan = {
+        contains: kecamatan,
+        mode: "insensitive",
+      };
+    }
+
+    if (desa) {
+      where.desa = {
+        contains: desa,
+        mode: "insensitive",
+      };
+    }
+
+    // Get all road segments with detailed information
+    const roads = await prisma.jalanLingkunganKubuRaya.findMany({
+      where,
+      orderBy: [{ noJalan: "asc" }, { noRuas: "asc" }],
+      select: {
+        id: true,
+        noRuas: true,
+        noProv: true,
+        noKab: true,
+        noKec: true,
+        noDesa: true,
+        noJalan: true,
+        nama: true,
+        namaJalan: true,
+        panjangM: true,
+        lebarM: true,
+        tahun: true,
+        kondisi: true,
+        nilai: true,
+        bobot: true,
+        keterangan: true,
+        kecamatan: true,
+        desa: true,
+        utmXAwal: true,
+        utmYAwal: true,
+        pngnlAwal: true,
+        utmXAkhi: true,
+        utmYAkhi: true,
+        pngnlAkhi: true,
+      },
+    });
+
+    // Group roads by noJalan and calculate totals
+    const groupedRoads = {};
+    let totalLength = 0;
+    let totalRuas = 0;
+
+    roads.forEach((road) => {
+      const noJalan = road.noJalan || "Unknown";
+
+      if (!groupedRoads[noJalan]) {
+        groupedRoads[noJalan] = {
+          noJalan,
+          ruas: [],
+          totalPanjang: 0,
+          totalRuas: 0,
+        };
+      }
+
+      groupedRoads[noJalan].ruas.push(road);
+      groupedRoads[noJalan].totalPanjang += road.panjangM || 0;
+      groupedRoads[noJalan].totalRuas += 1;
+
+      totalLength += road.panjangM || 0;
+      totalRuas += 1;
+    });
+
+    // Convert to array and sort by noJalan
+    const reportData = Object.values(groupedRoads).sort((a, b) => {
+      const aNum = parseInt(a.noJalan) || 0;
+      const bNum = parseInt(b.noJalan) || 0;
+      return aNum - bNum;
+    });
+
+    // Get summary statistics
+    const summary = {
+      totalLength,
+      totalRuas,
+      totalJalan: reportData.length,
+      kecamatan: roads.length > 0 ? roads[0].kecamatan : null,
+      desa: roads.length > 0 ? roads[0].desa : null,
+    };
+
+    res.json({
+      success: true,
+      data: {
+        summary,
+        roads: reportData,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching road report:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch road report",
     });
   }
 });

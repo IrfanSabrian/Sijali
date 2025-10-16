@@ -13,17 +13,17 @@
 
     <!-- Key Metrics Overview -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-      <!-- Total Jalan -->
+      <!-- Total Panjang Jalan -->
       <div
         class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700"
       >
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Total Ruas Jalan
+              Total Panjang Jalan
             </p>
             <p class="text-3xl font-bold text-gray-900 dark:text-white">
-              {{ formatNumber(stats.totalRoads) }}
+              {{ formatDistanceShort(stats.totalLength) }}
             </p>
           </div>
           <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -44,7 +44,7 @@
         </div>
         <div class="mt-4">
           <span class="text-sm text-gray-500 dark:text-gray-400"
-            >Total Panjang: {{ formatDistance(stats.totalLength) }}</span
+            >Total Ruas: {{ formatNumber(stats.totalRoads) }}</span
           >
         </div>
       </div>
@@ -59,11 +59,11 @@
               Kondisi Baik
             </p>
             <p class="text-3xl font-bold text-green-600 dark:text-green-400">
-              {{ conditionStats.baik || 0 }}
+              {{ formatDistanceShort(conditionLengthStats.baik) }}
             </p>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              {{ getPercentage(conditionStats.baik, stats.totalRoads) }}% dari
-              total
+              {{ getPercentage(conditionLengthStats.baik, stats.totalLength) }}%
+              dari total panjang
             </p>
           </div>
           <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
@@ -94,11 +94,12 @@
               Kondisi Sedang
             </p>
             <p class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-              {{ conditionStats.sedang || 0 }}
+              {{ formatDistanceShort(conditionLengthStats.sedang) }}
             </p>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              {{ getPercentage(conditionStats.sedang, stats.totalRoads) }}% dari
-              total
+              {{
+                getPercentage(conditionLengthStats.sedang, stats.totalLength)
+              }}% dari total panjang
             </p>
           </div>
           <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
@@ -129,11 +130,15 @@
               Rusak Ringan
             </p>
             <p class="text-3xl font-bold text-orange-600 dark:text-orange-400">
-              {{ conditionStats.rusakRingan || 0 }}
+              {{ formatDistanceShort(conditionLengthStats.rusakRingan) }}
             </p>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              {{ getPercentage(conditionStats.rusakRingan, stats.totalRoads) }}%
-              dari total
+              {{
+                getPercentage(
+                  conditionLengthStats.rusakRingan,
+                  stats.totalLength
+                )
+              }}% dari total panjang
             </p>
           </div>
           <div class="p-3 bg-orange-100 dark:bg-orange-900 rounded-full">
@@ -164,11 +169,15 @@
               Rusak Berat
             </p>
             <p class="text-3xl font-bold text-red-600 dark:text-red-400">
-              {{ conditionStats.rusakBerat || 0 }}
+              {{ formatDistanceShort(conditionLengthStats.rusakBerat) }}
             </p>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              {{ getPercentage(conditionStats.rusakBerat, stats.totalRoads) }}%
-              dari total
+              {{
+                getPercentage(
+                  conditionLengthStats.rusakBerat,
+                  stats.totalLength
+                )
+              }}% dari total panjang
             </p>
           </div>
           <div class="p-3 bg-red-100 dark:bg-red-900 rounded-full">
@@ -197,10 +206,21 @@
         class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700"
       >
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Distribusi Kondisi Jalan
+          Distribusi Panjang Jalan per Kondisi
         </h3>
-        <div class="h-80">
+        <div class="h-80 relative">
           <canvas ref="conditionChart"></canvas>
+          <div
+            v-if="!conditionStats || Object.keys(conditionStats).length === 0"
+            class="absolute inset-0 flex items-center justify-center"
+          >
+            <div class="text-center">
+              <div
+                class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"
+              ></div>
+              <p class="text-gray-500 dark:text-gray-400">Memuat data...</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -209,10 +229,21 @@
         class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700"
       >
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Jumlah Jalan per Kecamatan
+          Panjang Jalan per Kecamatan
         </h3>
-        <div class="h-80">
+        <div class="h-80 relative">
           <canvas ref="kecamatanChart"></canvas>
+          <div
+            v-if="!kecamatanStats || kecamatanStats.length === 0"
+            class="absolute inset-0 flex items-center justify-center"
+          >
+            <div class="text-center">
+              <div
+                class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"
+              ></div>
+              <p class="text-gray-500 dark:text-gray-400">Memuat data...</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -325,15 +356,26 @@
       </div>
     </div>
 
-    <!-- Year Analysis -->
+    <!-- Road Condition by District -->
     <div
       class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700"
     >
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Analisis per Tahun Pembangunan
+        Kondisi Jalan per Kecamatan
       </h3>
-      <div class="h-80">
-        <canvas ref="yearChart"></canvas>
+      <div class="h-80 relative">
+        <canvas ref="conditionByDistrictChart"></canvas>
+        <div
+          v-if="!kecamatanStats || kecamatanStats.length === 0"
+          class="absolute inset-0 flex items-center justify-center"
+        >
+          <div class="text-center">
+            <div
+              class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"
+            ></div>
+            <p class="text-gray-500 dark:text-gray-400">Memuat data...</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -512,7 +554,12 @@ const props = defineProps({
 
 const conditionChart = ref(null);
 const kecamatanChart = ref(null);
-const yearChart = ref(null);
+const conditionByDistrictChart = ref(null);
+
+// Chart instances for cleanup
+let conditionChartInstance = null;
+let kecamatanChartInstance = null;
+let conditionByDistrictChartInstance = null;
 
 // Filter state
 const selectedKecamatan = ref("");
@@ -542,6 +589,37 @@ const worstConditionKecamatan = computed(() => {
     .slice(0, 5);
 });
 
+// Length-based condition stats
+const conditionLengthStats = computed(() => {
+  if (!props.kecamatanStats || props.kecamatanStats.length === 0) {
+    return {
+      baik: 0,
+      sedang: 0,
+      rusakRingan: 0,
+      rusakBerat: 0,
+    };
+  }
+
+  let baik = 0;
+  let sedang = 0;
+  let rusakRingan = 0;
+  let rusakBerat = 0;
+
+  props.kecamatanStats.forEach((kecamatan) => {
+    baik += kecamatan.conditions["Baik"]?.length || 0;
+    sedang += kecamatan.conditions["Sedang"]?.length || 0;
+    rusakRingan += kecamatan.conditions["Rusak Ringan"]?.length || 0;
+    rusakBerat += kecamatan.conditions["Rusak Berat"]?.length || 0;
+  });
+
+  return {
+    baik,
+    sedang,
+    rusakRingan,
+    rusakBerat,
+  };
+});
+
 // Methods
 const formatNumber = (num) => {
   if (!num) return "0";
@@ -551,9 +629,17 @@ const formatNumber = (num) => {
 const formatDistance = (meters) => {
   if (!meters) return "0 m";
   if (meters >= 1000) {
-    return `${(meters / 1000).toFixed(2)} km`;
+    return `${(meters / 1000).toFixed(1)} km`;
   }
   return `${meters.toFixed(0)} m`;
+};
+
+const formatDistanceShort = (meters) => {
+  if (!meters) return "0m";
+  if (meters >= 1000) {
+    return `${(meters / 1000).toFixed(1)}km`;
+  }
+  return `${meters.toFixed(0)}m`;
 };
 
 const getPercentage = (value, total) => {
@@ -630,19 +716,24 @@ const resetFilters = () => {
 const createConditionChart = () => {
   if (!conditionChart.value) return;
 
+  // Destroy existing chart
+  if (conditionChartInstance) {
+    conditionChartInstance.destroy();
+  }
+
   const ctx = conditionChart.value.getContext("2d");
 
-  new Chart(ctx, {
+  conditionChartInstance = new Chart(ctx, {
     type: "doughnut",
     data: {
       labels: ["Baik", "Sedang", "Rusak Ringan", "Rusak Berat"],
       datasets: [
         {
           data: [
-            props.conditionStats.baik || 0,
-            props.conditionStats.sedang || 0,
-            props.conditionStats.rusakRingan || 0,
-            props.conditionStats.rusakBerat || 0,
+            conditionLengthStats.value.baik || 0,
+            conditionLengthStats.value.sedang || 0,
+            conditionLengthStats.value.rusakRingan || 0,
+            conditionLengthStats.value.rusakBerat || 0,
           ],
           backgroundColor: [
             "rgba(34, 197, 94, 0.8)",
@@ -671,6 +762,15 @@ const createConditionChart = () => {
             usePointStyle: true,
           },
         },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const value = context.parsed;
+              const formatted = formatDistanceShort(value);
+              return `${context.label}: ${formatted}`;
+            },
+          },
+        },
       },
     },
   });
@@ -679,19 +779,24 @@ const createConditionChart = () => {
 const createKecamatanChart = () => {
   if (!kecamatanChart.value) return;
 
+  // Destroy existing chart
+  if (kecamatanChartInstance) {
+    kecamatanChartInstance.destroy();
+  }
+
   const ctx = kecamatanChart.value.getContext("2d");
   const topKecamatan = [...props.kecamatanStats]
-    .sort((a, b) => b.totalRoads - a.totalRoads)
+    .sort((a, b) => (b.totalLength || 0) - (a.totalLength || 0))
     .slice(0, 5);
 
-  new Chart(ctx, {
+  kecamatanChartInstance = new Chart(ctx, {
     type: "bar",
     data: {
       labels: topKecamatan.map((k) => k.kecamatan),
       datasets: [
         {
-          label: "Jumlah Ruas Jalan",
-          data: topKecamatan.map((k) => k.totalRoads),
+          label: "Panjang (km)",
+          data: topKecamatan.map((k) => (k.totalLength || 0) / 1000),
           backgroundColor: "rgba(99, 102, 241, 0.8)",
           borderColor: "rgba(99, 102, 241, 1)",
           borderWidth: 1,
@@ -704,8 +809,14 @@ const createKecamatanChart = () => {
       scales: {
         y: {
           beginAtZero: true,
+          title: {
+            display: true,
+            text: "Panjang (km)",
+          },
           ticks: {
-            stepSize: 1,
+            callback: function (value) {
+              return value.toFixed(1) + "km";
+            },
           },
         },
       },
@@ -713,38 +824,71 @@ const createKecamatanChart = () => {
         legend: {
           display: false,
         },
+        tooltip: {
+          callbacks: {
+            afterLabel: function (context) {
+              const kecamatan = topKecamatan[context.dataIndex];
+              return [
+                `Total Ruas: ${kecamatan.totalRoads}`,
+                `Total Panjang: ${formatDistanceShort(kecamatan.totalLength)}`,
+              ];
+            },
+          },
+        },
       },
     },
   });
 };
 
-const createYearChart = () => {
-  if (!yearChart.value) return;
+const createConditionByDistrictChart = () => {
+  if (!conditionByDistrictChart.value) return;
 
-  const ctx = yearChart.value.getContext("2d");
-  const yearData = props.yearStats.slice(0, 10); // Show last 10 years
+  // Destroy existing chart
+  if (conditionByDistrictChartInstance) {
+    conditionByDistrictChartInstance.destroy();
+  }
 
-  new Chart(ctx, {
-    type: "line",
+  const ctx = conditionByDistrictChart.value.getContext("2d");
+  const data = props.kecamatanStats.slice(0, 8); // Show top 8 kecamatan
+
+  if (!data || data.length === 0) return;
+
+  conditionByDistrictChartInstance = new Chart(ctx, {
+    type: "bar",
     data: {
-      labels: yearData.map((y) => y.tahun),
+      labels: data.map((k) => k.kecamatan),
       datasets: [
         {
-          label: "Jumlah Ruas Jalan",
-          data: yearData.map((y) => y.totalRoads),
-          borderColor: "rgba(16, 185, 129, 1)",
-          backgroundColor: "rgba(16, 185, 129, 0.1)",
-          tension: 0.4,
-          fill: true,
+          label: "Baik",
+          data: data.map((k) => (k.conditions["Baik"]?.length || 0) / 1000),
+          backgroundColor: "rgba(34, 197, 94, 0.8)",
+          borderColor: "rgba(34, 197, 94, 1)",
+          borderWidth: 1,
         },
         {
-          label: "Total Panjang (km)",
-          data: yearData.map((y) => (y.totalLength || 0) / 1000),
-          borderColor: "rgba(59, 130, 246, 1)",
-          backgroundColor: "rgba(59, 130, 246, 0.1)",
-          tension: 0.4,
-          fill: true,
-          yAxisID: "y1",
+          label: "Sedang",
+          data: data.map((k) => (k.conditions["Sedang"]?.length || 0) / 1000),
+          backgroundColor: "rgba(251, 191, 36, 0.8)",
+          borderColor: "rgba(251, 191, 36, 1)",
+          borderWidth: 1,
+        },
+        {
+          label: "Rusak Ringan",
+          data: data.map(
+            (k) => (k.conditions["Rusak Ringan"]?.length || 0) / 1000
+          ),
+          backgroundColor: "rgba(249, 115, 22, 0.8)",
+          borderColor: "rgba(249, 115, 22, 1)",
+          borderWidth: 1,
+        },
+        {
+          label: "Rusak Berat",
+          data: data.map(
+            (k) => (k.conditions["Rusak Berat"]?.length || 0) / 1000
+          ),
+          backgroundColor: "rgba(239, 68, 68, 0.8)",
+          borderColor: "rgba(239, 68, 68, 1)",
+          borderWidth: 1,
         },
       ],
     },
@@ -752,35 +896,70 @@ const createYearChart = () => {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        y: {
-          type: "linear",
-          display: true,
-          position: "left",
+        x: {
+          stacked: true,
           title: {
             display: true,
-            text: "Jumlah Ruas Jalan",
+            text: "Kecamatan",
+          },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
           },
         },
-        y1: {
-          type: "linear",
-          display: true,
-          position: "right",
+        y: {
+          stacked: true,
+          beginAtZero: true,
           title: {
             display: true,
-            text: "Panjang (km)",
+            text: "Panjang Jalan (km)",
           },
-          grid: {
-            drawOnChartArea: false,
+          ticks: {
+            callback: function (value) {
+              return value.toFixed(1) + "km";
+            },
           },
         },
       },
       plugins: {
         legend: {
           position: "top",
+          labels: {
+            usePointStyle: true,
+            padding: 15,
+            font: {
+              size: 11,
+            },
+          },
+        },
+        tooltip: {
+          callbacks: {
+            afterLabel: function (context) {
+              const kecamatan = data[context.dataIndex];
+              return [
+                `Total Ruas: ${kecamatan.totalRoads}`,
+                `Total Panjang: ${formatDistanceShort(kecamatan.totalLength)}`,
+              ];
+            },
+          },
         },
       },
     },
   });
+};
+
+// Function to create all charts
+const createAllCharts = () => {
+  // Add small delay to ensure DOM is ready
+  setTimeout(() => {
+    if (props.conditionStats && Object.keys(props.conditionStats).length > 0) {
+      createConditionChart();
+    }
+    if (props.kecamatanStats && props.kecamatanStats.length > 0) {
+      createKecamatanChart();
+      createConditionByDistrictChart();
+    }
+  }, 50);
 };
 
 // Watchers
@@ -794,21 +973,34 @@ watch(selectedDesa, () => {
   fetchMaterialStats();
 });
 
+// Watch for props changes to recreate charts when data is available
+watch(
+  () => [props.conditionStats, props.kecamatanStats],
+  (newValues) => {
+    const [conditionStats, kecamatanStats] = newValues;
+
+    // Only recreate charts if we have data
+    if (
+      (conditionStats && Object.keys(conditionStats).length > 0) ||
+      (kecamatanStats && kecamatanStats.length > 0)
+    ) {
+      nextTick(() => {
+        createAllCharts();
+      });
+    }
+  },
+  { deep: true, immediate: false }
+);
+
 onMounted(async () => {
   await nextTick();
 
   // Initialize filtered data
   filteredMaterialStats.value = props.materialStats;
 
-  // Add delay to ensure canvas elements are rendered
+  // Create charts with delay to ensure canvas elements are rendered
   setTimeout(() => {
-    try {
-      createConditionChart();
-      createKecamatanChart();
-      createYearChart();
-    } catch (error) {
-      console.error("Error creating charts:", error);
-    }
+    createAllCharts();
   }, 100);
 });
 </script>
