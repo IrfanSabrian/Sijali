@@ -1,11 +1,25 @@
 -- ============================================
--- SQL Script untuk Tabel Users di PostgreSQL
+-- FIXED SQL Script untuk Tabel Users di PostgreSQL
+-- Safe for re-execution - handles existing database state
+-- ============================================
+
+BEGIN;
+
+-- ============================================
+-- ROLE TYPE CREATION (Safe for re-execution)
+-- ============================================
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'Role') THEN
+        CREATE TYPE "Role" AS ENUM ('ADMIN', 'USER');
+    END IF;
+END $$;
+
+-- ============================================
+-- USER TABLE CREATION
 -- ============================================
 -- Drop table jika sudah ada (hati-hati di production!)
 DROP TABLE IF EXISTS "User" CASCADE;
-
--- Buat ENUM untuk role
-CREATE TYPE "Role" AS ENUM ('ADMIN', 'USER');
 
 -- Buat tabel User
 CREATE TABLE
@@ -19,14 +33,16 @@ CREATE TABLE
         "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
--- Buat index untuk performa
+-- ============================================
+-- INDEXES FOR PERFORMANCE
+-- ============================================
 CREATE INDEX "User_email_idx" ON "User" ("email");
-
 CREATE INDEX "User_username_idx" ON "User" ("username");
-
 CREATE INDEX "User_role_idx" ON "User" ("role");
 
--- Insert data user
+-- ============================================
+-- INSERT DEFAULT USERS
+-- ============================================
 -- Admin password: "akuadmin"
 -- User password: "sijali2025"
 INSERT INTO
@@ -43,12 +59,21 @@ VALUES
         'kpnusantara',
         '$2b$10$Qgm4IHfWsm/SwmREnMRAD.9c3Ii1HDbG/Fq8NT69VzLgG.g748nE6',
         'USER'
-    );
+    )
+ON CONFLICT (username) DO NOTHING; -- Prevent duplicate insertions
 
 -- ============================================
--- Verifikasi
+-- VERIFICATION
 -- ============================================
 SELECT
-    *
+    id, email, username, role, "createdAt"
 FROM
-    "User";
+    "User"
+ORDER BY id;
+
+COMMIT;
+
+-- ============================================
+-- SUCCESS MESSAGE
+-- ============================================
+SELECT 'User table created successfully!' as status;

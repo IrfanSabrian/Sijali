@@ -1549,15 +1549,6 @@
                 :material-stats="materialStats"
                 :kecamatan-list="kecamatanList"
               />
-
-              <!-- Report Generator -->
-              <ReportGenerator
-                :stats="stats"
-                :condition-stats="conditionStats"
-                :kecamatan-stats="kecamatanStats"
-                :material-stats="materialStats"
-                @download-report="handleDownloadReport"
-              />
             </div>
           </div>
         </div>
