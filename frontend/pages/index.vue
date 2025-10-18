@@ -530,7 +530,7 @@ const loadHeroStats = async () => {
   try {
     // Fetch summary data for total road length and districts
     const summaryResponse = await fetch(
-      "http://localhost:3001/api/jalan/stats/summary"
+      "/api/jalan/stats/summary"
     );
     if (summaryResponse.ok) {
       const summaryResult = await summaryResponse.json();
@@ -551,7 +551,7 @@ const loadHeroStats = async () => {
 
     // Fetch kondisi data for good condition roads
     const kondisiResponse = await fetch(
-      "http://localhost:3001/api/jalan/stats/kondisi-material-filtered"
+      "/api/jalan/stats/kondisi-material-filtered"
     );
     if (kondisiResponse.ok) {
       const kondisiResult = await kondisiResponse.json();
@@ -583,7 +583,7 @@ const loadHeroStats = async () => {
 
     // Fetch unique desa/kelurahan count
     const jalanResponse = await fetch(
-      "http://localhost:3001/api/jalan/stats/summary"
+      "/api/jalan/stats/summary"
     );
     if (jalanResponse.ok) {
       const jalanResult = await jalanResponse.json();
@@ -593,7 +593,7 @@ const loadHeroStats = async () => {
         // Let's check if there's a filter endpoint for desa
         try {
           const desaResponse = await fetch(
-            "http://localhost:3001/api/jalan/filters/desa"
+            "/api/jalan/filters/desa"
           );
           if (desaResponse.ok) {
             const desaResult = await desaResponse.json();
