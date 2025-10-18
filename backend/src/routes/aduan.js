@@ -360,8 +360,8 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
         description,
         email,
         photos: photos, // Prisma akan handle array dengan benar
-        status: 'diajukan'
-      }
+        status: "diajukan",
+      },
     });
 
     console.log("Database insert result:", created);

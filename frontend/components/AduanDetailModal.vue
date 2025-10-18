@@ -1327,15 +1327,15 @@ const filterAndDisplayBatasKecamatan = async (
     console.log(
       "Available kecamatan in GeoJSON:",
       districtData.features.slice(0, 3).map((f) => ({
-        WADMKC: f.properties.WADMKC,
-        NAMOBJ: f.properties.NAMOBJ,
+        nama_kecamatan: f.properties.nama_kecamatan,
+        nama_kabupaten: f.properties.nama_kabupaten,
         allProps: Object.keys(f.properties),
       }))
     );
 
     // Filter features by kecamatan name (same as homepage)
     const filteredFeatures = districtData.features.filter(
-      (feature) => feature.properties.WADMKC === kecamatanName
+      (feature) => feature.properties.nama_kecamatan === kecamatanName
     );
 
     if (filteredFeatures.length === 0) {
@@ -1345,13 +1345,13 @@ const filterAndDisplayBatasKecamatan = async (
       // Try alternative search methods
       const alternativeFeatures = districtData.features.filter(
         (feature) =>
-          feature.properties.NAMOBJ === kecamatanName ||
-          feature.properties.WADMKC?.toLowerCase() ===
+          feature.properties.nama_kecamatan === kecamatanName ||
+          feature.properties.nama_kecamatan?.toLowerCase() ===
             kecamatanName?.toLowerCase() ||
-          feature.properties.NAMOBJ?.toLowerCase() ===
+          feature.properties.nama_kabupaten?.toLowerCase() ===
             kecamatanName?.toLowerCase() ||
-          feature.properties.WADMKC?.includes(kecamatanName) ||
-          feature.properties.NAMOBJ?.includes(kecamatanName)
+          feature.properties.nama_kecamatan?.includes(kecamatanName) ||
+          feature.properties.nama_kabupaten?.includes(kecamatanName)
       );
 
       if (alternativeFeatures.length > 0) {
@@ -1447,15 +1447,15 @@ const filterAndDisplayBatasDesa = async (desaName, batasDesaLayer) => {
     console.log(
       "Available desa in GeoJSON:",
       villageData.features.slice(0, 3).map((f) => ({
-        WADMKD: f.properties.WADMKD,
-        NAMOBJ: f.properties.NAMOBJ,
+        nama_desa: f.properties.nama_desa,
+        nama_kecamatan: f.properties.nama_kecamatan,
         allProps: Object.keys(f.properties),
       }))
     );
 
     // Filter features by desa name (same as homepage)
     const filteredFeatures = villageData.features.filter(
-      (feature) => feature.properties.WADMKD === desaName
+      (feature) => feature.properties.nama_desa === desaName
     );
 
     if (filteredFeatures.length === 0) {
@@ -1465,13 +1465,13 @@ const filterAndDisplayBatasDesa = async (desaName, batasDesaLayer) => {
       // Try alternative search methods
       const alternativeFeatures = villageData.features.filter(
         (feature) =>
-          feature.properties.NAMOBJ === desaName ||
-          feature.properties.WADMKD?.toLowerCase() ===
+          feature.properties.nama_desa === desaName ||
+          feature.properties.nama_desa?.toLowerCase() ===
             desaName?.toLowerCase() ||
-          feature.properties.NAMOBJ?.toLowerCase() ===
+          feature.properties.nama_kecamatan?.toLowerCase() ===
             desaName?.toLowerCase() ||
-          feature.properties.WADMKD?.includes(desaName) ||
-          feature.properties.NAMOBJ?.includes(desaName)
+          feature.properties.nama_desa?.includes(desaName) ||
+          feature.properties.nama_kecamatan?.includes(desaName)
       );
 
       if (alternativeFeatures.length > 0) {
