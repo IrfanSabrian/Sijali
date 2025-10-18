@@ -530,8 +530,8 @@ const loadHeroStats = async () => {
   try {
     // Get API URL from runtime config
     const config = useRuntimeConfig();
-    const apiUrl = config.public.apiUrl || "https://sijali-production.up.railway.app/api";
-    
+    const apiUrl = config.public.apiUrl;
+
     // Fetch summary data for total road length and districts
     const summaryResponse = await fetch(`${apiUrl}/jalan/stats/summary`);
     if (summaryResponse.ok) {
@@ -836,7 +836,6 @@ useHead({
 .hero-content {
   @apply w-full relative z-10 flex items-center justify-between;
   padding: 5vh 10vw;
-  min-height: 80vh;
 }
 
 .hero-text {
@@ -1932,7 +1931,7 @@ export default {
   setup() {
     const config = useRuntimeConfig();
     return {
-      config
+      config,
     };
   },
   methods: {
@@ -1953,7 +1952,7 @@ export default {
     },
     async loadKecamatanOptions() {
       try {
-        const apiUrl = this.config.public.apiUrl || "https://sijali-production.up.railway.app/api";
+        const apiUrl = this.config.public.apiUrl;
         const response = await fetch(`${apiUrl}/jalan/filters/kecamatan`);
         const result = await response.json();
 
@@ -2005,15 +2004,20 @@ export default {
         // Fetch real data from API
         try {
           console.log("Fetching data from API...");
-          const apiUrl = this.config.public.apiUrl || "https://sijali-production.up.railway.app/api";
-          const response = await fetch(`${apiUrl}/jalan/stats/kecamatan-kondisi`, {
-            method: "GET",
-            mode: "cors",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          });
+          const apiUrl =
+            this.config.public.apiUrl ||
+            "https://sijali-production.up.railway.app/api";
+          const response = await fetch(
+            `${apiUrl}/jalan/stats/kecamatan-kondisi`,
+            {
+              method: "GET",
+              mode: "cors",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+            }
+          );
           console.log("Response status:", response.status);
           console.log("Response ok:", response.ok);
 
@@ -2116,7 +2120,9 @@ export default {
         // Fetch real data from API
         try {
           console.log("Fetching kecamatan length data from API...");
-          const apiUrl = this.config.public.apiUrl || "https://sijali-production.up.railway.app/api";
+          const apiUrl =
+            this.config.public.apiUrl ||
+            "https://sijali-production.up.railway.app/api";
           const response = await fetch(`${apiUrl}/jalan/stats/summary`, {
             method: "GET",
             mode: "cors",
@@ -2258,7 +2264,7 @@ export default {
     },
     async updateKondisiMaterialCharts(kecamatan) {
       try {
-        const apiUrl = this.config.public.apiUrl || "https://sijali-production.up.railway.app/api";
+        const apiUrl = this.config.public.apiUrl;
         const url = kecamatan
           ? `${apiUrl}/jalan/stats/kondisi-material-filtered?kecamatan=${encodeURIComponent(
               kecamatan
@@ -2281,7 +2287,7 @@ export default {
     },
     async updateMaterialDamageChart(kecamatan) {
       try {
-        const apiUrl = this.config.public.apiUrl || "https://sijali-production.up.railway.app/api";
+        const apiUrl = this.config.public.apiUrl;
         const url = kecamatan
           ? `${apiUrl}/jalan/stats/material-kondisi?kecamatan=${encodeURIComponent(
               kecamatan
