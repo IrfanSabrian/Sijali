@@ -823,7 +823,7 @@
                         <th
                           class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
                         >
-                          Penanganan Awal
+                          Pangkalan Awal
                         </th>
                         <th
                           class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
@@ -838,12 +838,17 @@
                         <th
                           class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
                         >
-                          Penanganan Akhir
+                          Pangkalan Akhir
                         </th>
                         <th
                           class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider min-w-[200px]"
                         >
                           Keterangan
+                        </th>
+                        <th
+                          class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
+                        >
+                          Dokumentasi
                         </th>
                       </tr>
                     </thead>
@@ -852,7 +857,7 @@
                     >
                       <tr v-if="loadingRoads">
                         <td
-                          colspan="25"
+                          colspan="26"
                           class="px-6 py-8 text-center text-gray-500 dark:text-gray-400"
                         >
                           <div
@@ -1068,7 +1073,7 @@
                             "-"
                           }}
                         </td>
-                        <!-- Penanganan Awal -->
+                        <!-- Pangkalan Awal -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"
                         >
@@ -1094,7 +1099,7 @@
                             "-"
                           }}
                         </td>
-                        <!-- Penanganan Akhir -->
+                        <!-- Pangkalan Akhir -->
                         <td
                           class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"
                         >
@@ -1116,6 +1121,12 @@
                           <span v-else class="text-gray-500 dark:text-gray-400"
                             >-</span
                           >
+                        </td>
+                        <!-- Dokumentasi -->
+                        <td
+                          class="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"
+                        >
+                          {{ road.dokumentasi || "null" }}
                         </td>
                       </tr>
                     </tbody>
@@ -1362,53 +1373,135 @@
                       Kelola data pengguna sistem SIJALI
                     </p>
                   </div>
-                  <button
-                    @click="openAddUserModal"
-                    class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center space-x-2"
-                  >
-                    <svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  <div class="flex space-x-2">
+                    <button
+                      v-if="!userSelectMode"
+                      @click="openAddUserModal"
+                      class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center space-x-2"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-                      />
-                    </svg>
-                    <span>Tambah User</span>
-                  </button>
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                        />
+                      </svg>
+                      <span>Tambah User</span>
+                    </button>
+                    <button
+                      v-if="!userSelectMode"
+                      @click="toggleUserSelectMode"
+                      class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center space-x-2"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                      <span>Hapus</span>
+                    </button>
+                    <div v-else class="flex space-x-2">
+                      <button
+                        @click="confirmDeleteUsers"
+                        :disabled="selectedUsers.size === 0"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg transition-colors text-sm font-medium flex items-center space-x-2"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                        <span>Hapus ({{ selectedUsers.size }})</span>
+                      </button>
+                      <button
+                        @click="cancelUserSelectMode"
+                        class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center space-x-2"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                        <span>Batal</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Users Table -->
                 <div class="overflow-x-auto">
                   <table
                     class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                    style="table-layout: fixed"
                   >
                     <thead class="bg-gray-50 dark:bg-gray-700">
                       <tr>
                         <th
-                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                          v-if="userSelectMode"
+                          class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap sticky left-0 bg-gray-50 dark:bg-gray-700 z-10"
+                          style="width: 50px; min-width: 50px"
+                        >
+                          <input
+                            type="checkbox"
+                            :checked="isAllUsersSelected"
+                            @change="toggleSelectAllUsers"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        </th>
+                        <th
+                          class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
                         >
                           Username
                         </th>
                         <th
-                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                          class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
                         >
                           Email
                         </th>
                         <th
-                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                          class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
                         >
                           Role
                         </th>
                         <th
-                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                          class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
                         >
                           Dibuat
+                        </th>
+                        <th
+                          class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap"
+                        >
+                          Diperbarui
                         </th>
                       </tr>
                     </thead>
@@ -1418,7 +1511,7 @@
                       <!-- Loading State -->
                       <tr v-if="loadingUsers">
                         <td
-                          colspan="4"
+                          :colspan="userSelectMode ? 6 : 5"
                           class="px-4 py-8 text-center text-gray-500 dark:text-gray-400"
                         >
                           <div
@@ -1451,7 +1544,7 @@
                       <!-- No Data State -->
                       <tr v-else-if="users.length === 0">
                         <td
-                          colspan="4"
+                          :colspan="userSelectMode ? 6 : 5"
                           class="px-4 py-8 text-center text-gray-500 dark:text-gray-400"
                         >
                           <div class="flex flex-col items-center space-y-2">
@@ -1479,12 +1572,41 @@
                       <!-- Users Data -->
                       <tr
                         v-else
-                        v-for="user in users"
+                        v-for="(user, index) in users"
                         :key="user.id"
-                        @click="openEditUserModal(user)"
-                        class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                        @click="
+                          userSelectMode
+                            ? toggleUserSelection(user.id)
+                            : openEditUserModal(user)
+                        "
+                        :class="[
+                          'hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors',
+                          userSelectMode ? 'cursor-pointer' : 'cursor-pointer',
+                          selectedUsers.has(user.id)
+                            ? 'bg-blue-50 dark:bg-blue-900/20'
+                            : '',
+                        ]"
                       >
-                        <td class="px-4 py-4 whitespace-nowrap">
+                        <!-- Checkbox -->
+                        <td
+                          v-if="userSelectMode"
+                          :class="[
+                            'px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300 sticky left-0 z-10',
+                            selectedUsers.has(user.id)
+                              ? 'bg-blue-50 dark:bg-blue-900/20'
+                              : 'bg-white dark:bg-gray-800',
+                          ]"
+                          style="width: 50px; min-width: 50px"
+                        >
+                          <input
+                            type="checkbox"
+                            :checked="selectedUsers.has(user.id)"
+                            @click.stop="toggleUserSelection(user.id)"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        </td>
+                        <!-- Username -->
+                        <td class="px-3 py-3 whitespace-nowrap">
                           <div class="flex items-center">
                             <div
                               class="flex-shrink-0 h-8 w-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center"
@@ -1492,7 +1614,7 @@
                               <span
                                 class="text-sm font-medium text-purple-600 dark:text-purple-300"
                               >
-                                {{ users.indexOf(user) + 1 }}
+                                {{ index + 1 }}
                               </span>
                             </div>
                             <div class="ml-3">
@@ -1504,12 +1626,14 @@
                             </div>
                           </div>
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap">
+                        <!-- Email -->
+                        <td class="px-3 py-3 whitespace-nowrap">
                           <div class="text-sm text-gray-900 dark:text-white">
                             {{ user.email || "-" }}
                           </div>
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap">
+                        <!-- Role -->
+                        <td class="px-3 py-3 whitespace-nowrap">
                           <span
                             :class="[
                               'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
@@ -1521,12 +1645,25 @@
                             {{ user.role || "USER" }}
                           </span>
                         </td>
+                        <!-- Created At -->
                         <td
-                          class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
+                          class="px-3 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                         >
                           {{
                             user.createdAt
                               ? new Date(user.createdAt).toLocaleDateString(
+                                  "id-ID"
+                                )
+                              : "-"
+                          }}
+                        </td>
+                        <!-- Updated At -->
+                        <td
+                          class="px-3 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
+                        >
+                          {{
+                            user.updatedAt
+                              ? new Date(user.updatedAt).toLocaleDateString(
                                   "id-ID"
                                 )
                               : "-"
@@ -1698,6 +1835,18 @@
                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                     ></textarea>
                   </div>
+                  <div class="md:col-span-2">
+                    <label
+                      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >Dokumentasi (Link YouTube)</label
+                    >
+                    <input
+                      v-model="roadForm.dokumentasi"
+                      type="url"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    />
+                  </div>
                 </div>
                 <div class="flex justify-end space-x-3 mt-6">
                   <button
@@ -1782,6 +1931,25 @@
                     <span class="font-semibold">Keterangan:</span>
                     {{ selectedRoad.keterangan || "-" }}
                   </div>
+                  <div class="col-span-2">
+                    <span class="font-semibold">Dokumentasi:</span>
+                    <div v-if="selectedRoad.dokumentasi" class="mt-2">
+                      <div
+                        class="w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+                      >
+                        <iframe
+                          :src="getYouTubeEmbedUrl(selectedRoad.dokumentasi)"
+                          class="w-full h-48"
+                          frameborder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowfullscreen
+                        ></iframe>
+                      </div>
+                    </div>
+                    <span v-else class="text-gray-500 dark:text-gray-400"
+                      >Tidak ada dokumentasi</span
+                    >
+                  </div>
                 </div>
               </div>
               <div class="flex justify-end mt-6">
@@ -1822,6 +1990,20 @@
       @close="showGeoJSONImportModal = false"
       @import="handleGeoJSONImport"
     />
+
+    <!-- Toast Notifications -->
+    <Toast />
+
+    <!-- Confirmation Modal -->
+    <ConfirmationModal
+      :visible="showConfirmModal"
+      :title="confirmModalData.title"
+      :message="confirmModalData.message"
+      :confirm-text="confirmModalData.confirmText"
+      :cancel-text="confirmModalData.cancelText"
+      @confirm="handleConfirm"
+      @cancel="handleCancel"
+    />
   </div>
 </template>
 
@@ -1845,7 +2027,10 @@ import UserDetailModal from "~/components/UserDetailModal.vue";
 import GeoJSONImportModal from "~/components/GeoJSONImportModal.vue";
 import AnalysisDashboard from "~/components/AnalysisDashboard.vue";
 import ReportGenerator from "~/components/ReportGenerator.vue";
+import Toast from "~/components/Toast.vue";
+import ConfirmationModal from "~/components/ConfirmationModal.vue";
 import { useReportGenerator } from "~/composables/useReportGenerator.js";
+import { useToast } from "~/composables/useToast.js";
 
 // Register Chart.js components
 Chart.register(
@@ -1918,14 +2103,75 @@ const showRoadDetailModal = ref(false);
 const showGeoJSONImportModal = ref(false);
 const showAddUserModal = ref(false);
 const showEditUserModal = ref(false);
+const showConfirmModal = ref(false);
+const confirmModalData = ref({
+  title: "",
+  message: "",
+  confirmText: "Ya",
+  cancelText: "Tidak",
+  onConfirm: null,
+});
 const modalKey = ref(0);
 
 // Report state
 const { downloadReport } = useReportGenerator();
 
+// Toast notification
+const toast = useToast();
+
+// Confirmation modal functions
+const showConfirmation = (
+  title,
+  message,
+  onConfirm,
+  confirmText = "Ya",
+  cancelText = "Tidak"
+) => {
+  confirmModalData.value = {
+    title,
+    message,
+    confirmText,
+    cancelText,
+    onConfirm,
+  };
+  showConfirmModal.value = true;
+};
+
+const handleConfirm = () => {
+  if (confirmModalData.value.onConfirm) {
+    confirmModalData.value.onConfirm();
+  }
+  showConfirmModal.value = false;
+};
+
+const handleCancel = () => {
+  showConfirmModal.value = false;
+};
+
+// YouTube URL helper functions
+const getYouTubeEmbedUrl = (url) => {
+  if (!url) return "";
+
+  // Extract video ID from various YouTube URL formats
+  const videoId = extractYouTubeVideoId(url);
+  if (!videoId) return "";
+
+  return `https://www.youtube.com/embed/${videoId}`;
+};
+
+const extractYouTubeVideoId = (url) => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+};
+
 // Select mode state
 const selectMode = ref(false);
 const selectedRoads = ref(new Set());
+
+// User select mode state
+const userSelectMode = ref(false);
+const selectedUsers = ref(new Set());
 
 // Computed properties for select mode
 const selectedRoadsCount = computed(() => selectedRoads.value.size);
@@ -1936,6 +2182,16 @@ const isAllSelected = computed(() => {
   );
 });
 const hasSelectedRoads = computed(() => selectedRoads.value.size > 0);
+
+// Computed properties for user select mode
+const selectedUsersCount = computed(() => selectedUsers.value.size);
+const isAllUsersSelected = computed(() => {
+  return (
+    users.value.length > 0 &&
+    users.value.every((user) => selectedUsers.value.has(user.id))
+  );
+});
+const hasSelectedUsers = computed(() => selectedUsers.value.size > 0);
 
 // Form state
 const roadForm = ref({
@@ -1948,6 +2204,7 @@ const roadForm = ref({
   kondisi: "",
   tahun: "",
   keterangan: "",
+  dokumentasi: "",
 });
 
 const userForm = ref({
@@ -2351,27 +2608,30 @@ const editRoad = (road) => {
 };
 
 const deleteRoad = async (road) => {
-  if (!confirm(`Hapus jalan lingkungan "${road.namaJalan || road.nama}"?`))
-    return;
+  showConfirmation(
+    "Konfirmasi Hapus",
+    `Hapus jalan lingkungan "${road.namaJalan || road.nama}"?`,
+    async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/jalan/${road.id}`, {
+          method: "DELETE",
+        });
 
-  try {
-    const response = await fetch(`${API_BASE}/api/jalan/${road.id}`, {
-      method: "DELETE",
-    });
+        const data = await response.json();
 
-    const data = await response.json();
-
-    if (data.success) {
-      alert("Data berhasil dihapus!");
-      await fetchRoads();
-      await fetchStats();
-    } else {
-      alert("Gagal menghapus data: " + data.error);
+        if (data.success) {
+          toast.success("Data berhasil dihapus!");
+          await fetchRoads();
+          await fetchStats();
+        } else {
+          toast.error("Gagal menghapus data: " + data.error);
+        }
+      } catch (error) {
+        console.error("Error deleting road:", error);
+        toast.error("Terjadi kesalahan saat menghapus data");
+      }
     }
-  } catch (error) {
-    console.error("Error deleting road:", error);
-    alert("Terjadi kesalahan saat menghapus data");
-  }
+  );
 };
 
 const saveRoad = async () => {
@@ -2393,7 +2653,7 @@ const saveRoad = async () => {
     const data = await response.json();
 
     if (data.success) {
-      alert(
+      toast.success(
         showEditModal.value
           ? "Data berhasil diupdate!"
           : "Data berhasil ditambahkan!"
@@ -2402,11 +2662,11 @@ const saveRoad = async () => {
       await fetchRoads();
       await fetchStats();
     } else {
-      alert("Gagal menyimpan data: " + data.error);
+      toast.error("Gagal menyimpan data: " + data.error);
     }
   } catch (error) {
     console.error("Error saving road:", error);
-    alert("Terjadi kesalahan saat menyimpan data");
+    toast.error("Terjadi kesalahan saat menyimpan data");
   }
 };
 
@@ -2430,27 +2690,111 @@ const closeRoadModal = () => {
 // CRUD Operations - Users
 
 const deleteUser = async (userItem) => {
-  if (!confirm(`Hapus user "${userItem.username}"?`)) return;
+  showConfirmation(
+    "Konfirmasi Hapus User",
+    `Hapus user "${userItem.username}"?`,
+    async () => {
+      try {
+        const response = await fetch(
+          `${API_BASE}/api/auth/users/${userItem.id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token.value}`,
+            },
+          }
+        );
 
-  try {
-    const response = await fetch(`${API_BASE}/api/auth/users/${userItem.id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
+        const data = await response.json();
 
-    const data = await response.json();
-
-    if (data.success) {
-      alert("User berhasil dihapus!");
-      await fetchUsers();
-    } else {
-      alert("Gagal menghapus user: " + data.message);
+        if (data.success) {
+          toast.success("User berhasil dihapus!");
+          await fetchUsers();
+        } else {
+          toast.error("Gagal menghapus user: " + data.message);
+        }
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        toast.error("Terjadi kesalahan saat menghapus user");
+      }
     }
+  );
+};
+
+// User selection functions
+const toggleUserSelectMode = () => {
+  userSelectMode.value = true;
+  selectedUsers.value.clear();
+};
+
+const cancelUserSelectMode = () => {
+  userSelectMode.value = false;
+  selectedUsers.value.clear();
+};
+
+const toggleUserSelection = (userId) => {
+  if (selectedUsers.value.has(userId)) {
+    selectedUsers.value.delete(userId);
+  } else {
+    selectedUsers.value.add(userId);
+  }
+};
+
+const toggleSelectAllUsers = () => {
+  if (isAllUsersSelected.value) {
+    selectedUsers.value.clear();
+  } else {
+    users.value.forEach((user) => selectedUsers.value.add(user.id));
+  }
+};
+
+const confirmDeleteUsers = () => {
+  if (selectedUsers.value.size === 0) return;
+
+  const selectedUserNames = users.value
+    .filter((user) => selectedUsers.value.has(user.id))
+    .map((user) => user.username)
+    .join(", ");
+
+  showConfirmation(
+    "Konfirmasi Hapus Multiple User",
+    `Anda yakin ingin menghapus user (${selectedUserNames})?`,
+    () => {
+      deleteSelectedUsers();
+    }
+  );
+};
+
+const deleteSelectedUsers = async () => {
+  try {
+    const deletePromises = Array.from(selectedUsers.value).map((userId) =>
+      fetch(`${API_BASE}/api/auth/users/${userId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+        },
+      })
+    );
+
+    const responses = await Promise.all(deletePromises);
+    const results = await Promise.all(responses.map((r) => r.json()));
+
+    const successCount = results.filter((r) => r.success).length;
+    const failCount = results.length - successCount;
+
+    if (successCount > 0) {
+      toast.success(`${successCount} user berhasil dihapus!`);
+      await fetchUsers();
+    }
+
+    if (failCount > 0) {
+      toast.error(`${failCount} user gagal dihapus!`);
+    }
+
+    cancelUserSelectMode();
   } catch (error) {
-    console.error("Error deleting user:", error);
-    alert("Terjadi kesalahan saat menghapus user");
+    console.error("Error deleting users:", error);
+    toast.error("Terjadi kesalahan saat menghapus user");
   }
 };
 
@@ -2480,7 +2824,7 @@ const handleUserSave = async (userData) => {
     const data = await response.json();
 
     if (data.success) {
-      alert(
+      toast.success(
         showEditUserModal.value
           ? "User berhasil diupdate!"
           : "User berhasil ditambahkan!"
@@ -2488,11 +2832,11 @@ const handleUserSave = async (userData) => {
       closeUserModal();
       await fetchUsers();
     } else {
-      alert("Gagal menyimpan user: " + data.message);
+      toast.error("Gagal menyimpan user: " + data.message);
     }
   } catch (error) {
     console.error("Error saving user:", error);
-    alert("Terjadi kesalahan saat menyimpan user");
+    toast.error("Terjadi kesalahan saat menyimpan user");
   }
 };
 
@@ -2513,16 +2857,16 @@ const handleRoadSave = async (roadData) => {
     const data = await response.json();
 
     if (data.success) {
-      alert("Data jalan berhasil diupdate!");
+      toast.success("Data jalan berhasil diupdate!");
       showRoadDetailModal.value = false;
       await fetchRoads();
       await fetchStats();
     } else {
-      alert("Gagal menyimpan data jalan: " + data.message);
+      toast.error("Gagal menyimpan data jalan: " + data.message);
     }
   } catch (error) {
     console.error("Error saving road:", error);
-    alert("Terjadi kesalahan saat menyimpan data jalan");
+    toast.error("Terjadi kesalahan saat menyimpan data jalan");
   }
 };
 
@@ -2530,10 +2874,10 @@ const handleRoadUpdate = async (updatedRoad) => {
   try {
     // Update the selected road data with new GeoJSON information
     selectedRoad.value = updatedRoad;
-    alert("Data berhasil diperbarui dari GeoJSON!");
+    toast.success("Data berhasil diperbarui dari GeoJSON!");
   } catch (error) {
     console.error("Error updating road:", error);
-    alert("Terjadi kesalahan saat memperbarui data");
+    toast.error("Terjadi kesalahan saat memperbarui data");
   }
 };
 
@@ -2588,16 +2932,16 @@ const handleGeoJSONImport = async (importedData) => {
     const data = await response.json();
 
     if (data.success) {
-      alert(`Berhasil mengimport ${importedData.length} data jalan!`);
+      toast.success(`Berhasil mengimport ${importedData.length} data jalan!`);
       showGeoJSONImportModal.value = false;
       await fetchRoads();
       await fetchStats();
     } else {
-      alert("Gagal mengimport data: " + data.message);
+      toast.error("Gagal mengimport data: " + data.message);
     }
   } catch (error) {
     console.error("Error importing GeoJSON:", error);
-    alert("Terjadi kesalahan saat mengimport data GeoJSON");
+    toast.error("Terjadi kesalahan saat mengimport data GeoJSON");
   }
 };
 
@@ -2684,10 +3028,12 @@ const exportSelectedRoads = async () => {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    alert(`Berhasil mengexport ${selectedRoadsList.length} data jalan!`);
+    toast.success(
+      `Berhasil mengexport ${selectedRoadsList.length} data jalan!`
+    );
   } catch (error) {
     console.error("Error exporting roads:", error);
-    alert("Terjadi kesalahan saat mengexport data");
+    toast.error("Terjadi kesalahan saat mengexport data");
   }
 };
 
@@ -2703,36 +3049,43 @@ const deleteSelectedRoads = async () => {
     )
     .join(", ");
 
-  if (!confirm(`Anda yakin ingin hapus data (${roadNames})?`)) return;
+  showConfirmation(
+    "Konfirmasi Hapus Multiple Data",
+    `Anda yakin ingin hapus data (${roadNames})?`,
+    async () => {
+      try {
+        const config = useRuntimeConfig();
+        const API_BASE =
+          config.public.apiBaseUrl ||
+          "https://sijali-production.up.railway.app";
+        const token = localStorage.getItem("token");
 
-  try {
-    const config = useRuntimeConfig();
-    const API_BASE =
-      config.public.apiBaseUrl || "https://sijali-production.up.railway.app";
-    const token = localStorage.getItem("token");
+        // Delete each selected road
+        for (const roadId of selectedRoads.value) {
+          const response = await fetch(`${API_BASE}/api/jalan/${roadId}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
-    // Delete each selected road
-    for (const roadId of selectedRoads.value) {
-      const response = await fetch(`${API_BASE}/api/jalan/${roadId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+          if (!response.ok) {
+            throw new Error(`Failed to delete road ${roadId}`);
+          }
+        }
 
-      if (!response.ok) {
-        throw new Error(`Failed to delete road ${roadId}`);
+        toast.success(
+          `Berhasil menghapus ${selectedRoads.value.size} data jalan!`
+        );
+        selectedRoads.value.clear();
+        await fetchRoads();
+        await fetchStats();
+      } catch (error) {
+        console.error("Error deleting roads:", error);
+        toast.error("Terjadi kesalahan saat menghapus data");
       }
     }
-
-    alert(`Berhasil menghapus ${selectedRoads.value.size} data jalan!`);
-    selectedRoads.value.clear();
-    await fetchRoads();
-    await fetchStats();
-  } catch (error) {
-    console.error("Error deleting roads:", error);
-    alert("Terjadi kesalahan saat menghapus data");
-  }
+  );
 };
 
 const openAddUserModal = () => {
@@ -3045,14 +3398,14 @@ const handleDownloadReport = async (reportInfo) => {
     if (result.success) {
       // Show success message
       console.log(`Laporan berhasil didownload: ${result.filename}`);
-      alert("Laporan berhasil didownload!");
+      toast.success("Laporan berhasil didownload!");
     } else {
       console.error("Error downloading report:", result.error);
-      alert("Gagal mendownload laporan. Silakan coba lagi.");
+      toast.error("Gagal mendownload laporan. Silakan coba lagi.");
     }
   } catch (error) {
     console.error("Error handling download:", error);
-    alert("Terjadi kesalahan saat mendownload laporan.");
+    toast.error("Terjadi kesalahan saat mendownload laporan.");
   }
 };
 

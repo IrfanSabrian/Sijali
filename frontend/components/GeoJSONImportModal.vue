@@ -442,6 +442,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { useToast } from "~/composables/useToast.js";
 
 const props = defineProps({
   visible: {
@@ -451,6 +452,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["close", "import"]);
+
+const toast = useToast();
 
 const fileInput = ref(null);
 const selectedFile = ref(null);
@@ -491,12 +494,12 @@ const handleFileUpload = (event) => {
           };
         });
       } else {
-        alert("File bukan format GeoJSON yang valid");
+        toast.error("File bukan format GeoJSON yang valid");
         resetForm();
       }
     } catch (error) {
       console.error("Error parsing GeoJSON:", error);
-      alert("Error parsing file GeoJSON");
+      toast.error("Error parsing file GeoJSON");
       resetForm();
     }
   };
@@ -517,7 +520,7 @@ const importData = async () => {
     emit("import", parsedData.value);
   } catch (error) {
     console.error("Error importing data:", error);
-    alert("Error importing data");
+    toast.error("Error importing data");
   } finally {
     importing.value = false;
   }

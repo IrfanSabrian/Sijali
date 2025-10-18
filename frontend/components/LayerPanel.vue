@@ -304,6 +304,7 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import { useAuth } from "~/composables/useAuth";
+import { useToast } from "~/composables/useToast.js";
 
 const emit = defineEmits([
   "close",
@@ -313,6 +314,7 @@ const emit = defineEmits([
 ]);
 
 const { isAuthenticated, canAccessLayers, canEditData } = useAuth();
+const toast = useToast();
 
 // Mock data for layers - can be replaced with API calls later
 const availableDatasets = ref([]);
@@ -672,16 +674,16 @@ const updateLayerOpacity = (groupId, layerId, opacity) => {
 };
 
 const showLayerInfo = (layer) => {
-  alert(
-    `Info Layer: ${layer.name}\nOpacity: ${Math.round(
+  toast.info(
+    `Info Layer: ${layer.name} - Opacity: ${Math.round(
       layer.opacity * 100
-    )}%\nVisible: ${layer.visible ? "Ya" : "Tidak"}`
+    )}% - Visible: ${layer.visible ? "Ya" : "Tidak"}`
   );
 };
 
 const addLayer = () => {
   // Implement add layer functionality
-  alert("Fitur tambah layer akan diimplementasikan");
+  toast.warning("Fitur tambah layer akan diimplementasikan");
 };
 
 const refreshLayers = () => {
@@ -692,7 +694,7 @@ const refreshLayers = () => {
 // Load kecamatan data
 const loadKecamatanData = async (kecamatan) => {
   if (!isAuthenticated.value || !canAccessLayers.value) {
-    alert("Silakan login terlebih dahulu untuk mengakses data.");
+    toast.warning("Silakan login terlebih dahulu untuk mengakses data.");
     return;
   }
 
@@ -709,10 +711,10 @@ const loadKecamatanData = async (kecamatan) => {
     emit("layer-loaded", layerData);
 
     // Show success message
-    alert(`Data ${kecamatan.name} berhasil dimuat!`);
+    toast.success(`Data ${kecamatan.name} berhasil dimuat!`);
   } catch (error) {
     console.error("Error loading kecamatan data:", error);
-    alert(`Gagal memuat data ${kecamatan.name}. Silakan coba lagi.`);
+    toast.error(`Gagal memuat data ${kecamatan.name}. Silakan coba lagi.`);
   }
 };
 

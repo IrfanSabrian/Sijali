@@ -268,12 +268,15 @@
 
 <script setup>
 import { ref, reactive, computed } from "vue";
+import { useToast } from "~/composables/useToast.js";
 
 const emit = defineEmits([
   "close",
   "measurement-started",
   "measurement-cleared",
 ]);
+
+const toast = useToast();
 
 // State
 const activeTool = ref(null);
@@ -386,7 +389,7 @@ const exportMeasurements = () => {
     measurements.coordinates.length;
 
   if (totalMeasurements === 0) {
-    alert("Tidak ada data pengukuran untuk diekspor");
+    toast.warning("Tidak ada data pengukuran untuk diekspor");
     return;
   }
 
@@ -405,7 +408,9 @@ const exportMeasurements = () => {
   console.log(
     `Measurements exported successfully (${totalMeasurements} measurements)`
   );
-  alert(`Data pengukuran berhasil diekspor (${totalMeasurements} pengukuran)`);
+  toast.success(
+    `Data pengukuran berhasil diekspor (${totalMeasurements} pengukuran)`
+  );
 };
 
 const formatDistance = (meters) => {

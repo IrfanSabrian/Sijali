@@ -281,6 +281,7 @@
 
 <script setup>
 import { ref, watch } from "vue";
+import { useToast } from "~/composables/useToast.js";
 
 const emit = defineEmits([
   "close",
@@ -290,6 +291,8 @@ const emit = defineEmits([
   "export-geojson",
   "clear-all",
 ]);
+
+const toast = useToast();
 
 // Drawing tool state
 const activeDrawingTool = ref("select");
@@ -345,7 +348,7 @@ const handleFileImport = (event) => {
         emit("import-geojson", geojson);
       } catch (error) {
         console.error("Error parsing GeoJSON:", error);
-        alert("Invalid GeoJSON file");
+        toast.error("Invalid GeoJSON file");
       }
     };
     reader.readAsText(file);

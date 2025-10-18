@@ -162,6 +162,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import { useReportGenerator } from "~/composables/useReportGenerator.js";
+import { useToast } from "~/composables/useToast.js";
 
 const props = defineProps({
   isOpen: {
@@ -177,6 +178,7 @@ const props = defineProps({
 const emit = defineEmits(["close", "download-pdf", "download-excel"]);
 
 const { generatePreviewHTML, downloadReport } = useReportGenerator();
+const toast = useToast();
 
 const previewHTML = ref(null);
 const isDownloadingPDF = ref(false);
@@ -213,7 +215,7 @@ const downloadPDF = async () => {
     emit("download-pdf");
   } catch (error) {
     console.error("Error downloading PDF:", error);
-    alert("Gagal mendownload PDF");
+    toast.error("Gagal mendownload PDF");
   } finally {
     isDownloadingPDF.value = false;
   }
@@ -228,7 +230,7 @@ const downloadExcel = async () => {
     emit("download-excel");
   } catch (error) {
     console.error("Error downloading Excel:", error);
-    alert("Gagal mendownload Excel");
+    toast.error("Gagal mendownload Excel");
   } finally {
     isDownloadingExcel.value = false;
   }

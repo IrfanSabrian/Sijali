@@ -1045,12 +1045,12 @@ const handleBasemapChange = async (basemapId) => {
         map.basemap = "topo";
         currentBasemap.value = "topo";
         console.log("Fallback to topo successful");
-        alert(
+        toast.warning(
           `Basemap "${basemapId}" tidak tersedia, menggunakan Topographic sebagai gantinya.`
         );
       } catch (fallbackError) {
         console.error("Fallback basemap also failed:", fallbackError);
-        alert("Gagal mengubah basemap. Silakan coba lagi.");
+        toast.error("Gagal mengubah basemap. Silakan coba lagi.");
       }
     }
   }

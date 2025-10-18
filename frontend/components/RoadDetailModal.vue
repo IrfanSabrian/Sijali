@@ -197,6 +197,19 @@
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                       />
                     </div>
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Dokumentasi (Link YouTube)
+                      </label>
+                      <input
+                        v-model="editForm.dokumentasi"
+                        type="url"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -583,6 +596,29 @@
                       </span>
                       <span v-else class="text-gray-500 dark:text-gray-400"
                         >-</span
+                      >
+                    </div>
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Dokumentasi
+                      </label>
+                      <div v-if="road.dokumentasi" class="mt-2">
+                        <div
+                          class="w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+                        >
+                          <iframe
+                            :src="getYouTubeEmbedUrl(road.dokumentasi)"
+                            class="w-full h-48"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                          ></iframe>
+                        </div>
+                      </div>
+                      <span v-else class="text-gray-500 dark:text-gray-400"
+                        >Tidak ada dokumentasi</span
                       >
                     </div>
                     <div>
@@ -1139,6 +1175,7 @@
 import { ref, onMounted, onUnmounted, watch, nextTick } from "vue";
 import { useApiService } from "~/composables/useApiService";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { useToast } from "~/composables/useToast.js";
 import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
 
 const props = defineProps({
@@ -1155,6 +1192,24 @@ const props = defineProps({
 const emit = defineEmits(["close", "save", "update"]);
 
 const { fetchRoads } = useApiService();
+const toast = useToast();
+
+// YouTube URL helper functions
+const getYouTubeEmbedUrl = (url) => {
+  if (!url) return "";
+
+  // Extract video ID from various YouTube URL formats
+  const videoId = extractYouTubeVideoId(url);
+  if (!videoId) return "";
+
+  return `https://www.youtube.com/embed/${videoId}`;
+};
+
+const extractYouTubeVideoId = (url) => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+};
 
 // Refs
 const mapContainer = ref(null);
@@ -1175,6 +1230,7 @@ const editForm = ref({
   lebarM: "",
   kondisi: "",
   keterangan: "",
+  dokumentasi: "",
   noJalan: "",
   tahun: "",
   nilai: "",
@@ -1273,6 +1329,7 @@ const populateEditForm = () => {
     lebarM: props.road.Lebar_m_ || props.road.lebarM || "",
     kondisi: props.road.Kondisi || props.road.kondisi || "",
     keterangan: props.road.Keterangan || props.road.keterangan || "",
+    dokumentasi: props.road.dokumentasi || "",
     noJalan: props.road.No_Jalan || props.road.noJalan || "",
     tahun: props.road.Tahun || props.road.tahun || "",
     nilai: props.road.Nilai || props.road.nilai || "",
@@ -1300,6 +1357,7 @@ const cancelEdit = () => {
     namaJalan: "",
     kecamatan: "",
     desa: "",
+    dokumentasi: "",
     panjangM: "",
     lebarM: "",
     kondisi: "",
@@ -1333,7 +1391,7 @@ const saveRoad = async () => {
           throw new Error("Invalid GeoJSON format");
         }
       } catch (error) {
-        alert(
+        toast.error(
           'Format GeoJSON tidak valid. Pastikan format: {"type": "LineString", "coordinates": [[lng, lat], [lng, lat]]}'
         );
         return;
@@ -1349,7 +1407,7 @@ const saveRoad = async () => {
     isEditMode.value = false;
   } catch (error) {
     console.error("Error saving road:", error);
-    alert("Terjadi kesalahan saat menyimpan data");
+    toast.error("Terjadi kesalahan saat menyimpan data");
   } finally {
     saving.value = false;
   }
@@ -2333,12 +2391,12 @@ const handleBasemapChange = async (basemapId) => {
         map.basemap = "topo";
         currentBasemap.value = "topo";
         console.log("Fallback to topo successful");
-        alert(
+        toast.warning(
           `Basemap "${basemapId}" tidak tersedia, menggunakan Topographic sebagai gantinya.`
         );
       } catch (fallbackError) {
         console.error("Fallback basemap also failed:", fallbackError);
-        alert("Gagal mengubah basemap. Silakan coba lagi.");
+        toast.error("Gagal mengubah basemap. Silakan coba lagi.");
       }
     }
   }

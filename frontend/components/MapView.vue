@@ -1916,7 +1916,7 @@ onMounted(async () => {
       errorMessage += `Detail error: ${error.message}`;
     }
 
-    alert(errorMessage);
+    toast.error(errorMessage);
   }
 });
 
@@ -2041,12 +2041,12 @@ const handleBasemapChange = async (basemapId) => {
         map.basemap = "topo";
         currentBasemap.value = "topo";
         console.log("Fallback to topo successful");
-        alert(
+        toast.warning(
           `Basemap "${basemapId}" tidak tersedia, menggunakan Topographic sebagai gantinya.`
         );
       } catch (fallbackError) {
         console.error("Fallback basemap also failed:", fallbackError);
-        alert("Gagal mengubah basemap. Silakan coba lagi.");
+        toast.error("Gagal mengubah basemap. Silakan coba lagi.");
       }
     }
   }
@@ -2643,7 +2643,7 @@ const handleMeasurementTool = async (type) => {
     }
   } catch (error) {
     console.error("Error activating measurement tool:", error);
-    alert("Gagal mengaktifkan alat ukur");
+    toast.error("Gagal mengaktifkan alat ukur");
   }
 };
 
@@ -2737,7 +2737,7 @@ const handleMeasurementStart = async (measurementData) => {
     }
   } catch (error) {
     console.error("Error starting measurement:", error);
-    alert("Gagal memulai pengukuran");
+    toast.error("Gagal memulai pengukuran");
   }
 };
 
@@ -3079,7 +3079,7 @@ const handleImportGeoJSON = async (geojson) => {
     }
   } catch (error) {
     console.error("Error importing GeoJSON:", error);
-    alert("Error importing GeoJSON");
+    toast.error("Error importing GeoJSON");
   }
 };
 
@@ -3115,7 +3115,7 @@ const handleExportGeoJSON = () => {
     URL.revokeObjectURL(url);
   } catch (error) {
     console.error("Error exporting GeoJSON:", error);
-    alert("Error exporting GeoJSON");
+    toast.error("Error exporting GeoJSON");
   }
 };
 
@@ -3214,7 +3214,7 @@ const handleLayerLoaded = async (layerData) => {
     console.log(`Layer ${layerData.name} loaded successfully`);
   } catch (error) {
     console.error("Error adding layer to map:", error);
-    alert("Gagal menambahkan layer ke peta");
+    toast.error("Gagal menambahkan layer ke peta");
   }
 };
 

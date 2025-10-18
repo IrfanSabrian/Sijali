@@ -207,6 +207,7 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import { useAuth } from "~/composables/useAuth";
+import { useToast } from "~/composables/useToast.js";
 
 const emit = defineEmits([
   "close",
@@ -215,6 +216,7 @@ const emit = defineEmits([
 ]);
 
 const { isAuthenticated, canAccessLayers } = useAuth();
+const toast = useToast();
 
 // Search state
 const searchQuery = ref("");
@@ -264,7 +266,9 @@ const performSearch = async () => {
   if (!searchQuery.value.trim()) return;
 
   if (!isAuthenticated.value || !canAccessLayers.value) {
-    alert("Silakan login terlebih dahulu untuk menggunakan fitur pencarian.");
+    toast.warning(
+      "Silakan login terlebih dahulu untuk menggunakan fitur pencarian."
+    );
     return;
   }
 
@@ -302,7 +306,7 @@ const performSearch = async () => {
     );
   } catch (error) {
     console.error("Search error:", error);
-    alert("Terjadi kesalahan saat melakukan pencarian.");
+    toast.error("Terjadi kesalahan saat melakukan pencarian.");
   } finally {
     isSearching.value = false;
   }

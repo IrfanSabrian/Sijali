@@ -345,6 +345,7 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { useToast } from "~/composables/useToast.js";
 import {
   faLayerGroup,
   faCog,
@@ -384,6 +385,8 @@ const emit = defineEmits([
   "clear-drawing",
   "selection-mode",
 ]);
+
+const toast = useToast();
 
 // Reactive data
 const activeTab = ref("layer");
@@ -608,11 +611,11 @@ const copyGeoJSON = () => {
     navigator.clipboard
       .writeText(props.shapeInfo.geojson)
       .then(() => {
-        alert("GeoJSON copied to clipboard!");
+        toast.success("GeoJSON copied to clipboard!");
       })
       .catch((err) => {
         console.error("Failed to copy GeoJSON:", err);
-        alert("Failed to copy GeoJSON");
+        toast.error("Failed to copy GeoJSON");
       });
   }
 };

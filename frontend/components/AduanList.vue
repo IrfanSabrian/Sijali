@@ -55,14 +55,14 @@
             <th class="px-4 py-3">Email</th>
             <th class="px-4 py-3">Status</th>
             <th class="px-4 py-3">Tanggal</th>
-            <th class="px-4 py-3">Aksi</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="aduan in aduanList"
             :key="aduan.id"
-            class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+            @click="openDetail(aduan)"
+            class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
           >
             <td class="px-4 py-3">{{ aduan.id }}</td>
             <td class="px-4 py-3 font-medium">{{ aduan.nomor_ruas }}</td>
@@ -81,17 +81,9 @@
             <td class="px-4 py-3">
               {{ formatDate(aduan.created_at) }}
             </td>
-            <td class="px-4 py-3">
-              <button
-                @click="openDetail(aduan)"
-                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
-              >
-                Detail
-              </button>
-            </td>
           </tr>
           <tr v-if="aduanList.length === 0">
-            <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
               Tidak ada data aduan
             </td>
           </tr>
