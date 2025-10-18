@@ -800,7 +800,8 @@
                 >
                   <label
                     class="block text-sm text-gray-600 dark:text-gray-300 mb-1"
-                    >Foto (bisa banyak) <span class="text-red-500">*</span></label
+                    >Foto (bisa banyak)
+                    <span class="text-red-500">*</span></label
                   >
                   <input
                     type="file"
@@ -1824,9 +1825,6 @@ onMounted(async () => {
       currentScale.value = Math.round(newScale);
     });
 
-    // Hide loading indicator
-    loading.value = false;
-
     console.log("Map loaded successfully");
 
     // Load boundary GeoJSON data for map visualization only (NOT for statistics)
@@ -1837,6 +1835,9 @@ onMounted(async () => {
 
     // Display kabupaten boundary by default (pertama kali dimuat)
     await displayBatasKabupaten();
+
+    // Hide loading indicator AFTER all polygon data is loaded
+    loading.value = false;
 
     // Set initial view to kabupaten boundary immediately (using extent)
     if (batasKabupatenLayer && batasKabupatenLayer.graphics.length > 0) {
