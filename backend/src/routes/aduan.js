@@ -18,7 +18,11 @@ if (process.env.SENDGRID_API_KEY) {
     console.log("✅ SendGrid configured as alternative email service");
   } catch (error) {
     console.warn("⚠️  SendGrid not available:", error.message);
+    sendGridAvailable = false;
+    sendGridMail = null;
   }
+} else {
+  console.log("ℹ️  SendGrid API key not provided, using SMTP only");
 }
 
 const router = express.Router();
@@ -43,113 +47,124 @@ let transporter = null;
 let transporterConfig = null;
 
 if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-  // Primary configuration - optimized for Railway with more aggressive settings
-  const primaryConfig = {
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: String(process.env.SMTP_SECURE || "false").toLowerCase() === "true",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-    debug: false,
-    logger: false,
-    connectionTimeout: 300000, // 5 minutes - very aggressive for Railway
-    greetingTimeout: 120000, // 2 minutes
-    socketTimeout: 300000, // 5 minutes
-    pool: false, // Disable pooling for Railway
-    tls: {
-      rejectUnauthorized: false,
-      ciphers: "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
-      secureProtocol: "TLSv1_2_method",
-      servername: process.env.SMTP_HOST,
-    },
-    requireTLS: false, // More permissive for Railway
-    ignoreTLS: false,
-    // Additional Railway-specific options
-    name: "sijali-railway",
-    localAddress: undefined,
-    connectionTimeout: 300000,
-    greetingTimeout: 120000,
-    socketTimeout: 300000,
-  };
+  try {
+    // Primary configuration - optimized for Railway with more aggressive settings
+    const primaryConfig = {
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT || 587),
+      secure:
+        String(process.env.SMTP_SECURE || "false").toLowerCase() === "true",
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+      debug: false,
+      logger: false,
+      connectionTimeout: 300000, // 5 minutes - very aggressive for Railway
+      greetingTimeout: 120000, // 2 minutes
+      socketTimeout: 300000, // 5 minutes
+      pool: false, // Disable pooling for Railway
+      tls: {
+        rejectUnauthorized: false,
+        ciphers:
+          "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
+        secureProtocol: "TLSv1_2_method",
+        servername: process.env.SMTP_HOST,
+      },
+      requireTLS: false, // More permissive for Railway
+      ignoreTLS: false,
+      // Additional Railway-specific options
+      name: "sijali-railway",
+      localAddress: undefined,
+    };
 
-  // Alternative configuration for better Railway compatibility
-  const alternativeConfig = {
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 465), // Try port 465 (SSL)
-    secure: true, // Force SSL
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-    debug: false,
-    logger: false,
-    connectionTimeout: 300000, // 5 minutes
-    greetingTimeout: 120000, // 2 minutes
-    socketTimeout: 300000, // 5 minutes
-    pool: false, // Disable pooling for alternative config
-    tls: {
-      rejectUnauthorized: false,
-      ciphers: "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
-      secureProtocol: "TLSv1_2_method",
-      servername: process.env.SMTP_HOST,
-    },
-    requireTLS: false, // More permissive
-    ignoreTLS: false,
-    name: "sijali-railway-alt",
-    localAddress: undefined,
-  };
+    // Alternative configuration for better Railway compatibility
+    const alternativeConfig = {
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT || 465), // Try port 465 (SSL)
+      secure: true, // Force SSL
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+      debug: false,
+      logger: false,
+      connectionTimeout: 300000, // 5 minutes
+      greetingTimeout: 120000, // 2 minutes
+      socketTimeout: 300000, // 5 minutes
+      pool: false, // Disable pooling for alternative config
+      tls: {
+        rejectUnauthorized: false,
+        ciphers:
+          "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
+        secureProtocol: "TLSv1_2_method",
+        servername: process.env.SMTP_HOST,
+      },
+      requireTLS: false, // More permissive
+      ignoreTLS: false,
+      name: "sijali-railway-alt",
+      localAddress: undefined,
+    };
 
-  // Third configuration - try different approach
-  const thirdConfig = {
-    host: process.env.SMTP_HOST,
-    port: 25, // Try port 25 (non-encrypted)
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-    debug: false,
-    logger: false,
-    connectionTimeout: 300000,
-    greetingTimeout: 120000,
-    socketTimeout: 300000,
-    pool: false,
-    tls: {
-      rejectUnauthorized: false,
-    },
-    requireTLS: false,
-    ignoreTLS: true, // Allow non-encrypted for Railway
-    name: "sijali-railway-plain",
-  };
+    // Third configuration - try different approach
+    const thirdConfig = {
+      host: process.env.SMTP_HOST,
+      port: 25, // Try port 25 (non-encrypted)
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+      debug: false,
+      logger: false,
+      connectionTimeout: 300000,
+      greetingTimeout: 120000,
+      socketTimeout: 300000,
+      pool: false,
+      tls: {
+        rejectUnauthorized: false,
+      },
+      requireTLS: false,
+      ignoreTLS: true, // Allow non-encrypted for Railway
+      name: "sijali-railway-plain",
+    };
 
-  // Try configurations in order of preference
-  const configs = [
-    { config: primaryConfig, name: "Primary (Port 587)" },
-    { config: alternativeConfig, name: "Alternative (Port 465)" },
-    { config: thirdConfig, name: "Third (Port 25)" },
-  ];
+    // Try configurations in order of preference
+    const configs = [
+      { config: primaryConfig, name: "Primary (Port 587)" },
+      { config: alternativeConfig, name: "Alternative (Port 465)" },
+      { config: thirdConfig, name: "Third (Port 25)" },
+    ];
 
-  let configSuccess = false;
-  for (let i = 0; i < configs.length; i++) {
-    try {
-      console.log(`🔍 Trying ${configs[i].name} configuration...`);
-      transporter = nodemailer.createTransport(configs[i].config);
-      transporterConfig = configs[i].name.toLowerCase().split(" ")[0];
-      console.log(
-        `✅ Email transporter configured (${configs[i].name}):`,
-        process.env.SMTP_USER
-      );
-      configSuccess = true;
-      break;
-    } catch (error) {
-      console.warn(`⚠️  ${configs[i].name} config failed:`, error.message);
-      if (i === configs.length - 1) {
-        console.error("❌ All email configurations failed");
-        transporter = null;
+    let configSuccess = false;
+    for (let i = 0; i < configs.length; i++) {
+      try {
+        console.log(`🔍 Trying ${configs[i].name} configuration...`);
+        transporter = nodemailer.createTransport(configs[i].config);
+        transporterConfig = configs[i].name.toLowerCase().split(" ")[0];
+        console.log(
+          `✅ Email transporter configured (${configs[i].name}):`,
+          process.env.SMTP_USER
+        );
+        configSuccess = true;
+        break;
+      } catch (error) {
+        console.warn(`⚠️  ${configs[i].name} config failed:`, error.message);
+        if (i === configs.length - 1) {
+          console.error("❌ All email configurations failed");
+          transporter = null;
+          configSuccess = false;
+        }
       }
     }
+
+    if (!configSuccess && !sendGridAvailable) {
+      console.warn("⚠️  No email service available - emails will be skipped");
+    }
+  } catch (error) {
+    console.error("❌ Error setting up email configurations:", error.message);
+    transporter = null;
+    sendGridAvailable = false;
   }
 } else {
   console.warn("⚠️  SMTP not configured - emails will not be sent");
@@ -192,11 +207,17 @@ const sendEmailViaSendGrid = async (to, subject, html) => {
   };
 
   try {
+    console.log("📧 Sending email via SendGrid to:", to);
     const response = await sendGridMail.send(msg);
     console.log("✅ Email sent via SendGrid:", response[0].statusCode);
-    return { success: true, messageId: response[0].headers["x-message-id"] };
+    return {
+      success: true,
+      messageId:
+        response[0].headers["x-message-id"] || "sendgrid-" + Date.now(),
+    };
   } catch (error) {
     console.error("❌ SendGrid email failed:", error.message);
+    console.error("SendGrid error details:", error.response?.body || error);
     throw error;
   }
 };
