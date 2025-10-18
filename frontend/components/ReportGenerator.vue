@@ -76,19 +76,51 @@
 
     <!-- Location Selection for Jalan Lingkungan -->
     <div v-if="selectedReportType === 'jalan-lingkungan'" class="mt-6">
+      <!-- Info Message -->
+      <div
+        class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+      >
+        <div class="flex items-start gap-3">
+          <svg
+            class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <div>
+            <h4
+              class="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-1"
+            >
+              Pilih Lokasi untuk Laporan
+            </h4>
+            <p class="text-sm text-blue-700 dark:text-blue-300">
+              Untuk laporan jalan lingkungan, Anda harus memilih kecamatan dan
+              desa terlebih dahulu sebelum dapat melihat preview laporan.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
-            Pilih Kecamatan
+            Pilih Kecamatan <span class="text-red-500">*</span>
           </label>
           <select
             v-model="selectedKecamatan"
             @change="onKecamatanChange"
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
           >
-            <option value="">Semua Kecamatan</option>
+            <option value="">Pilih Kecamatan</option>
             <option
               v-for="kecamatan in kecamatanList"
               :key="kecamatan"
@@ -103,14 +135,14 @@
           <label
             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
-            Pilih Desa
+            Pilih Desa <span class="text-red-500">*</span>
           </label>
           <select
             v-model="selectedDesa"
             :disabled="!selectedKecamatan"
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-600"
           >
-            <option value="">Semua Desa</option>
+            <option value="">Pilih Desa</option>
             <option v-for="desa in availableDesa" :key="desa" :value="desa">
               {{ desa }}
             </option>
@@ -123,7 +155,7 @@
     <div class="mt-8">
       <button
         @click="previewReport"
-        :disabled="!selectedReportType || isLoading"
+        :disabled="isPreviewDisabled || isLoading"
         class="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg font-semibold transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5"
       >
         <svg
@@ -166,7 +198,13 @@
             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
           ></path>
         </svg>
-        {{ isLoading ? "Memuat Preview..." : "Lihat Preview Laporan" }}
+        {{
+          isLoading
+            ? "Memuat Preview..."
+            : selectedReportType === "jalan-lingkungan" && isPreviewDisabled
+            ? "Pilih Kecamatan dan Desa Terlebih Dahulu"
+            : "Lihat Preview Laporan"
+        }}
       </button>
     </div>
 
@@ -277,6 +315,19 @@ const availableDesa = computed(() => {
   return desaByKecamatan.value[selectedKecamatan.value] || [];
 });
 
+// Computed property untuk menentukan apakah tombol preview harus disabled
+const isPreviewDisabled = computed(() => {
+  if (!selectedReportType.value) return true;
+
+  // Untuk laporan jalan lingkungan, kecamatan dan desa harus dipilih
+  if (selectedReportType.value === "jalan-lingkungan") {
+    return !selectedKecamatan.value || !selectedDesa.value;
+  }
+
+  // Untuk laporan jenis lain, hanya perlu jenis laporan
+  return false;
+});
+
 // Methods
 const selectReportType = (type) => {
   selectedReportType.value = type;
@@ -342,6 +393,7 @@ const fetchReportData = async () => {
 
 const onKecamatanChange = () => {
   selectedDesa.value = "";
+  clearStatus(); // Clear status message when kecamatan changes
 };
 
 const previewReport = async () => {
@@ -362,6 +414,25 @@ const previewReport = async () => {
       } akan segera tersedia. Saat ini hanya laporan Jalan Lingkungan yang tersedia.`,
     };
     return;
+  }
+
+  // Validasi khusus untuk laporan jalan lingkungan - harus pilih kecamatan dan desa
+  if (selectedReportType.value === "jalan-lingkungan") {
+    if (!selectedKecamatan.value) {
+      statusMessage.value = {
+        type: "error",
+        text: "Silakan pilih kecamatan terlebih dahulu untuk laporan jalan lingkungan",
+      };
+      return;
+    }
+
+    if (!selectedDesa.value) {
+      statusMessage.value = {
+        type: "error",
+        text: "Silakan pilih desa terlebih dahulu untuk laporan jalan lingkungan",
+      };
+      return;
+    }
   }
 
   // Set loading state
@@ -408,6 +479,13 @@ const clearStatus = () => {
 
 // Watch for changes to clear status
 watch([selectedReportType, selectedKecamatan, selectedDesa], clearStatus);
+
+// Additional watcher for desa to clear status when selected
+watch(selectedDesa, (newValue) => {
+  if (newValue) {
+    clearStatus();
+  }
+});
 
 // Lifecycle
 onMounted(() => {

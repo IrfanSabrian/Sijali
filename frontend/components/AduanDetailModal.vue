@@ -7,7 +7,8 @@
     >
       <div
         @click.stop
-        class="w-full max-w-6xl h-[95vh] lg:h-[90vh] bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col"
+        class="w-full max-w-6xl h-[95vh] lg:h-[90vh] bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col modal-content"
+        style="max-height: 95vh"
       >
         <!-- Header -->
         <div
@@ -38,10 +39,11 @@
         </div>
 
         <!-- Content -->
-        <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        <div class="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
           <!-- Left Side - Complaint Details -->
           <div
-            class="w-full lg:w-1/2 p-4 lg:p-6 overflow-y-auto border-r-0 lg:border-r border-b lg:border-b-0 border-gray-200 dark:border-gray-700 order-2 lg:order-1"
+            class="w-full lg:w-1/2 p-4 lg:p-6 overflow-y-auto border-r-0 lg:border-r border-b lg:border-b-0 border-gray-200 dark:border-gray-700 order-2 lg:order-1 scrollable-content min-h-0"
+            style="max-height: calc(95vh - 120px)"
           >
             <div class="space-y-6">
               <!-- Basic Info -->
@@ -1857,5 +1859,61 @@ onUnmounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Mobile scroll fixes */
+@media (max-width: 768px) {
+  .modal-content {
+    max-height: 95vh;
+    overflow: hidden;
+  }
+
+  .scrollable-content {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    max-height: calc(95vh - 120px);
+    /* Ensure proper scrolling behavior */
+    overscroll-behavior: contain;
+    /* Fix for iOS Safari */
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Ensure proper touch scrolling on iOS */
+  .scrollable-content::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollable-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollable-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+  }
+
+  /* Additional mobile fixes */
+  .modal-content {
+    /* Prevent body scroll when modal is open */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}
+
+/* Additional fixes for very small screens */
+@media (max-width: 480px) {
+  .scrollable-content {
+    max-height: calc(95vh - 100px);
+    padding: 12px;
+  }
+
+  .modal-content {
+    margin: 8px;
+    max-height: calc(100vh - 16px);
+  }
 }
 </style>
