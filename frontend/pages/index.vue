@@ -592,11 +592,11 @@ const loadHeroStats = async () => {
       console.log("Fetching desa count from API...");
       const desaResponse = await fetch(`${apiUrl}/jalan/filters/desa`);
       console.log("Desa response status:", desaResponse.status);
-      
+
       if (desaResponse.ok) {
         const desaResult = await desaResponse.json();
         console.log("Desa result:", desaResult);
-        
+
         if (desaResult.success && desaResult.data) {
           totalVillages.value = desaResult.data.length;
           console.log("Total villages loaded:", totalVillages.value);
@@ -1619,11 +1619,11 @@ useHead({
     min-width: 160px;
     margin: 0 auto; /* Center the chart */
   }
-  
+
   .dual-donut-container {
     @apply flex flex-col items-center space-y-6; /* Center container and stack vertically */
   }
-  
+
   .donut-section {
     @apply flex flex-col items-center; /* Center each donut section */
   }

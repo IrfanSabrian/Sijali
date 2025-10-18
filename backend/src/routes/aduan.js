@@ -343,11 +343,11 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
     // Bangun ARRAY[...]::text[] aman via Prisma.sql
     let photosArraySql;
     if (photos.length === 0) {
-      photosArraySql = Prisma.sql`'{}'::text[]`; // Use empty array literal instead of ARRAY[]::text[]
+      photosArraySql = Prisma.sql`'{}'::text[]`; // Use empty array literal
     } else {
-      photosArraySql = Prisma.sql`ARRAY[${Prisma.join(
-        photos.map((url) => Prisma.sql`${url}`)
-      )}]::text[]`;
+      // Convert array to PostgreSQL array format manually
+      const photosArray = `{${photos.map(url => `"${url}"`).join(',')}}`;
+      photosArraySql = Prisma.sql`${photosArray}::text[]`;
     }
 
     console.log("About to insert into database...");
@@ -358,7 +358,9 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
       description,
       email,
       photos: photos.length,
+      photosArray: photos
     });
+    console.log("Photos array SQL:", photosArraySql);
 
     // Insert menggunakan query mentah (tabel aduan dibuat via SQL file)
     const rows = await prisma.$queryRaw(
