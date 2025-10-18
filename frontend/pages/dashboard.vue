@@ -1878,7 +1878,7 @@ const config = useRuntimeConfig();
 const isDashboardTab = computed(() => {
   return activeTab.value === "dashboard";
 });
-const API_BASE = config.public.apiBaseUrl || "http://localhost:3001";
+const API_BASE = config.public.apiBaseUrl || "https://sijali-production.up.railway.app";
 
 // User state
 const user = ref(null);
@@ -2539,7 +2539,7 @@ const handleRoadUpdate = async (updatedRoad) => {
 const handleGeoJSONImport = async (importedData) => {
   try {
     const config = useRuntimeConfig();
-    const API_BASE = config.public.apiBaseUrl || "http://localhost:3001";
+    const API_BASE = config.public.apiBaseUrl || "https://sijali-production.up.railway.app";
     const token = localStorage.getItem("token");
 
     // Convert GeoJSON features to road data format
@@ -2705,7 +2705,7 @@ const deleteSelectedRoads = async () => {
 
   try {
     const config = useRuntimeConfig();
-    const API_BASE = config.public.apiBaseUrl || "http://localhost:3001";
+    const API_BASE = config.public.apiBaseUrl || "https://sijali-production.up.railway.app";
     const token = localStorage.getItem("token");
 
     // Delete each selected road

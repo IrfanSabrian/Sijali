@@ -289,7 +289,9 @@ const selectReportType = (type) => {
 
 const fetchLocations = async () => {
   try {
-    const response = await fetch("http://localhost:3001/api/jalan/locations");
+    const config = useRuntimeConfig();
+    const apiUrl = config.public.apiUrl;
+    const response = await fetch(`${apiUrl}/jalan/locations`);
     const result = await response.json();
 
     if (result.success) {
@@ -315,8 +317,10 @@ const fetchReportData = async () => {
       params.append("kecamatan", selectedKecamatan.value);
     if (selectedDesa.value) params.append("desa", selectedDesa.value);
 
+    const config = useRuntimeConfig();
+    const apiUrl = config.public.apiUrl;
     const response = await fetch(
-      `http://localhost:3001/api/jalan/report?${params}`
+      `${apiUrl}/jalan/report?${params}`
     );
     const result = await response.json();
 

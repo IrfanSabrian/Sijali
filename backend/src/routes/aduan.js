@@ -231,19 +231,42 @@ const sendStatusEmail = async ({ to, nomorRuas, status, description }) => {
 };
 
 // Setup Cloudinary storage
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: process.env.CLOUDINARY_FOLDER || "SIJALI",
-    allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
-    transformation: [{ width: 1200, height: 1200, crop: "limit" }],
-  },
-});
+let storage, upload;
 
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024, files: 10 }, // 10MB limit per file, max 10 files
-});
+try {
+  console.log("Setting up Cloudinary storage...");
+  console.log("Cloudinary config:", {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY ? "***" : "NOT SET",
+    api_secret: process.env.CLOUDINARY_API_SECRET ? "***" : "NOT SET",
+    folder: process.env.CLOUDINARY_FOLDER || "SIJALI"
+  });
+
+  storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+      folder: process.env.CLOUDINARY_FOLDER || "SIJALI",
+      allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
+      transformation: [{ width: 1200, height: 1200, crop: "limit" }],
+    },
+  });
+
+  upload = multer({
+    storage: storage,
+    limits: { fileSize: 10 * 1024 * 1024, files: 10 }, // 10MB limit per file, max 10 files
+  });
+
+  console.log("✅ Cloudinary storage configured successfully");
+} catch (error) {
+  console.error("❌ Error setting up Cloudinary storage:", error);
+  // Fallback to memory storage if Cloudinary fails
+  const multer = require("multer");
+  upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024, files: 10 },
+  });
+  console.log("⚠️  Using memory storage as fallback");
+}
 
 // GET /api/aduan - list semua aduan dengan pagination dan filter
 router.get("/", async (req, res) => {
@@ -296,6 +319,10 @@ router.get("/", async (req, res) => {
 // POST /api/aduan - terima form multipart dan simpan ke DB + upload ke Cloudinary
 router.post("/", upload.array("photos", 10), async (req, res) => {
   try {
+    console.log("POST /api/aduan - Request received");
+    console.log("Body:", req.body);
+    console.log("Files:", req.files ? req.files.length : 0);
+
     const nomorRuas = (req.body.nomor_ruas || "").trim();
     const namaPelapor = (req.body.nama_pelapor || "").trim() || null;
     const anonim = String(req.body.anonim).toLowerCase() === "true";
@@ -303,6 +330,7 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
     const email = (req.body.email || "").trim() || null;
 
     if (!nomorRuas) {
+      console.log("Error: nomor_ruas is required");
       return res
         .status(400)
         .json({ success: false, error: "nomor_ruas wajib diisi" });
@@ -310,6 +338,7 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
 
     // Get uploaded photos URLs from Cloudinary
     const photos = req.files ? req.files.map((file) => file.path) : [];
+    console.log("Photos URLs:", photos);
 
     // Bangun ARRAY[...]::text[] aman via Prisma.sql
     let photosArraySql;
@@ -321,6 +350,7 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
       )}]::text[]`;
     }
 
+    console.log("About to insert into database...");
     // Insert menggunakan query mentah (tabel aduan dibuat via SQL file)
     const rows = await prisma.$queryRaw(
       Prisma.sql`
@@ -353,9 +383,19 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
     return res.json({ success: true, data: serializeBigInt(created) });
   } catch (err) {
     console.error("POST /api/aduan error:", err);
+    console.error("Error stack:", err.stack);
+    console.error("Error details:", {
+      message: err.message,
+      code: err.code,
+      name: err.name
+    });
     return res
       .status(500)
-      .json({ success: false, error: err.message || "Terjadi kesalahan" });
+      .json({ 
+        success: false, 
+        error: err.message || "Terjadi kesalahan",
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      });
   }
 });
 
