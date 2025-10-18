@@ -39,9 +39,15 @@ const corsOptions = {
     "http://localhost:3001",
     "http://localhost:3002",
     "http://localhost:3003",
+    "https://sijali.vercel.app", // Vercel deployment
+    "https://sijali-web.vercel.app", // Alternative Vercel URL
+    /^https:\/\/.*\.vercel\.app$/, // All Vercel subdomains
+    /^https:\/\/.*\.railway\.app$/, // All Railway subdomains
   ],
   credentials: true,
   optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 app.use(cors(corsOptions));
 
