@@ -7,22 +7,17 @@ const { PrismaClient, Prisma } = require("@prisma/client");
 const nodemailer = require("nodemailer");
 const cloudinary = require("../config/cloudinary");
 
-// SendGrid as primary email service
-let sendGridAvailable = false;
-let sendGridMail = null;
-if (process.env.SENDGRID_API_KEY) {
-  try {
-    sendGridMail = require("@sendgrid/mail");
-    sendGridMail.setApiKey(process.env.SENDGRID_API_KEY);
-    sendGridAvailable = true;
-    console.log("✅ SendGrid configured as primary email service");
-  } catch (error) {
-    console.warn("⚠️  SendGrid not available:", error.message);
-    sendGridAvailable = false;
-    sendGridMail = null;
-  }
+// Email service configuration - disabled for Railway (free tier)
+// Will be enabled for paid hosting
+let emailServiceEnabled = false;
+
+// Check if we're on Railway (free tier) - disable email
+if (process.env.RAILWAY_ENVIRONMENT || process.env.NODE_ENV === "production") {
+  console.log("ℹ️  Email service disabled");
+  emailServiceEnabled = false;
 } else {
-  console.log("ℹ️  SendGrid API key not provided, using SMTP only");
+  console.log("ℹ️  Email service ready for paid hosting");
+  emailServiceEnabled = true;
 }
 
 const router = express.Router();
@@ -42,15 +37,13 @@ const serializeBigInt = (obj) => {
   }
   return obj;
 };
-// Email transporter with multiple configuration options
+// Simple email transporter - only for paid hosting
 let transporter = null;
-let transporterConfig = null;
 
-if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+if (process.env.SMTP_USER && process.env.SMTP_PASS && emailServiceEnabled) {
   try {
-    // Primary configuration - optimized for Railway with more aggressive settings
-    const primaryConfig = {
-      host: process.env.SMTP_HOST,
+    transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || "smtp.gmail.com",
       port: Number(process.env.SMTP_PORT || 587),
       secure:
         String(process.env.SMTP_SECURE || "false").toLowerCase() === "true",
@@ -60,112 +53,14 @@ if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       },
       debug: false,
       logger: false,
-      connectionTimeout: 300000, // 5 minutes - very aggressive for Railway
-      greetingTimeout: 120000, // 2 minutes
-      socketTimeout: 300000, // 5 minutes
-      pool: false, // Disable pooling for Railway
-      tls: {
-        rejectUnauthorized: false,
-        ciphers:
-          "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
-        secureProtocol: "TLSv1_2_method",
-        servername: process.env.SMTP_HOST,
-      },
-      requireTLS: false, // More permissive for Railway
-      ignoreTLS: false,
-      // Additional Railway-specific options
-      name: "sijali-railway",
-      localAddress: undefined,
-    };
-
-    // Alternative configuration for better Railway compatibility
-    const alternativeConfig = {
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT || 465), // Try port 465 (SSL)
-      secure: true, // Force SSL
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      debug: false,
-      logger: false,
-      connectionTimeout: 300000, // 5 minutes
-      greetingTimeout: 120000, // 2 minutes
-      socketTimeout: 300000, // 5 minutes
-      pool: false, // Disable pooling for alternative config
-      tls: {
-        rejectUnauthorized: false,
-        ciphers:
-          "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
-        secureProtocol: "TLSv1_2_method",
-        servername: process.env.SMTP_HOST,
-      },
-      requireTLS: false, // More permissive
-      ignoreTLS: false,
-      name: "sijali-railway-alt",
-      localAddress: undefined,
-    };
-
-    // Third configuration - try different approach
-    const thirdConfig = {
-      host: process.env.SMTP_HOST,
-      port: 25, // Try port 25 (non-encrypted)
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      debug: false,
-      logger: false,
-      connectionTimeout: 300000,
-      greetingTimeout: 120000,
-      socketTimeout: 300000,
-      pool: false,
-      tls: {
-        rejectUnauthorized: false,
-      },
-      requireTLS: false,
-      ignoreTLS: true, // Allow non-encrypted for Railway
-      name: "sijali-railway-plain",
-    };
-
-    // Try configurations in order of preference
-    const configs = [
-      { config: primaryConfig, name: "Primary (Port 587)" },
-      { config: alternativeConfig, name: "Alternative (Port 465)" },
-      { config: thirdConfig, name: "Third (Port 25)" },
-    ];
-
-    let configSuccess = false;
-    for (let i = 0; i < configs.length; i++) {
-      try {
-        console.log(`🔍 Trying ${configs[i].name} configuration...`);
-        transporter = nodemailer.createTransport(configs[i].config);
-        transporterConfig = configs[i].name.toLowerCase().split(" ")[0];
-        console.log(
-          `✅ Email transporter configured (${configs[i].name}):`,
-          process.env.SMTP_USER
-        );
-        configSuccess = true;
-        break;
-      } catch (error) {
-        console.warn(`⚠️  ${configs[i].name} config failed:`, error.message);
-        if (i === configs.length - 1) {
-          console.error("❌ All email configurations failed");
-          transporter = null;
-          configSuccess = false;
-        }
-      }
-    }
-
-    if (!configSuccess && !sendGridAvailable) {
-      console.warn("⚠️  No email service available - emails will be skipped");
-    }
+    });
+    console.log("✅ Email transporter configured:", process.env.SMTP_USER);
   } catch (error) {
-    console.error("❌ Error setting up email configurations:", error.message);
+    console.error("❌ Error setting up email transporter:", error.message);
     transporter = null;
-    sendGridAvailable = false;
   }
+} else if (!emailServiceEnabled) {
+  console.log("ℹ️  Email service disabled for Railway free tier");
 } else {
   console.warn("⚠️  SMTP not configured - emails will not be sent");
 }
@@ -193,31 +88,26 @@ if (transporter) {
   testEmailConnection().catch(console.error);
 }
 
-// SendGrid email function as fallback
-const sendEmailViaSendGrid = async (to, subject, html) => {
-  if (!sendGridAvailable || !sendGridMail) {
-    throw new Error("SendGrid not available");
+// Simple email sending function
+const sendEmail = async (to, subject, html) => {
+  if (!transporter) {
+    throw new Error("Email transporter not available");
   }
 
-  const msg = {
+  const mailOptions = {
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: to,
-    from: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER,
     subject: subject,
     html: html,
   };
 
   try {
-    console.log("📧 Sending email via SendGrid to:", to);
-    const response = await sendGridMail.send(msg);
-    console.log("✅ Email sent via SendGrid:", response[0].statusCode);
-    return {
-      success: true,
-      messageId:
-        response[0].headers["x-message-id"] || "sendgrid-" + Date.now(),
-    };
+    console.log("📧 Sending email to:", to);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent successfully! MessageId:", info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ SendGrid email failed:", error.message);
-    console.error("SendGrid error details:", error.response?.body || error);
+    console.error("❌ Email send failed:", error.message);
     throw error;
   }
 };
@@ -231,11 +121,15 @@ const sendStatusEmail = async (
     return;
   }
 
-  // Skip jika SMTP dan SendGrid belum dikonfigurasi
-  if (!transporter && !sendGridAvailable) {
-    console.warn(
-      "⚠️  Neither SMTP nor SendGrid configured, skipping email send"
-    );
+  // Skip jika email service tidak diaktifkan
+  if (!emailServiceEnabled) {
+    console.log("📧 Email service disabled, skipping email send");
+    return;
+  }
+
+  // Skip jika transporter belum dikonfigurasi
+  if (!transporter) {
+    console.warn("⚠️  Email transporter not configured, skipping email send");
     return;
   }
 
@@ -403,100 +297,41 @@ const sendStatusEmail = async (
       })`
     );
 
-    // Try SendGrid first if available (more reliable for Railway)
-    if (sendGridAvailable) {
-      console.log(`📧 Using SendGrid as primary email service`);
-      const result = await sendEmailViaSendGrid(to, subject, html);
-      return result;
-    }
-    // Fallback to SMTP if SendGrid not available
-    else if (transporter) {
-      console.log(
-        `📧 Using SMTP transporter config: ${transporterConfig || "unknown"}`
-      );
-
-      const mailOptions = {
-        from: process.env.SMTP_FROM || process.env.SMTP_USER,
-        to,
-        subject,
-        html,
-      };
-
-      console.log(`📧 SMTP Mail options:`, {
-        from: mailOptions.from,
-        to: mailOptions.to,
-        subject: mailOptions.subject,
-        htmlLength: mailOptions.html.length,
-      });
-
-      const info = await transporter.sendMail(mailOptions);
-      console.log(
-        `✅ Email sent successfully via SMTP! MessageId: ${info.messageId}`
-      );
-      return { success: true, messageId: info.messageId };
-    } else {
-      throw new Error("No email service available");
-    }
+    const result = await sendEmail(to, subject, html);
+    return result;
   } catch (error) {
     console.error(
       `❌ Error sending email (Attempt ${retryCount + 1}):`,
       error.message
     );
-    console.error("Error code:", error.code);
-    console.error("Error command:", error.command);
-    console.error("Full error:", error);
 
-    // Retry logic for connection timeouts and temporary failures
-    const maxRetries = 3;
+    // Simple retry logic for connection timeouts
+    const maxRetries = 2;
     const retryableErrors = [
       "ETIMEDOUT",
       "ECONNRESET",
       "ENOTFOUND",
       "ECONNREFUSED",
       "EHOSTUNREACH",
-      "ECONNABORTED",
     ];
 
     if (retryCount < maxRetries && retryableErrors.includes(error.code)) {
       console.log(
-        `🔄 Retrying email send in 5 seconds... (${
+        `🔄 Retrying email send in 3 seconds... (${
           retryCount + 1
         }/${maxRetries})`
       );
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       return sendStatusEmail(
         { to, nomorRuas, status, description },
         retryCount + 1
       );
     }
 
-    // If SendGrid failed and SMTP is available, try SMTP as fallback
-    if (sendGridAvailable && transporter && retryCount === 0) {
-      console.log("🔄 SendGrid failed, trying SMTP as fallback...");
-      try {
-        const mailOptions = {
-          from: process.env.SMTP_FROM || process.env.SMTP_USER,
-          to,
-          subject,
-          html,
-        };
-        const info = await transporter.sendMail(mailOptions);
-        console.log(
-          `✅ Email sent successfully via SMTP fallback! MessageId: ${info.messageId}`
-        );
-        return { success: true, messageId: info.messageId };
-      } catch (smtpError) {
-        console.error("❌ SMTP fallback also failed:", smtpError.message);
-      }
-    }
-
-    // Log final failure with more details
+    // Log final failure
     console.error(`❌ Email send failed after ${retryCount + 1} attempts:`, {
       error: error.message,
-      code: error.code,
-      command: error.command,
       attempts: retryCount + 1,
-      config: transporterConfig,
     });
 
     // Tidak throw error, hanya log saja agar proses tidak terganggu
@@ -646,7 +481,7 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
     console.log("Database insert result:", created);
 
     // Kirim email status "diajukan" ke pelapor bila ada email (async, tidak memblokir response)
-    if (email && (transporter || sendGridAvailable)) {
+    if (email && emailServiceEnabled) {
       setImmediate(async () => {
         try {
           await sendStatusEmail({
@@ -661,9 +496,7 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
         }
       });
     } else if (email) {
-      console.log(
-        "📧 Email service not available, skipping email notification"
-      );
+      console.log("📧 Email service disabled, skipping email notification");
     }
 
     return res.json({ success: true, data: serializeBigInt(created) });
@@ -712,7 +545,7 @@ router.patch("/:id/status", async (req, res) => {
     }
 
     // Kirim email notifikasi (async, tidak memblokir response)
-    if (updated.email && (transporter || sendGridAvailable)) {
+    if (updated.email && emailServiceEnabled) {
       setImmediate(async () => {
         try {
           await sendStatusEmail({
@@ -727,9 +560,7 @@ router.patch("/:id/status", async (req, res) => {
         }
       });
     } else if (updated.email) {
-      console.log(
-        "📧 Email service not available, skipping email notification"
-      );
+      console.log("📧 Email service disabled, skipping email notification");
     }
 
     return res.json({ success: true, data: serializeBigInt(updated) });
