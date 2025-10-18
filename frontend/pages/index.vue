@@ -89,7 +89,7 @@
           </div>
         </div>
 
-        <div class="hero-visual" data-aos="fade-left" data-aos-delay="600">
+        <div class="hero-visual hidden md:block" data-aos="fade-left" data-aos-delay="600">
           <WeatherWidget />
         </div>
       </div>
@@ -608,7 +608,11 @@ const loadHeroStats = async () => {
 
     // Mark stats as loaded (but don't start animation yet)
     statsLoaded.value = true;
-    // Animation will be triggered by Intersection Observer when stat cards are visible
+    
+    // Start counter animation immediately after data is loaded
+    setTimeout(() => {
+      startCounters();
+    }, 500); // Small delay to ensure DOM is ready
   } catch (error) {
     console.error("Error loading hero stats:", error);
   }
@@ -1762,10 +1766,6 @@ useHead({
     padding-top: 6vh;
   }
 
-  .hero-content {
-    padding: 2vh 4vw;
-  }
-
   .hero-stats {
     padding: 1.5vh 4vw;
   }
@@ -1842,9 +1842,6 @@ useHead({
 }
 
 @media (max-width: 320px) {
-  .hero-content {
-    padding: 1.5vh 3vw;
-  }
 
   .hero-stats {
     padding: 1vh 3vw;
@@ -1984,6 +1981,9 @@ export default {
       }
     },
     async initCharts() {
+      // Wait for DOM to be ready
+      await this.$nextTick();
+
       // Load kecamatan options first
       await this.loadKecamatanOptions();
 
