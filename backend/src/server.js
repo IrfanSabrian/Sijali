@@ -16,6 +16,9 @@ const aduanRoutes = require("./routes/aduan");
 const app = express();
 const prisma = new PrismaClient();
 
+// Trust proxy for Railway deployment
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 
@@ -34,20 +37,32 @@ app.use(limiter);
 
 // CORS configuration
 const corsOptions = {
-  origin: [
-    process.env.FRONTEND_URL || "http://localhost:3000",
-    "http://localhost:3001",
-    "http://localhost:3002",
-    "http://localhost:3003",
-    "https://sijali.vercel.app", // Vercel deployment
-    "https://sijali-web.vercel.app", // Alternative Vercel URL
-    /^https:\/\/.*\.vercel\.app$/, // All Vercel subdomains
-    /^https:\/\/.*\.railway\.app$/, // All Railway subdomains
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "http://localhost:3001", 
+      "http://localhost:3002",
+      "http://localhost:3003",
+      "https://sijali.vercel.app",
+      "https://sijali-web.vercel.app",
+    ];
+    
+    // Check if origin is in allowed list or matches patterns
+    if (allowedOrigins.includes(origin) || 
+        /^https:\/\/.*\.vercel\.app$/.test(origin) ||
+        /^https:\/\/.*\.railway\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
 };
 app.use(cors(corsOptions));
 
