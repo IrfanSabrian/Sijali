@@ -617,7 +617,7 @@ const loadHeroStats = async () => {
     setTimeout(() => {
       startCounters();
     }, 500); // Small delay to ensure DOM is ready
-    
+
     // Load chart data after hero stats are loaded (lower priority)
     setTimeout(async () => {
       console.log("Hero stats loaded, loading charts...");
@@ -759,7 +759,7 @@ const handleScroll = () => {
 };
 
 // Add scroll listener on mount
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener("scroll", handleScroll);
 
   // Initialize AOS
@@ -1943,7 +1943,7 @@ export default {
   async mounted() {
     // Set component instance for external access
     window.initChartsComponent = this;
-    
+
     // Don't call initCharts here, it will be called after hero stats are loaded
     console.log("Component mounted, waiting for hero stats...");
   },
@@ -2005,7 +2005,7 @@ export default {
     async initCharts() {
       // Wait for DOM to be ready
       await this.$nextTick();
-      
+
       // Load kecamatan options first
       await this.loadKecamatanOptions();
 
