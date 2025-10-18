@@ -24,10 +24,13 @@ const serializeBigInt = (obj) => {
   }
   return obj;
 };
-// Email transporter
+// Email transporter with multiple configuration options
 let transporter = null;
+let transporterConfig = null;
+
 if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-  transporter = nodemailer.createTransport({
+  // Primary configuration - optimized for Railway
+  const primaryConfig = {
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT || 587),
     secure: String(process.env.SMTP_SECURE || "false").toLowerCase() === "true",
@@ -35,21 +38,105 @@ if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
-    debug: false, // Disable debug output for production
-    logger: false, // Disable logger for production
-    connectionTimeout: 60000, // 60 seconds
-    greetingTimeout: 30000, // 30 seconds
-    socketTimeout: 60000, // 60 seconds
+    debug: false,
+    logger: false,
+    connectionTimeout: 120000, // 2 minutes
+    greetingTimeout: 60000, // 1 minute
+    socketTimeout: 120000, // 2 minutes
+    pool: true,
+    maxConnections: 3, // Reduced for Railway
+    maxMessages: 50, // Reduced for Railway
+    rateDelta: 30000, // 30 seconds
+    rateLimit: 3, // 3 emails per 30 seconds
     tls: {
-      rejectUnauthorized: false, // Allow self-signed certificates
+      rejectUnauthorized: false,
+      ciphers: "SSLv3",
+      secureProtocol: "TLSv1_2_method",
     },
-  });
-  console.log("✅ Email transporter configured:", process.env.SMTP_USER);
+    requireTLS: true,
+    ignoreTLS: false,
+  };
+
+  // Alternative configuration for better Railway compatibility
+  const alternativeConfig = {
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT || 465), // Try port 465 (SSL)
+    secure: true, // Force SSL
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    debug: false,
+    logger: false,
+    connectionTimeout: 180000, // 3 minutes
+    greetingTimeout: 90000, // 1.5 minutes
+    socketTimeout: 180000, // 3 minutes
+    pool: false, // Disable pooling for alternative config
+    tls: {
+      rejectUnauthorized: false,
+      ciphers: "SSLv3",
+      secureProtocol: "TLSv1_2_method",
+    },
+    requireTLS: true,
+    ignoreTLS: false,
+  };
+
+  // Try primary configuration first
+  try {
+    transporter = nodemailer.createTransport(primaryConfig);
+    transporterConfig = "primary";
+    console.log(
+      "✅ Email transporter configured (Primary):",
+      process.env.SMTP_USER
+    );
+  } catch (error) {
+    console.warn(
+      "⚠️  Primary email config failed, trying alternative:",
+      error.message
+    );
+    try {
+      transporter = nodemailer.createTransport(alternativeConfig);
+      transporterConfig = "alternative";
+      console.log(
+        "✅ Email transporter configured (Alternative):",
+        process.env.SMTP_USER
+      );
+    } catch (altError) {
+      console.error("❌ Both email configurations failed:", altError.message);
+      transporter = null;
+    }
+  }
 } else {
   console.warn("⚠️  SMTP not configured - emails will not be sent");
 }
 
-const sendStatusEmail = async ({ to, nomorRuas, status, description }, retryCount = 0) => {
+// Test email connection on startup
+const testEmailConnection = async () => {
+  if (!transporter) {
+    console.warn("⚠️  No email transporter available for testing");
+    return false;
+  }
+
+  try {
+    console.log("🔍 Testing email connection...");
+    await transporter.verify();
+    console.log("✅ Email connection verified successfully");
+    return true;
+  } catch (error) {
+    console.error("❌ Email connection test failed:", error.message);
+    return false;
+  }
+};
+
+// Test connection on startup (non-blocking)
+if (transporter) {
+  testEmailConnection().catch(console.error);
+}
+
+const sendStatusEmail = async (
+  { to, nomorRuas, status, description },
+  retryCount = 0
+) => {
   if (!to) {
     console.warn("⚠️  No recipient email provided");
     return;
@@ -219,20 +306,77 @@ const sendStatusEmail = async ({ to, nomorRuas, status, description }, retryCoun
   `;
 
   try {
-    console.log(`📧 Sending email to ${to} - Status: ${status}`);
-    const info = await transporter.sendMail({
+    console.log(
+      `📧 Sending email to ${to} - Status: ${status} (Attempt ${
+        retryCount + 1
+      })`
+    );
+    console.log(
+      `📧 Using transporter config: ${transporterConfig || "unknown"}`
+    );
+
+    const mailOptions = {
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       to,
       subject,
       html,
+    };
+
+    console.log(`📧 Mail options:`, {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      htmlLength: mailOptions.html.length,
     });
+
+    const info = await transporter.sendMail(mailOptions);
+
     console.log(`✅ Email sent successfully! MessageId: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ Error sending email:", error.message);
+    console.error(
+      `❌ Error sending email (Attempt ${retryCount + 1}):`,
+      error.message
+    );
+    console.error("Error code:", error.code);
+    console.error("Error command:", error.command);
     console.error("Full error:", error);
+
+    // Retry logic for connection timeouts and temporary failures
+    const maxRetries = 3;
+    const retryableErrors = [
+      "ETIMEDOUT",
+      "ECONNRESET",
+      "ENOTFOUND",
+      "ECONNREFUSED",
+      "EHOSTUNREACH",
+      "ECONNABORTED",
+    ];
+
+    if (retryCount < maxRetries && retryableErrors.includes(error.code)) {
+      console.log(
+        `🔄 Retrying email send in 5 seconds... (${
+          retryCount + 1
+        }/${maxRetries})`
+      );
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      return sendStatusEmail(
+        { to, nomorRuas, status, description },
+        retryCount + 1
+      );
+    }
+
+    // Log final failure with more details
+    console.error(`❌ Email send failed after ${retryCount + 1} attempts:`, {
+      error: error.message,
+      code: error.code,
+      command: error.command,
+      attempts: retryCount + 1,
+      config: transporterConfig,
+    });
+
     // Tidak throw error, hanya log saja agar proses tidak terganggu
-    return { success: false, error: error.message };
+    return { success: false, error: error.message, attempts: retryCount + 1 };
   }
 };
 
