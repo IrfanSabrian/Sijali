@@ -719,96 +719,6 @@ const resolveThumbnail = (thumbnailUrl) => {
   @apply w-full h-full bg-white border-r border-gray-200 flex flex-col shadow-lg;
 }
 
-/* Mobile specific styles - smaller sidebar */
-@media (max-width: 767px) {
-  .sidebar-panel {
-    @apply w-72 max-w-[85vw];
-  }
-
-  .sidebar-header {
-    @apply p-3;
-  }
-
-  .logo-text h2 {
-    @apply text-base;
-  }
-
-  .logo-text p {
-    @apply text-xs;
-  }
-
-  .tab-button {
-    @apply py-2 px-3 text-xs;
-    min-height: 40px;
-  }
-
-  .tab-icon {
-    @apply w-4 h-4;
-  }
-
-  .tab-icon svg {
-    @apply w-4 h-4;
-  }
-
-  .filter-section-scrollable {
-    @apply p-3 space-y-3;
-  }
-
-  .form-group {
-    @apply space-y-1;
-  }
-
-  .form-label {
-    @apply text-xs;
-  }
-
-  .form-select {
-    @apply px-2 py-1.5 text-sm;
-  }
-
-  .apply-button {
-    @apply py-2 px-3 text-sm;
-  }
-
-  .settings-content,
-  .tools-content {
-    @apply space-y-3;
-  }
-
-  .settings-content h3,
-  .tools-content h3 {
-    @apply text-base mb-3;
-  }
-
-  .tool-button {
-    @apply p-2 space-x-2;
-  }
-
-  .tool-button-small {
-    @apply p-2 text-xs;
-  }
-
-  .section-title {
-    @apply text-sm mb-2;
-  }
-
-  .boundary-toggle-item {
-    @apply p-3;
-  }
-
-  .boundary-label {
-    @apply text-xs;
-  }
-
-  .boundary-description {
-    @apply text-xs;
-  }
-
-  .filter-button-fixed {
-    @apply p-3;
-  }
-}
-
 @media (min-width: 768px) {
   .sidebar-panel {
     @apply w-80;
@@ -1007,5 +917,95 @@ const resolveThumbnail = (thumbnailUrl) => {
 /* Divider */
 .divider {
   @apply border-t border-gray-200 my-4;
+}
+
+/* Mobile specific styles - smaller sidebar */
+@media (max-width: 767px) {
+  .sidebar-panel {
+    @apply w-72 max-w-[85vw];
+  }
+
+  .sidebar-header {
+    @apply p-3;
+  }
+
+  .logo-text h2 {
+    @apply text-base;
+  }
+
+  .logo-text p {
+    @apply text-xs;
+  }
+
+  .tab-button {
+    @apply py-2 px-3 text-xs;
+    min-height: 40px;
+  }
+
+  .tab-icon {
+    @apply w-4 h-4;
+  }
+
+  .tab-icon svg {
+    @apply w-4 h-4;
+  }
+
+  .filter-section-scrollable {
+    @apply p-3 space-y-3;
+  }
+
+  .form-group {
+    @apply space-y-1;
+  }
+
+  .form-label {
+    @apply text-xs;
+  }
+
+  .form-select {
+    @apply px-2 py-1.5 text-sm;
+  }
+
+  .apply-button {
+    @apply py-2 px-3 text-sm;
+  }
+
+  .settings-content,
+  .tools-content {
+    @apply space-y-3;
+  }
+
+  .settings-content h3,
+  .tools-content h3 {
+    @apply text-base mb-3;
+  }
+
+  .tool-button {
+    @apply p-2 space-x-2;
+  }
+
+  .tool-button-small {
+    @apply p-2 text-xs;
+  }
+
+  .section-title {
+    @apply text-sm mb-2;
+  }
+
+  .boundary-toggle-item {
+    @apply p-3;
+  }
+
+  .boundary-label {
+    @apply text-xs;
+  }
+
+  .boundary-description {
+    @apply text-xs;
+  }
+
+  .filter-button-fixed {
+    @apply p-3;
+  }
 }
 </style>
