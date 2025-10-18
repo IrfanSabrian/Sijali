@@ -319,9 +319,7 @@ const fetchReportData = async () => {
 
     const config = useRuntimeConfig();
     const apiUrl = config.public.apiUrl;
-    const response = await fetch(
-      `${apiUrl}/jalan/report?${params}`
-    );
+    const response = await fetch(`${apiUrl}/jalan/report?${params}`);
     const result = await response.json();
 
     if (result.success) {

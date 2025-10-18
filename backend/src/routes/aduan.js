@@ -239,7 +239,7 @@ try {
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY ? "***" : "NOT SET",
     api_secret: process.env.CLOUDINARY_API_SECRET ? "***" : "NOT SET",
-    folder: process.env.CLOUDINARY_FOLDER || "SIJALI"
+    folder: process.env.CLOUDINARY_FOLDER || "SIJALI",
   });
 
   storage = new CloudinaryStorage({
@@ -343,7 +343,7 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
     // Bangun ARRAY[...]::text[] aman via Prisma.sql
     let photosArraySql;
     if (photos.length === 0) {
-      photosArraySql = Prisma.sql`ARRAY[]::text[]`;
+      photosArraySql = Prisma.sql`'{}'::text[]`; // Use empty array literal instead of ARRAY[]::text[]
     } else {
       photosArraySql = Prisma.sql`ARRAY[${Prisma.join(
         photos.map((url) => Prisma.sql`${url}`)
@@ -351,6 +351,15 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
     }
 
     console.log("About to insert into database...");
+    console.log("Insert data:", {
+      nomorRuas,
+      namaPelapor: anonim ? null : namaPelapor,
+      anonim,
+      description,
+      email,
+      photos: photos.length
+    });
+    
     // Insert menggunakan query mentah (tabel aduan dibuat via SQL file)
     const rows = await prisma.$queryRaw(
       Prisma.sql`
@@ -387,15 +396,13 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
     console.error("Error details:", {
       message: err.message,
       code: err.code,
-      name: err.name
+      name: err.name,
     });
-    return res
-      .status(500)
-      .json({ 
-        success: false, 
-        error: err.message || "Terjadi kesalahan",
-        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
-      });
+    return res.status(500).json({
+      success: false,
+      error: err.message || "Terjadi kesalahan",
+      details: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    });
   }
 });
 
