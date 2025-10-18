@@ -340,16 +340,6 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
     const photos = req.files ? req.files.map((file) => file.path) : [];
     console.log("Photos URLs:", photos);
 
-    // Bangun ARRAY[...]::text[] aman via Prisma.sql
-    let photosArraySql;
-    if (photos.length === 0) {
-      photosArraySql = Prisma.sql`'{}'::text[]`; // Use empty array literal
-    } else {
-      // Convert array to PostgreSQL array format manually
-      const photosArray = `{${photos.map(url => `"${url}"`).join(',')}}`;
-      photosArraySql = Prisma.sql`${photosArray}::text[]`;
-    }
-
     console.log("About to insert into database...");
     console.log("Insert data:", {
       nomorRuas,
@@ -358,25 +348,23 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
       description,
       email,
       photos: photos.length,
-      photosArray: photos
+      photosArray: photos,
     });
-    console.log("Photos array SQL:", photosArraySql);
 
-    // Insert menggunakan query mentah (tabel aduan dibuat via SQL file)
-    const rows = await prisma.$queryRaw(
-      Prisma.sql`
-        INSERT INTO aduan (
-          nomor_ruas, nama_pelapor, anonim, description, email, photos, status
-        ) VALUES (
-          ${nomorRuas}, ${
-        anonim ? null : namaPelapor
-      }, ${anonim}, ${description}, ${email}, ${photosArraySql}, 'diajukan'
-        )
-        RETURNING *
-      `
-    );
+    // Insert menggunakan Prisma ORM biasa (lebih aman untuk array)
+    const created = await prisma.aduan.create({
+      data: {
+        nomorRuas,
+        namaPelapor: anonim ? null : namaPelapor,
+        anonim,
+        description,
+        email,
+        photos: photos, // Prisma akan handle array dengan benar
+        status: 'diajukan'
+      }
+    });
 
-    const created = rows && rows[0] ? rows[0] : null;
+    console.log("Database insert result:", created);
 
     // Kirim email status "diajukan" ke pelapor bila ada email
     try {
