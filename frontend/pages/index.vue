@@ -529,9 +529,7 @@ const startCounters = () => {
 const loadHeroStats = async () => {
   try {
     // Fetch summary data for total road length and districts
-    const summaryResponse = await fetch(
-      "/api/jalan/stats/summary"
-    );
+    const summaryResponse = await fetch("/api/jalan/stats/summary");
     if (summaryResponse.ok) {
       const summaryResult = await summaryResponse.json();
       if (summaryResult.success && summaryResult.data) {
@@ -582,9 +580,7 @@ const loadHeroStats = async () => {
     }
 
     // Fetch unique desa/kelurahan count
-    const jalanResponse = await fetch(
-      "/api/jalan/stats/summary"
-    );
+    const jalanResponse = await fetch("/api/jalan/stats/summary");
     if (jalanResponse.ok) {
       const jalanResult = await jalanResponse.json();
       if (jalanResult.success && jalanResult.data) {
@@ -592,9 +588,7 @@ const loadHeroStats = async () => {
         // Since the summary endpoint doesn't provide this, we'll need to call a different endpoint
         // Let's check if there's a filter endpoint for desa
         try {
-          const desaResponse = await fetch(
-            "/api/jalan/filters/desa"
-          );
+          const desaResponse = await fetch("/api/jalan/filters/desa");
           if (desaResponse.ok) {
             const desaResult = await desaResponse.json();
             if (desaResult.success && desaResult.data) {
@@ -1932,218 +1926,20 @@ export default {
     await this.initCharts();
   },
   methods: {
-    createDistrictChartWithDummyData(ctx) {
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: ["Sungai Raya", "Rasau Jaya", "Kubu", "Teluk Pakedai"],
-          datasets: [
-            {
-              label: "Baik",
-              data: [1293, 777, 119, 89],
-              backgroundColor: "#10b981",
-            },
-            {
-              label: "Sedang",
-              data: [452, 158, 125, 24],
-              backgroundColor: "#eab308",
-            },
-            {
-              label: "Rusak Ringan",
-              data: [176, 102, 42, 24],
-              backgroundColor: "#f97316",
-            },
-            {
-              label: "Rusak Berat",
-              data: [260, 210, 80, 37],
-              backgroundColor: "#dc2626",
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "top",
-            },
-            tooltip: {
-              enabled: true,
-              backgroundColor: "rgba(0, 0, 0, 0.8)",
-              titleColor: "white",
-              bodyColor: "white",
-              borderColor: "rgba(255, 255, 255, 0.2)",
-              borderWidth: 1,
-              cornerRadius: 8,
-            },
-          },
-          scales: {
-            x: {
-              stacked: true,
-            },
-            y: {
-              stacked: true,
-              beginAtZero: true,
-            },
-          },
-        },
-      });
-    },
-    createMaterialChartWithDummyData(ctx) {
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: ["Beton", "Aspal", "Tanah", "Paving"],
-          datasets: [
-            {
-              label: "Baik",
-              data: [1808, 1173, 23, 81],
-              backgroundColor: "#10b981",
-            },
-            {
-              label: "Sedang",
-              data: [806, 242, 3, 4],
-              backgroundColor: "#eab308",
-            },
-            {
-              label: "Rusak Ringan",
-              data: [380, 102, 41, 0],
-              backgroundColor: "#f97316",
-            },
-            {
-              label: "Rusak Berat",
-              data: [219, 43, 613, 1],
-              backgroundColor: "#dc2626",
-            },
-          ],
-        },
-        options: {
-          indexAxis: "y",
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "top",
-            },
-            tooltip: {
-              enabled: true,
-              backgroundColor: "rgba(0, 0, 0, 0.8)",
-              titleColor: "white",
-              bodyColor: "white",
-              borderColor: "rgba(255, 255, 255, 0.2)",
-              borderWidth: 1,
-              cornerRadius: 8,
-              callbacks: {
-                label: function (context) {
-                  return (
-                    context.dataset.label + ": " + context.parsed.x + " jalan"
-                  );
-                },
-              },
-            },
-          },
-          scales: {
-            x: {
-              beginAtZero: true,
-              ticks: {
-                callback: function (value) {
-                  return value + " jalan";
-                },
-              },
-            },
-            y: {
-              beginAtZero: true,
-            },
-          },
-        },
-      });
-    },
-    createDistrictLengthChartWithDummyData(ctx) {
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: [
-            "Sungai Raya",
-            "Sungai Kakap",
-            "Sungai Ambawang",
-            "Kubu",
-            "Kuala Mandor B",
-            "Rasau Jaya",
-            "Teluk Pakedai",
-            "Terentang",
-            "Batu Ampar",
-          ],
-          datasets: [
-            {
-              label: "Panjang Jalan (km)",
-              data: [
-                628.7, 435.3, 280.7, 184.1, 163.6, 130.1, 99.3, 74.3, 111.5,
-                7.4,
-              ],
-              backgroundColor: [
-                "#3b82f6", // Blue
-                "#10b981", // Green
-                "#f59e0b", // Orange
-                "#ef4444", // Red
-                "#8b5cf6", // Purple
-                "#06b6d4", // Cyan
-                "#84cc16", // Lime
-                "#f97316", // Orange
-                "#ec4899", // Pink
-                "#6b7280", // Gray
-              ],
-              borderWidth: 1,
-              borderColor: "#ffffff",
-            },
-          ],
-        },
-        options: {
-          indexAxis: "y",
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false,
-            },
-            tooltip: {
-              enabled: true,
-              backgroundColor: "rgba(0, 0, 0, 0.8)",
-              titleColor: "white",
-              bodyColor: "white",
-              borderColor: "rgba(255, 255, 255, 0.2)",
-              borderWidth: 1,
-              cornerRadius: 8,
-              callbacks: {
-                label: function (context) {
-                  return "Panjang: " + context.parsed.x.toFixed(1) + " km";
-                },
-              },
-            },
-          },
-          scales: {
-            x: {
-              beginAtZero: true,
-              grid: {
-                color: "rgba(0, 0, 0, 0.1)",
-              },
-              ticks: {
-                callback: function (value) {
-                  return value + " km";
-                },
-                color: "#6b7280",
-              },
-            },
-            y: {
-              grid: {
-                display: false,
-              },
-              ticks: {
-                color: "#6b7280",
-              },
-            },
-          },
-        },
-      });
+    showChartError(ctx, message) {
+      // Clear the canvas and show error message
+      ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+      const parent = ctx.parentElement;
+      parent.innerHTML = `
+        <div class="flex items-center justify-center h-64 text-gray-500">
+          <div class="text-center">
+            <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            <p class="text-sm">${message}</p>
+          </div>
+        </div>
+      `;
     },
     async loadKecamatanOptions() {
       try {
@@ -2292,13 +2088,13 @@ export default {
             });
           } else {
             console.error("Failed to fetch kecamatan-kondisi data");
-            // Fallback to dummy data
-            this.createDistrictChartWithDummyData(districtCtx);
+            // Show error message instead of dummy data
+            this.showChartError(districtCtx, "Gagal memuat data kecamatan");
           }
         } catch (error) {
           console.error("Error fetching kecamatan-kondisi data:", error);
-          // Fallback to dummy data
-          this.createDistrictChartWithDummyData(districtCtx);
+          // Show error message instead of dummy data
+          this.showChartError(districtCtx, "Gagal memuat data kecamatan");
         }
       }
 
@@ -2411,13 +2207,13 @@ export default {
             });
           } else {
             console.error("Failed to fetch kecamatan length data");
-            // Fallback to dummy data
-            this.createDistrictLengthChartWithDummyData(districtLengthCtx);
+            // Show error message instead of dummy data
+            this.showChartError(districtLengthCtx, "Gagal memuat data panjang jalan");
           }
         } catch (error) {
           console.error("Error fetching kecamatan length data:", error);
-          // Fallback to dummy data
-          this.createDistrictLengthChartWithDummyData(districtLengthCtx);
+          // Show error message instead of dummy data
+          this.showChartError(districtLengthCtx, "Gagal memuat data panjang jalan");
         }
       }
 
