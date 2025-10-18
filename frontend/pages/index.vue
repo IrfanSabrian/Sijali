@@ -528,8 +528,12 @@ const startCounters = () => {
 // Load hero stats from API
 const loadHeroStats = async () => {
   try {
+    // Get API URL from runtime config
+    const config = useRuntimeConfig();
+    const apiUrl = config.public.apiUrl || "https://sijali-production.up.railway.app/api";
+    
     // Fetch summary data for total road length and districts
-    const summaryResponse = await fetch("/api/jalan/stats/summary");
+    const summaryResponse = await fetch(`${apiUrl}/jalan/stats/summary`);
     if (summaryResponse.ok) {
       const summaryResult = await summaryResponse.json();
       if (summaryResult.success && summaryResult.data) {
@@ -549,7 +553,7 @@ const loadHeroStats = async () => {
 
     // Fetch kondisi data for good condition roads
     const kondisiResponse = await fetch(
-      "/api/jalan/stats/kondisi-material-filtered"
+      `${apiUrl}/jalan/stats/kondisi-material-filtered`
     );
     if (kondisiResponse.ok) {
       const kondisiResult = await kondisiResponse.json();
@@ -588,7 +592,7 @@ const loadHeroStats = async () => {
         // Since the summary endpoint doesn't provide this, we'll need to call a different endpoint
         // Let's check if there's a filter endpoint for desa
         try {
-          const desaResponse = await fetch("/api/jalan/filters/desa");
+          const desaResponse = await fetch(`${apiUrl}/jalan/filters/desa`);
           if (desaResponse.ok) {
             const desaResult = await desaResponse.json();
             if (desaResult.success && desaResult.data) {
@@ -1925,10 +1929,16 @@ export default {
   async mounted() {
     await this.initCharts();
   },
+  setup() {
+    const config = useRuntimeConfig();
+    return {
+      config
+    };
+  },
   methods: {
     showChartError(ctx, message) {
       // Clear the canvas and show error message
-      ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+      ctx.getContext("2d").clearRect(0, 0, ctx.width, ctx.height);
       const parent = ctx.parentElement;
       parent.innerHTML = `
         <div class="flex items-center justify-center h-64 text-gray-500">
@@ -1943,7 +1953,8 @@ export default {
     },
     async loadKecamatanOptions() {
       try {
-        const response = await fetch("/api/jalan/filters/kecamatan");
+        const apiUrl = this.config.public.apiUrl || "https://sijali-production.up.railway.app/api";
+        const response = await fetch(`${apiUrl}/jalan/filters/kecamatan`);
         const result = await response.json();
 
         if (result.success && result.data) {
@@ -1994,7 +2005,8 @@ export default {
         // Fetch real data from API
         try {
           console.log("Fetching data from API...");
-          const response = await fetch("/api/jalan/stats/kecamatan-kondisi", {
+          const apiUrl = this.config.public.apiUrl || "https://sijali-production.up.railway.app/api";
+          const response = await fetch(`${apiUrl}/jalan/stats/kecamatan-kondisi`, {
             method: "GET",
             mode: "cors",
             headers: {
@@ -2104,7 +2116,8 @@ export default {
         // Fetch real data from API
         try {
           console.log("Fetching kecamatan length data from API...");
-          const response = await fetch("/api/jalan/stats/summary", {
+          const apiUrl = this.config.public.apiUrl || "https://sijali-production.up.railway.app/api";
+          const response = await fetch(`${apiUrl}/jalan/stats/summary`, {
             method: "GET",
             mode: "cors",
             headers: {
@@ -2208,12 +2221,18 @@ export default {
           } else {
             console.error("Failed to fetch kecamatan length data");
             // Show error message instead of dummy data
-            this.showChartError(districtLengthCtx, "Gagal memuat data panjang jalan");
+            this.showChartError(
+              districtLengthCtx,
+              "Gagal memuat data panjang jalan"
+            );
           }
         } catch (error) {
           console.error("Error fetching kecamatan length data:", error);
           // Show error message instead of dummy data
-          this.showChartError(districtLengthCtx, "Gagal memuat data panjang jalan");
+          this.showChartError(
+            districtLengthCtx,
+            "Gagal memuat data panjang jalan"
+          );
         }
       }
 
@@ -2239,11 +2258,12 @@ export default {
     },
     async updateKondisiMaterialCharts(kecamatan) {
       try {
+        const apiUrl = this.config.public.apiUrl || "https://sijali-production.up.railway.app/api";
         const url = kecamatan
-          ? `/api/jalan/stats/kondisi-material-filtered?kecamatan=${encodeURIComponent(
+          ? `${apiUrl}/jalan/stats/kondisi-material-filtered?kecamatan=${encodeURIComponent(
               kecamatan
             )}`
-          : "/api/jalan/stats/kondisi-material-filtered";
+          : `${apiUrl}/jalan/stats/kondisi-material-filtered`;
 
         const response = await fetch(url);
         const result = await response.json();
@@ -2261,11 +2281,12 @@ export default {
     },
     async updateMaterialDamageChart(kecamatan) {
       try {
+        const apiUrl = this.config.public.apiUrl || "https://sijali-production.up.railway.app/api";
         const url = kecamatan
-          ? `/api/jalan/stats/material-kondisi?kecamatan=${encodeURIComponent(
+          ? `${apiUrl}/jalan/stats/material-kondisi?kecamatan=${encodeURIComponent(
               kecamatan
             )}`
-          : "/api/jalan/stats/material-kondisi";
+          : `${apiUrl}/jalan/stats/material-kondisi`;
 
         const response = await fetch(url);
         const result = await response.json();
