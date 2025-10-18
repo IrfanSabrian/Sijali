@@ -89,7 +89,11 @@
           </div>
         </div>
 
-        <div class="hero-visual hidden md:block" data-aos="fade-left" data-aos-delay="600">
+        <div
+          class="hero-visual hidden md:block"
+          data-aos="fade-left"
+          data-aos-delay="600"
+        >
           <WeatherWidget />
         </div>
       </div>
@@ -608,11 +612,20 @@ const loadHeroStats = async () => {
 
     // Mark stats as loaded (but don't start animation yet)
     statsLoaded.value = true;
-    
+
     // Start counter animation immediately after data is loaded
     setTimeout(() => {
       startCounters();
     }, 500); // Small delay to ensure DOM is ready
+    
+    // Load chart data after hero stats are loaded (lower priority)
+    setTimeout(async () => {
+      console.log("Hero stats loaded, loading charts...");
+      // Call initCharts from the component instance
+      if (window.initChartsComponent) {
+        await window.initChartsComponent.initCharts();
+      }
+    }, 1000);
   } catch (error) {
     console.error("Error loading hero stats:", error);
   }
@@ -761,8 +774,8 @@ onMounted(() => {
   // Initialize counters first
   initializeCounters();
 
-  // Load hero stats from API
-  loadHeroStats();
+  // Load hero stats from API first (priority)
+  await loadHeroStats();
 
   // Setup intersection observer for stat cards (with delay to ensure DOM is ready)
   setTimeout(() => {
@@ -1555,6 +1568,8 @@ useHead({
 
 .donut-chart {
   @apply relative flex justify-center mb-4;
+  min-height: 200px;
+  min-width: 200px;
 }
 
 .donut-svg {
@@ -1593,8 +1608,10 @@ useHead({
   }
 
   .donut-chart {
-    height: 150px;
-    width: 150px;
+    height: 160px;
+    width: 160px;
+    min-height: 160px;
+    min-width: 160px;
   }
 }
 
@@ -1604,8 +1621,10 @@ useHead({
   }
 
   .donut-chart {
-    height: 120px;
-    width: 120px;
+    height: 180px;
+    width: 180px;
+    min-height: 180px;
+    min-width: 180px;
   }
 
   .analisis-card {
@@ -1842,7 +1861,6 @@ useHead({
 }
 
 @media (max-width: 320px) {
-
   .hero-stats {
     padding: 1vh 3vw;
   }
@@ -1923,7 +1941,11 @@ Chart.register(...registerables);
 
 export default {
   async mounted() {
-    await this.initCharts();
+    // Set component instance for external access
+    window.initChartsComponent = this;
+    
+    // Don't call initCharts here, it will be called after hero stats are loaded
+    console.log("Component mounted, waiting for hero stats...");
   },
   methods: {
     showChartError(ctx, message) {
@@ -1983,11 +2005,11 @@ export default {
     async initCharts() {
       // Wait for DOM to be ready
       await this.$nextTick();
-
+      
       // Load kecamatan options first
       await this.loadKecamatanOptions();
 
-      // Load initial data for both charts (all kecamatan)
+      // Load initial data for both charts (all kecamatan) - lower priority
       console.log("Loading initial chart data...");
       await this.updateKondisiMaterialCharts("");
       await this.updateMaterialDamageChart("");
