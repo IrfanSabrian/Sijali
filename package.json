@@ -1,0 +1,24 @@
+{
+  "name": "sijali-web",
+  "version": "1.0.0",
+  "description": "SIJALI - Sistem Informasi Jalan Lingkungan Kab. Kubu Raya",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "build": "cd backend && npm install",
+    "postinstall": "cd backend && npm install"
+  },
+  "keywords": [
+    "sijali",
+    "jalan-lingkungan",
+    "kubu-raya",
+    "gis",
+    "postgis"
+  ],
+  "author": "Irfan Sabrian",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

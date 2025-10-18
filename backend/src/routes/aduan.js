@@ -2,8 +2,10 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const { PrismaClient, Prisma } = require("@prisma/client");
 const nodemailer = require("nodemailer");
+const cloudinary = require("../config/cloudinary");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -228,10 +230,19 @@ const sendStatusEmail = async ({ to, nomorRuas, status, description }) => {
   }
 };
 
-// Storage sementara di memori, lalu kita simpan manual ke folder tujuan
+// Setup Cloudinary storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: process.env.CLOUDINARY_FOLDER || "SIJALI",
+    allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
+    transformation: [{ width: 1200, height: 1200, crop: "limit" }],
+  },
+});
+
 const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024, files: 10 },
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024, files: 10 }, // 10MB limit per file, max 10 files
 });
 
 // GET /api/aduan - list semua aduan dengan pagination dan filter
@@ -282,17 +293,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Utility: buat nama file unik
-const generateFileName = (originalName) => {
-  const ext = path.extname(originalName || "");
-  const base = path
-    .basename(originalName || "file", ext)
-    .replace(/[^a-zA-Z0-9_-]/g, "_");
-  const ts = new Date().toISOString().replace(/[:.]/g, "-");
-  return `${base}-${ts}-${Math.random().toString(36).slice(2, 8)}${ext}`;
-};
-
-// POST /api/aduan - terima form multipart dan simpan ke DB + file ke public/aduan/{nomor_ruas}
+// POST /api/aduan - terima form multipart dan simpan ke DB + upload ke Cloudinary
 router.post("/", upload.array("photos", 10), async (req, res) => {
   try {
     const nomorRuas = (req.body.nomor_ruas || "").trim();
@@ -307,29 +308,16 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
         .json({ success: false, error: "nomor_ruas wajib diisi" });
     }
 
-    // Folder path target di frontend/public/aduan/{nomor_ruas}
-    const frontendRoot = path.resolve(__dirname, "../../../frontend/public");
-    const folderPath = path.join(frontendRoot, "aduan", nomorRuas);
-
-    // Pastikan folder ada
-    fs.mkdirSync(folderPath, { recursive: true });
-
-    // Simpan file
-    const uploadedFiles = [];
-    for (const file of req.files || []) {
-      const filename = generateFileName(file.originalname);
-      const destPath = path.join(folderPath, filename);
-      fs.writeFileSync(destPath, file.buffer);
-      uploadedFiles.push(filename);
-    }
+    // Get uploaded photos URLs from Cloudinary
+    const photos = req.files ? req.files.map((file) => file.path) : [];
 
     // Bangun ARRAY[...]::text[] aman via Prisma.sql
     let photosArraySql;
-    if (uploadedFiles.length === 0) {
+    if (photos.length === 0) {
       photosArraySql = Prisma.sql`ARRAY[]::text[]`;
     } else {
       photosArraySql = Prisma.sql`ARRAY[${Prisma.join(
-        uploadedFiles.map((f) => Prisma.sql`${f}`)
+        photos.map((url) => Prisma.sql`${url}`)
       )}]::text[]`;
     }
 

@@ -1,0 +1,32 @@
+# Ignore files for Railway deployment
+node_modules/
+.git/
+.gitignore
+README.md
+*.log
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Frontend files (not needed for backend)
+frontend/
+public/
+
+# SQL files (already imported)
+*.sql
+
+# GeoJSON files (not needed for backend)
+*.geojson
+
+# Development files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
