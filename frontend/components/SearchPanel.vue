@@ -206,7 +206,6 @@
 
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import { useDataService } from "~/composables/useDataService";
 import { useAuth } from "~/composables/useAuth";
 
 const emit = defineEmits([
@@ -215,7 +214,6 @@ const emit = defineEmits([
   "coordinates-selected",
 ]);
 
-const { searchFeatures, kecamatanData } = useDataService();
 const { isAuthenticated, canAccessLayers } = useAuth();
 
 // Search state
@@ -273,52 +271,19 @@ const performSearch = async () => {
   isSearching.value = true;
 
   try {
-    // Search in loaded layers
-    const layerResults = searchFeatures(searchQuery.value);
+    // Simple search implementation - can be enhanced later with API calls
+    const mockResults = [
+      {
+        id: "search_1",
+        name: `Hasil pencarian untuk "${searchQuery.value}"`,
+        address: "Kabupaten Kubu Raya, Kalimantan Barat",
+        coordinates: { lat: -0.0263, lng: 109.3425 },
+        type: "search",
+        layer: "Pencarian",
+      },
+    ];
 
-    // Search in kecamatan data
-    const kecamatanResults = kecamatanData
-      .filter(
-        (kec) =>
-          kec.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          kec.desas.some((desa) =>
-            desa.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-          )
-      )
-      .map((kec) => ({
-        id: `kec_${kec.id}`,
-        name: kec.name,
-        address: `Kabupaten Kubu Raya, Kalimantan Barat`,
-        coordinates: { lat: kec.center[1], lng: kec.center[0] },
-        type: "administrative",
-        layer: "Kecamatan",
-      }));
-
-    // Search in desa data
-    const desaResults = [];
-    kecamatanData.forEach((kec) => {
-      kec.desas
-        .filter((desa) =>
-          desa.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-        )
-        .forEach((desa) => {
-          desaResults.push({
-            id: `desa_${desa.id}`,
-            name: desa.name,
-            address: `${kec.name}, Kabupaten Kubu Raya`,
-            coordinates: { lat: kec.center[1], lng: kec.center[0] },
-            type: "administrative",
-            layer: "Desa",
-          });
-        });
-    });
-
-    // Combine all results
-    searchResults.value = [
-      ...layerResults,
-      ...kecamatanResults,
-      ...desaResults,
-    ].slice(0, 10); // Limit to 10 results
+    searchResults.value = mockResults;
 
     // Add to recent searches
     const newSearch = {

@@ -838,6 +838,7 @@ useHead({
 .hero-content {
   @apply w-full relative z-10 flex items-center justify-between;
   padding: 5vh 10vw;
+  min-height: 80vh;
 }
 
 .hero-text {
@@ -909,6 +910,8 @@ useHead({
   @apply bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105;
   position: relative;
   overflow: hidden;
+  min-height: 48px;
+  touch-action: manipulation;
 }
 
 .btn-primary::before {
@@ -935,6 +938,8 @@ useHead({
   @apply bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-1;
   position: relative;
   overflow: hidden;
+  min-height: 48px;
+  touch-action: manipulation;
 }
 
 .btn-secondary::before {
@@ -1014,7 +1019,7 @@ useHead({
 }
 
 .hero-stats {
-  @apply w-full relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
+  @apply w-full relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6;
   padding: 3vh 10vw;
 }
 
@@ -1057,6 +1062,7 @@ useHead({
   @apply py-20;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   background: linear-gradient(to bottom, #f8fafc 0%, #e0e7ff 100%);
+  min-height: 60vh;
 }
 
 .map-container {
@@ -1580,6 +1586,38 @@ useHead({
   .district-svg {
     @apply w-20 h-20;
   }
+
+  .chart-container {
+    height: 250px;
+  }
+
+  .donut-chart {
+    height: 150px;
+    width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    height: 200px;
+  }
+
+  .donut-chart {
+    height: 120px;
+    width: 120px;
+  }
+
+  .analisis-card {
+    @apply p-3;
+  }
+
+  .card-header {
+    @apply flex-col items-start gap-2;
+  }
+
+  .card-title {
+    @apply text-sm;
+  }
 }
 
 .priority-title {
@@ -1606,9 +1644,34 @@ useHead({
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .hero-content {
+    @apply flex-col text-center;
+    padding: 4vh 6vw;
+  }
+
+  .hero-visual {
+    @apply ml-0 mt-8 max-w-full;
+  }
+
+  .hero-stats {
+    @apply grid-cols-2;
+    padding: 3vh 6vw;
+  }
+
+  .analisis-grid {
+    @apply grid-cols-1;
+  }
+
+  .dual-donut-container {
+    @apply flex-col;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-section {
     padding-top: 8vh;
+    min-height: 100vh;
   }
 
   .hero-content {
@@ -1617,6 +1680,7 @@ useHead({
   }
 
   .hero-stats {
+    @apply grid-cols-1 gap-4;
     padding: 2vh 5vw;
   }
 
@@ -1637,11 +1701,11 @@ useHead({
   }
 
   .hero-description {
-    @apply text-base;
+    @apply text-base max-w-full;
   }
 
   .hero-buttons {
-    @apply flex-col items-center;
+    @apply flex-col items-center gap-4;
   }
 
   .btn-primary,
@@ -1664,6 +1728,196 @@ useHead({
   .map-container,
   .analisis-content {
     @apply px-4;
+  }
+
+  .map-section {
+    @apply py-12;
+    min-height: 50vh;
+  }
+
+  .map-title-text {
+    @apply text-lg;
+  }
+
+  .section-title {
+    @apply text-2xl;
+  }
+
+  .section-description {
+    @apply text-lg;
+  }
+
+  .card-title {
+    @apply text-lg;
+  }
+
+  .stat-card {
+    @apply p-4;
+  }
+
+  .stat-number {
+    @apply text-xl;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding-top: 6vh;
+  }
+
+  .hero-content {
+    padding: 2vh 4vw;
+  }
+
+  .hero-stats {
+    padding: 1.5vh 4vw;
+  }
+
+  .title-line-1 {
+    @apply text-xl;
+  }
+
+  .title-line-2 {
+    @apply text-2xl;
+  }
+
+  .title-highlight {
+    @apply text-lg;
+  }
+
+  .hero-description {
+    @apply text-sm;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    @apply px-6 py-3 text-sm;
+  }
+
+  .btn-title {
+    @apply text-sm;
+  }
+
+  .btn-subtitle {
+    @apply text-xs;
+  }
+
+  .section-title {
+    @apply text-xl;
+  }
+
+  .section-description {
+    @apply text-base;
+  }
+
+  .analisis-card {
+    @apply p-4;
+  }
+
+  .card-title {
+    @apply text-base;
+  }
+
+  .stat-card {
+    @apply p-3;
+  }
+
+  .stat-number {
+    @apply text-lg;
+  }
+
+  .stat-label {
+    @apply text-xs;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
+
+  .donut-chart {
+    height: 150px;
+    width: 150px;
+  }
+
+  .donut-svg {
+    @apply w-24 h-24;
+  }
+}
+
+@media (max-width: 320px) {
+  .hero-content {
+    padding: 1.5vh 3vw;
+  }
+
+  .hero-stats {
+    padding: 1vh 3vw;
+  }
+
+  .title-line-1 {
+    @apply text-lg;
+  }
+
+  .title-line-2 {
+    @apply text-xl;
+  }
+
+  .title-highlight {
+    @apply text-base;
+  }
+
+  .hero-description {
+    @apply text-xs;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    @apply px-4 py-2 text-xs;
+    min-height: 40px;
+  }
+
+  .btn-title {
+    @apply text-xs;
+  }
+
+  .btn-subtitle {
+    @apply text-xs;
+  }
+
+  .stat-card {
+    @apply p-2;
+  }
+
+  .stat-number {
+    @apply text-base;
+  }
+
+  .stat-label {
+    @apply text-xs;
+  }
+
+  .section-title {
+    @apply text-lg;
+  }
+
+  .section-description {
+    @apply text-sm;
+  }
+
+  .analisis-card {
+    @apply p-2;
+  }
+
+  .card-title {
+    @apply text-xs;
+  }
+
+  .chart-container {
+    height: 180px;
+  }
+
+  .donut-chart {
+    height: 100px;
+    width: 100px;
   }
 }
 </style>

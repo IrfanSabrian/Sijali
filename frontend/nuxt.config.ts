@@ -32,6 +32,11 @@ export default defineNuxtConfig({
       ],
       link: [
         {
+          rel: "icon",
+          type: "image/svg+xml",
+          href: "/sijali-logo.svg",
+        },
+        {
           rel: "stylesheet",
           href: "https://js.arcgis.com/4.28/esri/themes/light/main.css",
         },

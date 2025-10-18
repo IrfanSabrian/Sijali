@@ -303,7 +303,6 @@
 
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import { useDataService } from "~/composables/useDataService";
 import { useAuth } from "~/composables/useAuth";
 
 const emit = defineEmits([
@@ -313,16 +312,12 @@ const emit = defineEmits([
   "layer-loaded",
 ]);
 
-const {
-  availableDatasets,
-  loadedLayers,
-  isLoading: isLoadingData,
-  loadLayer,
-  initializeDatasets,
-  getLayerStats,
-} = useDataService();
-
 const { isAuthenticated, canAccessLayers, canEditData } = useAuth();
+
+// Mock data for layers - can be replaced with API calls later
+const availableDatasets = ref([]);
+const loadedLayers = ref(new Map());
+const isLoadingData = ref(false);
 
 // Basemap options - RDTR Interaktif style
 const selectedBasemap = ref("hybrid");
@@ -702,7 +697,15 @@ const loadKecamatanData = async (kecamatan) => {
   }
 
   try {
-    const layerData = await loadLayer(kecamatan.id, kecamatan);
+    // Mock layer data - can be replaced with API calls later
+    const layerData = {
+      id: kecamatan.id,
+      name: kecamatan.name,
+      data: null, // Will be loaded from API
+      visible: true,
+      opacity: 1.0,
+    };
+
     emit("layer-loaded", layerData);
 
     // Show success message
@@ -715,6 +718,7 @@ const loadKecamatanData = async (kecamatan) => {
 
 // Initialize datasets on mount
 onMounted(() => {
-  initializeDatasets();
+  // Initialize with empty datasets - can be populated with API calls later
+  availableDatasets.value = [];
 });
 </script>
