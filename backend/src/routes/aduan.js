@@ -357,9 +357,9 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
       anonim,
       description,
       email,
-      photos: photos.length
+      photos: photos.length,
     });
-    
+
     // Insert menggunakan query mentah (tabel aduan dibuat via SQL file)
     const rows = await prisma.$queryRaw(
       Prisma.sql`

@@ -658,8 +658,9 @@ const getMostUsedMaterial = () => {
 // Filter methods
 const fetchMaterialStats = async () => {
   try {
-    const API_BASE = "http://localhost:3001";
-    let url = `${API_BASE}/api/jalan/stats/material-kondisi`;
+    const config = useRuntimeConfig();
+    const apiUrl = config.public.apiUrl;
+    let url = `${apiUrl}/jalan/stats/material-kondisi`;
     const params = new URLSearchParams();
 
     if (selectedKecamatan.value) {
@@ -691,9 +692,10 @@ const fetchDesaList = async () => {
   }
 
   try {
-    const API_BASE = "http://localhost:3001";
+    const config = useRuntimeConfig();
+    const apiUrl = config.public.apiUrl;
     const response = await fetch(
-      `${API_BASE}/api/jalan/filters/desa?kecamatan=${selectedKecamatan.value}`
+      `${apiUrl}/jalan/filters/desa?kecamatan=${selectedKecamatan.value}`
     );
     const data = await response.json();
 

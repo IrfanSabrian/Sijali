@@ -329,7 +329,9 @@ const handleLogin = async () => {
   loading.value = true;
 
   try {
-    const response = await fetch("http://localhost:3001/api/auth/login", {
+    const config = useRuntimeConfig();
+    const apiUrl = config.public.apiUrl;
+    const response = await fetch(`${apiUrl}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

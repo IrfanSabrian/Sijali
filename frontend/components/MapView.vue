@@ -800,7 +800,7 @@
                 >
                   <label
                     class="block text-sm text-gray-600 dark:text-gray-300 mb-1"
-                    >Foto (bisa banyak)</label
+                    >Foto (bisa banyak) <span class="text-red-500">*</span></label
                   >
                   <input
                     type="file"
