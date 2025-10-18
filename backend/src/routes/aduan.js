@@ -7,6 +7,20 @@ const { PrismaClient, Prisma } = require("@prisma/client");
 const nodemailer = require("nodemailer");
 const cloudinary = require("../config/cloudinary");
 
+// SendGrid as alternative email service
+let sendGridAvailable = false;
+let sendGridMail = null;
+if (process.env.SENDGRID_API_KEY) {
+  try {
+    sendGridMail = require("@sendgrid/mail");
+    sendGridMail.setApiKey(process.env.SENDGRID_API_KEY);
+    sendGridAvailable = true;
+    console.log("✅ SendGrid configured as alternative email service");
+  } catch (error) {
+    console.warn("⚠️  SendGrid not available:", error.message);
+  }
+}
+
 const router = express.Router();
 const prisma = new PrismaClient();
 
@@ -29,7 +43,7 @@ let transporter = null;
 let transporterConfig = null;
 
 if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-  // Primary configuration - optimized for Railway
+  // Primary configuration - optimized for Railway with more aggressive settings
   const primaryConfig = {
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT || 587),
@@ -40,21 +54,24 @@ if (process.env.SMTP_USER && process.env.SMTP_PASS) {
     },
     debug: false,
     logger: false,
-    connectionTimeout: 120000, // 2 minutes
-    greetingTimeout: 60000, // 1 minute
-    socketTimeout: 120000, // 2 minutes
-    pool: true,
-    maxConnections: 3, // Reduced for Railway
-    maxMessages: 50, // Reduced for Railway
-    rateDelta: 30000, // 30 seconds
-    rateLimit: 3, // 3 emails per 30 seconds
+    connectionTimeout: 300000, // 5 minutes - very aggressive for Railway
+    greetingTimeout: 120000, // 2 minutes
+    socketTimeout: 300000, // 5 minutes
+    pool: false, // Disable pooling for Railway
     tls: {
       rejectUnauthorized: false,
-      ciphers: "SSLv3",
+      ciphers: "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
       secureProtocol: "TLSv1_2_method",
+      servername: process.env.SMTP_HOST,
     },
-    requireTLS: true,
+    requireTLS: false, // More permissive for Railway
     ignoreTLS: false,
+    // Additional Railway-specific options
+    name: "sijali-railway",
+    localAddress: undefined,
+    connectionTimeout: 300000,
+    greetingTimeout: 120000,
+    socketTimeout: 300000,
   };
 
   // Alternative configuration for better Railway compatibility
@@ -68,42 +85,70 @@ if (process.env.SMTP_USER && process.env.SMTP_PASS) {
     },
     debug: false,
     logger: false,
-    connectionTimeout: 180000, // 3 minutes
-    greetingTimeout: 90000, // 1.5 minutes
-    socketTimeout: 180000, // 3 minutes
+    connectionTimeout: 300000, // 5 minutes
+    greetingTimeout: 120000, // 2 minutes
+    socketTimeout: 300000, // 5 minutes
     pool: false, // Disable pooling for alternative config
     tls: {
       rejectUnauthorized: false,
-      ciphers: "SSLv3",
+      ciphers: "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
       secureProtocol: "TLSv1_2_method",
+      servername: process.env.SMTP_HOST,
     },
-    requireTLS: true,
+    requireTLS: false, // More permissive
     ignoreTLS: false,
+    name: "sijali-railway-alt",
+    localAddress: undefined,
   };
 
-  // Try primary configuration first
-  try {
-    transporter = nodemailer.createTransport(primaryConfig);
-    transporterConfig = "primary";
-    console.log(
-      "✅ Email transporter configured (Primary):",
-      process.env.SMTP_USER
-    );
-  } catch (error) {
-    console.warn(
-      "⚠️  Primary email config failed, trying alternative:",
-      error.message
-    );
+  // Third configuration - try different approach
+  const thirdConfig = {
+    host: process.env.SMTP_HOST,
+    port: 25, // Try port 25 (non-encrypted)
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    debug: false,
+    logger: false,
+    connectionTimeout: 300000,
+    greetingTimeout: 120000,
+    socketTimeout: 300000,
+    pool: false,
+    tls: {
+      rejectUnauthorized: false,
+    },
+    requireTLS: false,
+    ignoreTLS: true, // Allow non-encrypted for Railway
+    name: "sijali-railway-plain",
+  };
+
+  // Try configurations in order of preference
+  const configs = [
+    { config: primaryConfig, name: "Primary (Port 587)" },
+    { config: alternativeConfig, name: "Alternative (Port 465)" },
+    { config: thirdConfig, name: "Third (Port 25)" },
+  ];
+
+  let configSuccess = false;
+  for (let i = 0; i < configs.length; i++) {
     try {
-      transporter = nodemailer.createTransport(alternativeConfig);
-      transporterConfig = "alternative";
+      console.log(`🔍 Trying ${configs[i].name} configuration...`);
+      transporter = nodemailer.createTransport(configs[i].config);
+      transporterConfig = configs[i].name.toLowerCase().split(" ")[0];
       console.log(
-        "✅ Email transporter configured (Alternative):",
+        `✅ Email transporter configured (${configs[i].name}):`,
         process.env.SMTP_USER
       );
-    } catch (altError) {
-      console.error("❌ Both email configurations failed:", altError.message);
-      transporter = null;
+      configSuccess = true;
+      break;
+    } catch (error) {
+      console.warn(`⚠️  ${configs[i].name} config failed:`, error.message);
+      if (i === configs.length - 1) {
+        console.error("❌ All email configurations failed");
+        transporter = null;
+      }
     }
   }
 } else {
@@ -133,6 +178,29 @@ if (transporter) {
   testEmailConnection().catch(console.error);
 }
 
+// SendGrid email function as fallback
+const sendEmailViaSendGrid = async (to, subject, html) => {
+  if (!sendGridAvailable || !sendGridMail) {
+    throw new Error("SendGrid not available");
+  }
+
+  const msg = {
+    to: to,
+    from: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER,
+    subject: subject,
+    html: html,
+  };
+
+  try {
+    const response = await sendGridMail.send(msg);
+    console.log("✅ Email sent via SendGrid:", response[0].statusCode);
+    return { success: true, messageId: response[0].headers["x-message-id"] };
+  } catch (error) {
+    console.error("❌ SendGrid email failed:", error.message);
+    throw error;
+  }
+};
+
 const sendStatusEmail = async (
   { to, nomorRuas, status, description },
   retryCount = 0
@@ -142,9 +210,11 @@ const sendStatusEmail = async (
     return;
   }
 
-  // Skip jika SMTP belum dikonfigurasi
-  if (!transporter) {
-    console.warn("⚠️  SMTP not configured, skipping email send");
+  // Skip jika SMTP dan SendGrid belum dikonfigurasi
+  if (!transporter && !sendGridAvailable) {
+    console.warn(
+      "⚠️  Neither SMTP nor SendGrid configured, skipping email send"
+    );
     return;
   }
 
@@ -311,28 +381,41 @@ const sendStatusEmail = async (
         retryCount + 1
       })`
     );
-    console.log(
-      `📧 Using transporter config: ${transporterConfig || "unknown"}`
-    );
 
-    const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to,
-      subject,
-      html,
-    };
+    // Try SMTP first if available
+    if (transporter) {
+      console.log(
+        `📧 Using SMTP transporter config: ${transporterConfig || "unknown"}`
+      );
 
-    console.log(`📧 Mail options:`, {
-      from: mailOptions.from,
-      to: mailOptions.to,
-      subject: mailOptions.subject,
-      htmlLength: mailOptions.html.length,
-    });
+      const mailOptions = {
+        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        to,
+        subject,
+        html,
+      };
 
-    const info = await transporter.sendMail(mailOptions);
+      console.log(`📧 SMTP Mail options:`, {
+        from: mailOptions.from,
+        to: mailOptions.to,
+        subject: mailOptions.subject,
+        htmlLength: mailOptions.html.length,
+      });
 
-    console.log(`✅ Email sent successfully! MessageId: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
+      const info = await transporter.sendMail(mailOptions);
+      console.log(
+        `✅ Email sent successfully via SMTP! MessageId: ${info.messageId}`
+      );
+      return { success: true, messageId: info.messageId };
+    }
+    // Fallback to SendGrid if SMTP not available
+    else if (sendGridAvailable) {
+      console.log(`📧 Using SendGrid as fallback`);
+      const result = await sendEmailViaSendGrid(to, subject, html);
+      return result;
+    } else {
+      throw new Error("No email service available");
+    }
   } catch (error) {
     console.error(
       `❌ Error sending email (Attempt ${retryCount + 1}):`,
@@ -364,6 +447,20 @@ const sendStatusEmail = async (
         { to, nomorRuas, status, description },
         retryCount + 1
       );
+    }
+
+    // If SMTP failed and SendGrid is available, try SendGrid as last resort
+    if (transporter && sendGridAvailable && retryCount === 0) {
+      console.log("🔄 SMTP failed, trying SendGrid as fallback...");
+      try {
+        const result = await sendEmailViaSendGrid(to, subject, html);
+        return result;
+      } catch (sendGridError) {
+        console.error(
+          "❌ SendGrid fallback also failed:",
+          sendGridError.message
+        );
+      }
     }
 
     // Log final failure with more details
