@@ -1928,12 +1928,6 @@ export default {
   async mounted() {
     await this.initCharts();
   },
-  setup() {
-    const config = useRuntimeConfig();
-    return {
-      config,
-    };
-  },
   methods: {
     showChartError(ctx, message) {
       // Clear the canvas and show error message
@@ -1952,7 +1946,8 @@ export default {
     },
     async loadKecamatanOptions() {
       try {
-        const apiUrl = this.config.public.apiUrl;
+        const config = useRuntimeConfig();
+        const apiUrl = config.public.apiUrl;
         const response = await fetch(`${apiUrl}/jalan/filters/kecamatan`);
         const result = await response.json();
 
@@ -2004,9 +1999,8 @@ export default {
         // Fetch real data from API
         try {
           console.log("Fetching data from API...");
-          const apiUrl =
-            this.config.public.apiUrl ||
-            "https://sijali-production.up.railway.app/api";
+          const config = useRuntimeConfig();
+          const apiUrl = config.public.apiUrl;
           const response = await fetch(
             `${apiUrl}/jalan/stats/kecamatan-kondisi`,
             {
@@ -2120,9 +2114,8 @@ export default {
         // Fetch real data from API
         try {
           console.log("Fetching kecamatan length data from API...");
-          const apiUrl =
-            this.config.public.apiUrl ||
-            "https://sijali-production.up.railway.app/api";
+          const config = useRuntimeConfig();
+          const apiUrl = config.public.apiUrl;
           const response = await fetch(`${apiUrl}/jalan/stats/summary`, {
             method: "GET",
             mode: "cors",
@@ -2264,7 +2257,8 @@ export default {
     },
     async updateKondisiMaterialCharts(kecamatan) {
       try {
-        const apiUrl = this.config.public.apiUrl;
+        const config = useRuntimeConfig();
+        const apiUrl = config.public.apiUrl;
         const url = kecamatan
           ? `${apiUrl}/jalan/stats/kondisi-material-filtered?kecamatan=${encodeURIComponent(
               kecamatan
@@ -2287,7 +2281,8 @@ export default {
     },
     async updateMaterialDamageChart(kecamatan) {
       try {
-        const apiUrl = this.config.public.apiUrl;
+        const config = useRuntimeConfig();
+        const apiUrl = config.public.apiUrl;
         const url = kecamatan
           ? `${apiUrl}/jalan/stats/material-kondisi?kecamatan=${encodeURIComponent(
               kecamatan
