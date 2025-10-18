@@ -198,6 +198,8 @@ export const useApiService = () => {
     files = [],
   }) => {
     try {
+      console.log("postAduan: Starting request...");
+      
       const form = new FormData();
       form.append("nomor_ruas", nomorRuas || "");
       if (namaPelapor) form.append("nama_pelapor", namaPelapor);
@@ -208,18 +210,30 @@ export const useApiService = () => {
       // Tambahkan banyak file
       files.forEach((file) => form.append("photos", file));
 
+      console.log("postAduan: Sending request to", `${apiUrl}/aduan`);
+      console.log("postAduan: Form data entries:", Array.from(form.entries()));
+
       const response = await $fetch(`${apiUrl}/aduan`, {
         method: "POST",
         body: form,
       });
 
+      console.log("postAduan: Response received:", response);
+
       if (!response.success) {
         throw new Error(response.error || "Gagal mengirim aduan");
       }
 
+      console.log("postAduan: Success, returning data");
       return { success: true, data: response.data };
     } catch (error) {
       console.error("Error postAduan:", error);
+      console.error("Error details:", {
+        message: error.message,
+        status: error.status,
+        statusText: error.statusText,
+        data: error.data
+      });
       return { success: false, error: error.message || "Gagal mengirim aduan" };
     }
   };

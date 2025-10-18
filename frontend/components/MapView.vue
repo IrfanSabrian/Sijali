@@ -84,7 +84,8 @@
             <div
               class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"
             ></div>
-            <p class="text-gray-600 dark:text-gray-400">Memuat peta...</p>
+            <p class="text-gray-600 dark:text-gray-400">Memuat peta dan data batas wilayah...</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Mohon tunggu sebentar</p>
           </div>
         </div>
 
@@ -1825,6 +1826,9 @@ onMounted(async () => {
       currentScale.value = Math.round(newScale);
     });
 
+    // Hide loading indicator
+    loading.value = false;
+
     console.log("Map loaded successfully");
 
     // Load boundary GeoJSON data for map visualization only (NOT for statistics)
@@ -1835,9 +1839,6 @@ onMounted(async () => {
 
     // Display kabupaten boundary by default (pertama kali dimuat)
     await displayBatasKabupaten();
-
-    // Hide loading indicator AFTER all polygon data is loaded
-    loading.value = false;
 
     // Set initial view to kabupaten boundary immediately (using extent)
     if (batasKabupatenLayer && batasKabupatenLayer.graphics.length > 0) {
@@ -2508,8 +2509,20 @@ const submitAduan = async () => {
     toast.warning("Email wajib diisi");
     return;
   }
+  
+  console.log("Starting aduan submission...");
   submitLoading.value = true;
+  
   try {
+    console.log("Calling postAduan with data:", {
+      nomorRuas: aduanForm.nomorRuas,
+      namaPelapor: aduanForm.namaPelapor,
+      anonim: aduanForm.anonim,
+      keterangan: aduanForm.keterangan,
+      email: aduanForm.email,
+      filesCount: aduanForm.files.length,
+    });
+    
     const resp = await postAduan({
       nomorRuas: aduanForm.nomorRuas,
       namaPelapor: aduanForm.namaPelapor,
@@ -2518,22 +2531,33 @@ const submitAduan = async () => {
       email: aduanForm.email,
       files: aduanForm.files,
     });
-    if (!resp.success) throw new Error(resp.error || "Gagal mengirim aduan");
+    
+    console.log("postAduan response:", resp);
+    
+    if (!resp.success) {
+      throw new Error(resp.error || "Gagal mengirim aduan");
+    }
+    
+    console.log("Aduan submitted successfully, showing success toast...");
     toast.success(
       "Aduan berhasil terkirim! Aduan Anda akan segera diproses. Terima kasih telah melapor.",
       5000
     );
+    
+    // Close modal and reset form
     aduanModalVisible.value = false;
-    // reset form ringan (biarkan nomor ruas tetap terisi)
     aduanForm.namaPelapor = "";
     aduanForm.anonimString = "false";
     aduanForm.keterangan = "";
     aduanForm.email = "";
     aduanForm.files = [];
+    
+    console.log("Form reset and modal closed");
   } catch (e) {
-    console.error(e);
+    console.error("Error in submitAduan:", e);
     toast.error(e.message || "Gagal mengirim aduan");
   } finally {
+    console.log("Setting submitLoading to false");
     submitLoading.value = false;
   }
 };

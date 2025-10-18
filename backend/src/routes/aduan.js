@@ -245,8 +245,7 @@ try {
   storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: (req, file) => {
-      // Dynamic folder based on nomor_ruas
-      const nomorRuas = req.body.nomor_ruas || "unknown";
+      const nomorRuas = req.body.nomor_ruas || 'unknown';
       return {
         folder: `${process.env.CLOUDINARY_FOLDER || "SIJALI"}/aduan/${nomorRuas}`,
         allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
@@ -371,22 +370,16 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
     console.log("Database insert result:", created);
 
     // Kirim email status "diajukan" ke pelapor bila ada email
-    if (email && email.trim()) {
-      try {
-        console.log("Sending status email to:", email);
-        await sendStatusEmail({
-          to: email,
-          nomorRuas: nomorRuas,
-          status: "diajukan",
-          description,
-        });
-        console.log("Status email sent successfully");
-      } catch (emailError) {
-        console.error("Error sending status email:", emailError);
-        // Continue even if email fails
-      }
-    } else {
-      console.log("No email provided, skipping email notification");
+    try {
+      await sendStatusEmail({
+        to: email,
+        nomorRuas: nomorRuas,
+        status: "diajukan",
+        description,
+      });
+    } catch (emailError) {
+      console.error("Error sending status email:", emailError);
+      // Continue even if email fails
     }
 
     return res.json({ success: true, data: serializeBigInt(created) });
