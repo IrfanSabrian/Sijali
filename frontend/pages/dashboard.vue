@@ -1607,23 +1607,10 @@
                         </td>
                         <!-- Username -->
                         <td class="px-3 py-3 whitespace-nowrap">
-                          <div class="flex items-center">
-                            <div
-                              class="flex-shrink-0 h-8 w-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center"
-                            >
-                              <span
-                                class="text-sm font-medium text-purple-600 dark:text-purple-300"
-                              >
-                                {{ index + 1 }}
-                              </span>
-                            </div>
-                            <div class="ml-3">
-                              <div
-                                class="text-sm font-medium text-gray-900 dark:text-white"
-                              >
-                                {{ user.username || "-" }}
-                              </div>
-                            </div>
+                          <div
+                            class="text-sm font-medium text-gray-900 dark:text-white"
+                          >
+                            {{ user.username || "-" }}
                           </div>
                         </td>
                         <!-- Email -->

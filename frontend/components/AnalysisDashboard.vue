@@ -787,18 +787,19 @@ const createKecamatanChart = () => {
   }
 
   const ctx = kecamatanChart.value.getContext("2d");
-  const topKecamatan = [...props.kecamatanStats]
-    .sort((a, b) => (b.totalLength || 0) - (a.totalLength || 0))
-    .slice(0, 5);
+  // Show all kecamatan, not just top 5
+  const allKecamatan = [...props.kecamatanStats].sort(
+    (a, b) => (b.totalLength || 0) - (a.totalLength || 0)
+  );
 
   kecamatanChartInstance = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: topKecamatan.map((k) => k.kecamatan),
+      labels: allKecamatan.map((k) => k.kecamatan),
       datasets: [
         {
           label: "Panjang (km)",
-          data: topKecamatan.map((k) => (k.totalLength || 0) / 1000),
+          data: allKecamatan.map((k) => (k.totalLength || 0) / 1000),
           backgroundColor: "rgba(99, 102, 241, 0.8)",
           borderColor: "rgba(99, 102, 241, 1)",
           borderWidth: 1,
@@ -851,7 +852,7 @@ const createConditionByDistrictChart = () => {
   }
 
   const ctx = conditionByDistrictChart.value.getContext("2d");
-  const data = props.kecamatanStats.slice(0, 8); // Show top 8 kecamatan
+  const data = props.kecamatanStats; // Show all kecamatan
 
   if (!data || data.length === 0) return;
 

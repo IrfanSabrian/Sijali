@@ -52,7 +52,7 @@
         <div class="tab-icon">
           <font-awesome-icon :icon="tab.icon" />
         </div>
-        <span>{{ tab.label }}</span>
+        <span class="hidden md:inline">{{ tab.label }}</span>
       </button>
     </div>
 
@@ -66,11 +66,7 @@
 
           <div class="form-group">
             <label class="form-label">Pilih Kecamatan</label>
-            <select
-              v-model="selectedKecamatan"
-              class="form-select"
-              @change="fetchDesaOptions"
-            >
+            <select v-model="selectedKecamatan" class="form-select">
               <option value="">-- Semua Kecamatan --</option>
               <option
                 v-for="kecamatan in kecamatanOptions"
@@ -388,12 +384,40 @@ const emit = defineEmits([
 
 const toast = useToast();
 
+// Mobile detection
+const isMobile = () => {
+  return window.innerWidth <= 768;
+};
+
 // Reactive data
 const activeTab = ref("layer");
+
+// Initialize filter values from localStorage or default values
 const selectedKecamatan = ref("");
 const selectedDesa = ref("");
 const selectedTahun = ref("");
 const selectedKondisi = ref("");
+
+// Load saved filter values from localStorage
+const loadSavedFilters = () => {
+  if (typeof window !== "undefined") {
+    selectedKecamatan.value = localStorage.getItem("sidebar_kecamatan") || "";
+    selectedDesa.value = localStorage.getItem("sidebar_desa") || "";
+    selectedTahun.value = localStorage.getItem("sidebar_tahun") || "";
+    selectedKondisi.value = localStorage.getItem("sidebar_kondisi") || "";
+  }
+};
+
+// Save filter values to localStorage
+const saveFilters = () => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("sidebar_kecamatan", selectedKecamatan.value);
+    localStorage.setItem("sidebar_desa", selectedDesa.value);
+    localStorage.setItem("sidebar_tahun", selectedTahun.value);
+    localStorage.setItem("sidebar_kondisi", selectedKondisi.value);
+  }
+};
+
 const selectedBasemap = ref(props.currentBasemap);
 const opacity = ref(props.currentOpacity);
 
@@ -469,14 +493,29 @@ const fetchKecamatanOptions = async () => {
   }
 };
 
+// Watch for filter changes and save to localStorage
+watch(
+  [selectedKecamatan, selectedDesa, selectedTahun, selectedKondisi],
+  () => {
+    saveFilters();
+  },
+  { deep: true }
+);
+
+// Watch for kecamatan changes to reset desa only when kecamatan actually changes
+watch(selectedKecamatan, (newKecamatan, oldKecamatan) => {
+  if (newKecamatan !== oldKecamatan) {
+    selectedDesa.value = "";
+    fetchDesaOptions();
+  }
+});
+
 // Fetch desa options based on selected kecamatan
 const fetchDesaOptions = async () => {
-  // Reset selected desa when kecamatan changes
-  selectedDesa.value = "";
-
   // Clear desa options if no kecamatan selected
   if (!selectedKecamatan.value) {
     desaOptions.value = [];
+    selectedDesa.value = "";
     return;
   }
 
@@ -530,11 +569,21 @@ const applyLayer = () => {
     tahun: selectedTahun.value,
     kondisi: selectedKondisi.value,
   });
+
+  // Close sidebar on mobile after applying filter
+  if (isMobile()) {
+    emit("close");
+  }
 };
 
 const handleBasemapChange = () => {
   // Emit basemap change event
   emit("basemap-change", selectedBasemap.value);
+
+  // Close sidebar on mobile after changing basemap
+  if (isMobile()) {
+    emit("close");
+  }
 };
 
 const basemapOptions = [
@@ -594,16 +643,31 @@ const selectBasemap = (id) => {
 const activateDrawingTool = (tool) => {
   emit("drawing-tool", tool);
   console.log(`Drawing tool activated: ${tool}`);
+
+  // Close sidebar on mobile after activating drawing tool
+  if (isMobile()) {
+    emit("close");
+  }
 };
 
 const activateSelectionMode = () => {
   emit("selection-mode");
   console.log("Selection mode activated");
+
+  // Close sidebar on mobile after activating selection mode
+  if (isMobile()) {
+    emit("close");
+  }
 };
 
 const clearDrawing = () => {
   emit("clear-drawing");
   console.log("Clear all drawings");
+
+  // Close sidebar on mobile after clearing drawings
+  if (isMobile()) {
+    emit("close");
+  }
 };
 
 const copyGeoJSON = () => {
@@ -622,6 +686,10 @@ const copyGeoJSON = () => {
 
 // Lifecycle hooks
 onMounted(() => {
+  // Load saved filter values first
+  loadSavedFilters();
+
+  // Then fetch options
   fetchKecamatanOptions();
   fetchDesaOptions();
   fetchTahunOptions();
@@ -649,6 +717,96 @@ const resolveThumbnail = (thumbnailUrl) => {
 <style scoped>
 .sidebar-panel {
   @apply w-full h-full bg-white border-r border-gray-200 flex flex-col shadow-lg;
+}
+
+/* Mobile specific styles - smaller sidebar */
+@media (max-width: 767px) {
+  .sidebar-panel {
+    @apply w-72 max-w-[85vw];
+  }
+
+  .sidebar-header {
+    @apply p-3;
+  }
+
+  .logo-text h2 {
+    @apply text-base;
+  }
+
+  .logo-text p {
+    @apply text-xs;
+  }
+
+  .tab-button {
+    @apply py-2 px-3 text-xs;
+    min-height: 40px;
+  }
+
+  .tab-icon {
+    @apply w-4 h-4;
+  }
+
+  .tab-icon svg {
+    @apply w-4 h-4;
+  }
+
+  .filter-section-scrollable {
+    @apply p-3 space-y-3;
+  }
+
+  .form-group {
+    @apply space-y-1;
+  }
+
+  .form-label {
+    @apply text-xs;
+  }
+
+  .form-select {
+    @apply px-2 py-1.5 text-sm;
+  }
+
+  .apply-button {
+    @apply py-2 px-3 text-sm;
+  }
+
+  .settings-content,
+  .tools-content {
+    @apply space-y-3;
+  }
+
+  .settings-content h3,
+  .tools-content h3 {
+    @apply text-base mb-3;
+  }
+
+  .tool-button {
+    @apply p-2 space-x-2;
+  }
+
+  .tool-button-small {
+    @apply p-2 text-xs;
+  }
+
+  .section-title {
+    @apply text-sm mb-2;
+  }
+
+  .boundary-toggle-item {
+    @apply p-3;
+  }
+
+  .boundary-label {
+    @apply text-xs;
+  }
+
+  .boundary-description {
+    @apply text-xs;
+  }
+
+  .filter-button-fixed {
+    @apply p-3;
+  }
 }
 
 @media (min-width: 768px) {

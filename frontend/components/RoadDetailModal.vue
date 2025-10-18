@@ -172,36 +172,56 @@
                       <label
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
-                        Kondisi
+                        Kondisi Material
                       </label>
                       <select
                         v-model="editForm.kondisi"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                       >
-                        <option value="">Pilih Kondisi</option>
-                        <option value="Baik">Baik</option>
-                        <option value="Sedang">Sedang</option>
-                        <option value="Rusak Ringan">Rusak Ringan</option>
-                        <option value="Rusak Berat">Rusak Berat</option>
+                        <option
+                          v-for="kondisi in kondisiOptions"
+                          :key="kondisi"
+                          :value="kondisi"
+                        >
+                          {{ kondisi }}
+                        </option>
                       </select>
                     </div>
                     <div>
                       <label
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
-                        Keterangan
+                        Keterangan Kondisi
                       </label>
-                      <input
+                      <select
                         v-model="editForm.keterangan"
-                        type="text"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      />
+                      >
+                        <option
+                          v-for="keterangan in keteranganOptions"
+                          :key="keterangan"
+                          :value="keterangan"
+                        >
+                          {{ keterangan }}
+                        </option>
+                      </select>
                     </div>
+                  </div>
+                </div>
+
+                <!-- Dokumentasi Section -->
+                <div>
+                  <h4
+                    class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                  >
+                    Dokumentasi
+                  </h4>
+                  <div class="grid grid-cols-1 gap-4">
                     <div>
                       <label
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
-                        Dokumentasi (Link YouTube)
+                        Link YouTube
                       </label>
                       <input
                         v-model="editForm.dokumentasi"
@@ -583,7 +603,7 @@
                       <label
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
-                        Keterangan
+                        Keterangan Kondisi
                       </label>
                       <span
                         v-if="road.Keterangan || road.keterangan"
@@ -602,30 +622,7 @@
                       <label
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
-                        Dokumentasi
-                      </label>
-                      <div v-if="road.dokumentasi" class="mt-2">
-                        <div
-                          class="w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
-                        >
-                          <iframe
-                            :src="getYouTubeEmbedUrl(road.dokumentasi)"
-                            class="w-full h-48"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen
-                          ></iframe>
-                        </div>
-                      </div>
-                      <span v-else class="text-gray-500 dark:text-gray-400"
-                        >Tidak ada dokumentasi</span
-                      >
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                      >
-                        Kondisi
+                        Kondisi Material
                       </label>
                       <span
                         v-if="road.Kondisi || road.kondisi"
@@ -637,6 +634,79 @@
                       <span v-else class="text-gray-500 dark:text-gray-400"
                         >-</span
                       >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Dokumentasi Section -->
+                <div>
+                  <h4
+                    class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                  >
+                    Dokumentasi
+                  </h4>
+                  <div class="grid grid-cols-1 gap-4">
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Video Dokumentasi
+                      </label>
+                      <div v-if="road.dokumentasi" class="mt-2">
+                        <a
+                          :href="getYouTubeEmbedUrl(road.dokumentasi)"
+                          :data-fancybox="`youtube-${road.id || 'video'}`"
+                          :data-caption="`Video Dokumentasi - ${
+                            road.namaJalan || road.nama || 'Jalan'
+                          }`"
+                          class="block w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer"
+                          @click.prevent="openYouTubeFancybox(road.dokumentasi)"
+                        >
+                          <div class="relative">
+                            <img
+                              :src="getYouTubeThumbnail(road.dokumentasi)"
+                              :alt="'Thumbnail untuk ' + road.dokumentasi"
+                              class="w-full h-48 object-cover"
+                              @error="
+                                $event.target.src =
+                                  '/images/placeholder-video.jpg'
+                              "
+                            />
+                            <div
+                              class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 hover:bg-opacity-50 transition-all duration-200"
+                            >
+                              <div
+                                class="bg-red-600 rounded-full p-4 hover:bg-red-700 transition-colors duration-200"
+                              >
+                                <svg
+                                  class="w-8 h-8 text-white"
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        </a>
+                        <div class="mt-2">
+                          <p class="text-sm text-gray-600 dark:text-gray-400">
+                            <strong>Link YouTube:</strong>
+                            <a
+                              :href="road.dokumentasi"
+                              target="_blank"
+                              class="text-blue-600 dark:text-blue-400 hover:underline break-all"
+                            >
+                              {{ road.dokumentasi }}
+                            </a>
+                          </p>
+                        </div>
+                      </div>
+                      <div v-else class="mt-2">
+                        <p class="text-gray-500 dark:text-gray-400">
+                          Dokumentasi belum tersedia
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -899,6 +969,22 @@
                       </label>
                       <p class="text-gray-900 dark:text-white">
                         {{ road.Pngnl_Akhi || road.pngnlAkhi || "-" }}
+                      </p>
+                    </div>
+                    <div v-if="road.dokumentasi" class="md:col-span-2">
+                      <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Dokumentasi
+                      </label>
+                      <p class="text-gray-900 dark:text-white">
+                        <a
+                          :href="road.dokumentasi"
+                          target="_blank"
+                          class="text-blue-600 dark:text-blue-400 hover:underline break-all"
+                        >
+                          {{ road.dokumentasi }}
+                        </a>
                       </p>
                     </div>
                   </div>
@@ -1211,6 +1297,47 @@ const extractYouTubeVideoId = (url) => {
   return match && match[2].length === 11 ? match[2] : null;
 };
 
+const getYouTubeThumbnail = (url) => {
+  const videoId = extractYouTubeVideoId(url);
+  return videoId
+    ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+    : null;
+};
+
+const openYouTubeFancybox = (url) => {
+  if (typeof window !== "undefined" && window.Fancybox) {
+    const videoUrl = getYouTubeEmbedUrl(url);
+    const videoTitle = `Video Dokumentasi - ${
+      props.road?.namaJalan || props.road?.nama || "Jalan"
+    }`;
+
+    window.Fancybox.show(
+      [
+        {
+          src: videoUrl,
+          type: "iframe",
+          caption: videoTitle,
+        },
+      ],
+      {
+        Toolbar: {
+          display: {
+            left: ["infobar"],
+            middle: [],
+            right: ["close"],
+          },
+        },
+        closeButton: "top",
+        click: "close",
+        wheel: "close",
+        keyboard: {
+          Escape: "close",
+        },
+      }
+    );
+  }
+};
+
 // Refs
 const mapContainer = ref(null);
 const mapLoading = ref(false);
@@ -1245,6 +1372,10 @@ const editForm = ref({
   pngnlAkhi: "",
   geoJSON: "",
 });
+
+// API data for selectboxes
+const kondisiOptions = ref([]);
+const keteranganOptions = ref([]);
 
 // Map variables
 let map = null;
@@ -1302,6 +1433,40 @@ const basemapOptions = [
 
 const closeModal = () => {
   emit("close");
+};
+
+// Fetch options from API
+const fetchKondisiOptions = async () => {
+  try {
+    const config = useRuntimeConfig();
+    const API_BASE = config.public.apiBaseUrl || "http://localhost:3001";
+    const response = await fetch(`${API_BASE}/api/jalan/filters/kondisi`);
+    const data = await response.json();
+
+    if (data.success) {
+      kondisiOptions.value = data.data;
+    }
+  } catch (error) {
+    console.error("Error fetching kondisi options:", error);
+  }
+};
+
+const fetchKeteranganOptions = async () => {
+  try {
+    const config = useRuntimeConfig();
+    const API_BASE = config.public.apiBaseUrl || "http://localhost:3001";
+    const response = await fetch(`${API_BASE}/api/jalan/stats/keterangan`);
+    const data = await response.json();
+
+    if (data.success) {
+      // Extract keterangan values from stats data
+      keteranganOptions.value = data.data
+        .map((item) => item.keterangan)
+        .filter(Boolean);
+    }
+  } catch (error) {
+    console.error("Error fetching keterangan options:", error);
+  }
 };
 
 // Edit mode functions
@@ -2450,6 +2615,9 @@ watch(
     if (newVal) {
       await nextTick();
       initMap();
+      // Fetch options when modal opens
+      fetchKondisiOptions();
+      fetchKeteranganOptions();
     } else {
       destroyMap();
     }

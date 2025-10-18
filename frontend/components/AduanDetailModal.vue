@@ -788,6 +788,12 @@ const loadAllMapData = async (
   roadsLayer
 ) => {
   try {
+    // Ensure road info is loaded first
+    if (!roadInfo.value) {
+      console.log("Road info not loaded, loading now...");
+      await loadRoadInfo();
+    }
+
     // Load roads data
     const config = useRuntimeConfig();
     const API_BASE = config.public.apiBaseUrl || "http://localhost:3001";
@@ -1536,9 +1542,7 @@ const loadRelevantBoundaries = async (
   batasKecamatanLayer,
   batasDesaLayer
 ) => {
-  if (!roadInfo.value) return;
-
-  console.log("=== LOADING BOUNDARIES FOR ROAD ===");
+  console.log("=== LOADING BOUNDARIES FOR ADUAN ===");
   console.log("Road info:", roadInfo.value);
 
   // Always load kabupaten boundary first (Kubu Raya)
@@ -1551,7 +1555,11 @@ const loadRelevantBoundaries = async (
   console.log("Kabupaten layer forced visible:", batasKabupatenLayer.visible);
 
   // Load ONLY the specific kecamatan from the road data
-  if (roadInfo.value.kecamatan) {
+  if (
+    roadInfo.value &&
+    roadInfo.value.kecamatan &&
+    roadInfo.value.kecamatan !== "-"
+  ) {
     console.log("Loading kecamatan boundary for:", roadInfo.value.kecamatan);
     await filterAndDisplayBatasKecamatan(
       roadInfo.value.kecamatan,
@@ -1563,12 +1571,18 @@ const loadRelevantBoundaries = async (
       "Kabupaten layer kept visible after kecamatan load:",
       batasKabupatenLayer.visible
     );
+  } else {
+    console.log("No kecamatan data available, hiding kecamatan layer");
+    batasKecamatanLayer.visible = false;
   }
 
   // Load ONLY the specific desa from the road data
-  if (roadInfo.value.desa) {
+  if (roadInfo.value && roadInfo.value.desa && roadInfo.value.desa !== "-") {
     console.log("Loading desa boundary for:", roadInfo.value.desa);
     await filterAndDisplayBatasDesa(roadInfo.value.desa, batasDesaLayer);
+  } else {
+    console.log("No desa data available, hiding desa layer");
+    batasDesaLayer.visible = false;
   }
 };
 

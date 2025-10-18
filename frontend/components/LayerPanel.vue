@@ -316,6 +316,11 @@ const emit = defineEmits([
 const { isAuthenticated, canAccessLayers, canEditData } = useAuth();
 const toast = useToast();
 
+// Mobile detection
+const isMobile = () => {
+  return window.innerWidth <= 768;
+};
+
 // Mock data for layers - can be replaced with API calls later
 const availableDatasets = ref([]);
 const loadedLayers = ref(new Map());
@@ -608,6 +613,11 @@ const layerGroups = reactive([
 // Methods
 const changeBasemap = (basemapId) => {
   emit("basemap-changed", basemapId);
+
+  // Close sidebar on mobile after changing basemap
+  if (isMobile()) {
+    emit("close");
+  }
 };
 
 const toggleGroup = (groupId) => {

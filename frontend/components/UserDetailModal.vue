@@ -127,18 +127,6 @@
                       <label
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
-                        ID User
-                      </label>
-                      <p
-                        class="text-gray-900 dark:text-white font-mono bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg"
-                      >
-                        {{ user.id }}
-                      </p>
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                      >
                         Status
                       </label>
                       <span
