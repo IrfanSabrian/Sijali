@@ -29,21 +29,27 @@ let transporter = null;
 if (process.env.SMTP_USER && process.env.SMTP_PASS) {
   transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 465),
-    secure: String(process.env.SMTP_SECURE || "true").toLowerCase() === "true",
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: String(process.env.SMTP_SECURE || "false").toLowerCase() === "true",
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
-    debug: true, // Enable debug output
-    logger: true, // Log information to console
+    debug: false, // Disable debug output for production
+    logger: false, // Disable logger for production
+    connectionTimeout: 60000, // 60 seconds
+    greetingTimeout: 30000, // 30 seconds
+    socketTimeout: 60000, // 60 seconds
+    tls: {
+      rejectUnauthorized: false, // Allow self-signed certificates
+    },
   });
   console.log("✅ Email transporter configured:", process.env.SMTP_USER);
 } else {
   console.warn("⚠️  SMTP not configured - emails will not be sent");
 }
 
-const sendStatusEmail = async ({ to, nomorRuas, status, description }) => {
+const sendStatusEmail = async ({ to, nomorRuas, status, description }, retryCount = 0) => {
   if (!to) {
     console.warn("⚠️  No recipient email provided");
     return;
@@ -245,9 +251,11 @@ try {
   storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: (req, file) => {
-      const nomorRuas = req.body.nomor_ruas || 'unknown';
+      const nomorRuas = req.body.nomor_ruas || "unknown";
       return {
-        folder: `${process.env.CLOUDINARY_FOLDER || "SIJALI"}/aduan/${nomorRuas}`,
+        folder: `${
+          process.env.CLOUDINARY_FOLDER || "SIJALI"
+        }/aduan/${nomorRuas}`,
         allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
         transformation: [{ width: 1200, height: 1200, crop: "limit" }],
       };
@@ -369,17 +377,21 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
 
     console.log("Database insert result:", created);
 
-    // Kirim email status "diajukan" ke pelapor bila ada email
-    try {
-      await sendStatusEmail({
-        to: email,
-        nomorRuas: nomorRuas,
-        status: "diajukan",
-        description,
+    // Kirim email status "diajukan" ke pelapor bila ada email (async, tidak memblokir response)
+    if (email) {
+      setImmediate(async () => {
+        try {
+          await sendStatusEmail({
+            to: email,
+            nomorRuas: nomorRuas,
+            status: "diajukan",
+            description,
+          });
+        } catch (emailError) {
+          console.error("Error sending status email:", emailError);
+          // Continue even if email fails
+        }
       });
-    } catch (emailError) {
-      console.error("Error sending status email:", emailError);
-      // Continue even if email fails
     }
 
     return res.json({ success: true, data: serializeBigInt(created) });
@@ -427,16 +439,21 @@ router.patch("/:id/status", async (req, res) => {
         .json({ success: false, error: "Aduan tidak ditemukan" });
     }
 
-    try {
-      await sendStatusEmail({
-        to: updated.email,
-        nomorRuas: updated.nomor_ruas,
-        status,
-        description: description || updated.description,
+    // Kirim email notifikasi (async, tidak memblokir response)
+    if (updated.email) {
+      setImmediate(async () => {
+        try {
+          await sendStatusEmail({
+            to: updated.email,
+            nomorRuas: updated.nomor_ruas,
+            status,
+            description: description || updated.description,
+          });
+        } catch (emailError) {
+          console.error("Error sending status email:", emailError);
+          // Continue even if email fails
+        }
       });
-    } catch (emailError) {
-      console.error("Error sending status email:", emailError);
-      // Continue even if email fails
     }
 
     return res.json({ success: true, data: serializeBigInt(updated) });

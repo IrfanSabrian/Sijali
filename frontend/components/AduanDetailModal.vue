@@ -154,14 +154,14 @@
                   <a
                     v-for="(photo, idx) in aduan.photos"
                     :key="idx"
-                    :href="`/aduan/${aduan.nomor_ruas}/${photo}`"
+                    :href="photo"
                     :data-fancybox="`gallery-${aduan.id}`"
                     :data-caption="`Foto ${idx + 1} - Aduan #${aduan.id}`"
                     class="block"
                     @click.prevent="openFancybox(photo, idx)"
                   >
                     <img
-                      :src="`/aduan/${aduan.nomor_ruas}/${photo}`"
+                      :src="photo"
                       :alt="`Foto ${idx + 1}`"
                       class="w-full h-32 object-cover rounded border border-gray-300 dark:border-gray-600 cursor-pointer hover:opacity-80 transition-opacity"
                     />
@@ -1327,15 +1327,15 @@ const filterAndDisplayBatasKecamatan = async (
     console.log(
       "Available kecamatan in GeoJSON:",
       districtData.features.slice(0, 3).map((f) => ({
-        nama_kecamatan: f.properties.nama_kecamatan,
-        nama_kabupaten: f.properties.nama_kabupaten,
+        WADMKC: f.properties.WADMKC,
+        NAMOBJ: f.properties.NAMOBJ,
         allProps: Object.keys(f.properties),
       }))
     );
 
     // Filter features by kecamatan name (same as homepage)
     const filteredFeatures = districtData.features.filter(
-      (feature) => feature.properties.nama_kecamatan === kecamatanName
+      (feature) => feature.properties.WADMKC === kecamatanName
     );
 
     if (filteredFeatures.length === 0) {
@@ -1345,13 +1345,13 @@ const filterAndDisplayBatasKecamatan = async (
       // Try alternative search methods
       const alternativeFeatures = districtData.features.filter(
         (feature) =>
-          feature.properties.nama_kecamatan === kecamatanName ||
-          feature.properties.nama_kecamatan?.toLowerCase() ===
+          feature.properties.NAMOBJ === kecamatanName ||
+          feature.properties.WADMKC?.toLowerCase() ===
             kecamatanName?.toLowerCase() ||
-          feature.properties.nama_kabupaten?.toLowerCase() ===
+          feature.properties.NAMOBJ?.toLowerCase() ===
             kecamatanName?.toLowerCase() ||
-          feature.properties.nama_kecamatan?.includes(kecamatanName) ||
-          feature.properties.nama_kabupaten?.includes(kecamatanName)
+          feature.properties.WADMKC?.includes(kecamatanName) ||
+          feature.properties.NAMOBJ?.includes(kecamatanName)
       );
 
       if (alternativeFeatures.length > 0) {
@@ -1447,15 +1447,15 @@ const filterAndDisplayBatasDesa = async (desaName, batasDesaLayer) => {
     console.log(
       "Available desa in GeoJSON:",
       villageData.features.slice(0, 3).map((f) => ({
-        nama_desa: f.properties.nama_desa,
-        nama_kecamatan: f.properties.nama_kecamatan,
+        WADMKD: f.properties.WADMKD,
+        NAMOBJ: f.properties.NAMOBJ,
         allProps: Object.keys(f.properties),
       }))
     );
 
     // Filter features by desa name (same as homepage)
     const filteredFeatures = villageData.features.filter(
-      (feature) => feature.properties.nama_desa === desaName
+      (feature) => feature.properties.WADMKD === desaName
     );
 
     if (filteredFeatures.length === 0) {
@@ -1465,13 +1465,13 @@ const filterAndDisplayBatasDesa = async (desaName, batasDesaLayer) => {
       // Try alternative search methods
       const alternativeFeatures = villageData.features.filter(
         (feature) =>
-          feature.properties.nama_desa === desaName ||
-          feature.properties.nama_desa?.toLowerCase() ===
+          feature.properties.NAMOBJ === desaName ||
+          feature.properties.WADMKD?.toLowerCase() ===
             desaName?.toLowerCase() ||
-          feature.properties.nama_kecamatan?.toLowerCase() ===
+          feature.properties.NAMOBJ?.toLowerCase() ===
             desaName?.toLowerCase() ||
-          feature.properties.nama_desa?.includes(desaName) ||
-          feature.properties.nama_kecamatan?.includes(desaName)
+          feature.properties.WADMKD?.includes(desaName) ||
+          feature.properties.NAMOBJ?.includes(desaName)
       );
 
       if (alternativeFeatures.length > 0) {
@@ -1669,7 +1669,7 @@ const destroyMap = () => {
 const openFancybox = (photo, index) => {
   if (typeof window !== "undefined" && window.Fancybox) {
     const photos = props.aduan.photos.map((p, idx) => ({
-      src: `/aduan/${props.aduan.nomor_ruas}/${p}`,
+      src: p,
       caption: `Foto ${idx + 1} - Aduan #${props.aduan.id}`,
     }));
 

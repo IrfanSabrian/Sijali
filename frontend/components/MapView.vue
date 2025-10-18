@@ -84,8 +84,12 @@
             <div
               class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"
             ></div>
-            <p class="text-gray-600 dark:text-gray-400">Memuat peta dan data batas wilayah...</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Mohon tunggu sebentar</p>
+            <p class="text-gray-600 dark:text-gray-400">
+              Memuat peta dan data batas wilayah...
+            </p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              Mohon tunggu sebentar
+            </p>
           </div>
         </div>
 
@@ -2509,10 +2513,10 @@ const submitAduan = async () => {
     toast.warning("Email wajib diisi");
     return;
   }
-  
+
   console.log("Starting aduan submission...");
   submitLoading.value = true;
-  
+
   try {
     console.log("Calling postAduan with data:", {
       nomorRuas: aduanForm.nomorRuas,
@@ -2522,7 +2526,7 @@ const submitAduan = async () => {
       email: aduanForm.email,
       filesCount: aduanForm.files.length,
     });
-    
+
     const resp = await postAduan({
       nomorRuas: aduanForm.nomorRuas,
       namaPelapor: aduanForm.namaPelapor,
@@ -2531,19 +2535,19 @@ const submitAduan = async () => {
       email: aduanForm.email,
       files: aduanForm.files,
     });
-    
+
     console.log("postAduan response:", resp);
-    
+
     if (!resp.success) {
       throw new Error(resp.error || "Gagal mengirim aduan");
     }
-    
+
     console.log("Aduan submitted successfully, showing success toast...");
     toast.success(
       "Aduan berhasil terkirim! Aduan Anda akan segera diproses. Terima kasih telah melapor.",
       5000
     );
-    
+
     // Close modal and reset form
     aduanModalVisible.value = false;
     aduanForm.namaPelapor = "";
@@ -2551,7 +2555,7 @@ const submitAduan = async () => {
     aduanForm.keterangan = "";
     aduanForm.email = "";
     aduanForm.files = [];
-    
+
     console.log("Form reset and modal closed");
   } catch (e) {
     console.error("Error in submitAduan:", e);

@@ -199,7 +199,7 @@ export const useApiService = () => {
   }) => {
     try {
       console.log("postAduan: Starting request...");
-      
+
       const form = new FormData();
       form.append("nomor_ruas", nomorRuas || "");
       if (namaPelapor) form.append("nama_pelapor", namaPelapor);
@@ -232,7 +232,7 @@ export const useApiService = () => {
         message: error.message,
         status: error.status,
         statusText: error.statusText,
-        data: error.data
+        data: error.data,
       });
       return { success: false, error: error.message || "Gagal mengirim aduan" };
     }
