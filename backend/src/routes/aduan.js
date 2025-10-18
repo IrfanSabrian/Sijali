@@ -7,7 +7,7 @@ const { PrismaClient, Prisma } = require("@prisma/client");
 const nodemailer = require("nodemailer");
 const cloudinary = require("../config/cloudinary");
 
-// SendGrid as alternative email service
+// SendGrid as primary email service
 let sendGridAvailable = false;
 let sendGridMail = null;
 if (process.env.SENDGRID_API_KEY) {
@@ -15,7 +15,7 @@ if (process.env.SENDGRID_API_KEY) {
     sendGridMail = require("@sendgrid/mail");
     sendGridMail.setApiKey(process.env.SENDGRID_API_KEY);
     sendGridAvailable = true;
-    console.log("✅ SendGrid configured as alternative email service");
+    console.log("✅ SendGrid configured as primary email service");
   } catch (error) {
     console.warn("⚠️  SendGrid not available:", error.message);
     sendGridAvailable = false;
@@ -403,8 +403,14 @@ const sendStatusEmail = async (
       })`
     );
 
-    // Try SMTP first if available
-    if (transporter) {
+    // Try SendGrid first if available (more reliable for Railway)
+    if (sendGridAvailable) {
+      console.log(`📧 Using SendGrid as primary email service`);
+      const result = await sendEmailViaSendGrid(to, subject, html);
+      return result;
+    }
+    // Fallback to SMTP if SendGrid not available
+    else if (transporter) {
       console.log(
         `📧 Using SMTP transporter config: ${transporterConfig || "unknown"}`
       );
@@ -428,12 +434,6 @@ const sendStatusEmail = async (
         `✅ Email sent successfully via SMTP! MessageId: ${info.messageId}`
       );
       return { success: true, messageId: info.messageId };
-    }
-    // Fallback to SendGrid if SMTP not available
-    else if (sendGridAvailable) {
-      console.log(`📧 Using SendGrid as fallback`);
-      const result = await sendEmailViaSendGrid(to, subject, html);
-      return result;
     } else {
       throw new Error("No email service available");
     }
@@ -470,17 +470,23 @@ const sendStatusEmail = async (
       );
     }
 
-    // If SMTP failed and SendGrid is available, try SendGrid as last resort
-    if (transporter && sendGridAvailable && retryCount === 0) {
-      console.log("🔄 SMTP failed, trying SendGrid as fallback...");
+    // If SendGrid failed and SMTP is available, try SMTP as fallback
+    if (sendGridAvailable && transporter && retryCount === 0) {
+      console.log("🔄 SendGrid failed, trying SMTP as fallback...");
       try {
-        const result = await sendEmailViaSendGrid(to, subject, html);
-        return result;
-      } catch (sendGridError) {
-        console.error(
-          "❌ SendGrid fallback also failed:",
-          sendGridError.message
+        const mailOptions = {
+          from: process.env.SMTP_FROM || process.env.SMTP_USER,
+          to,
+          subject,
+          html,
+        };
+        const info = await transporter.sendMail(mailOptions);
+        console.log(
+          `✅ Email sent successfully via SMTP fallback! MessageId: ${info.messageId}`
         );
+        return { success: true, messageId: info.messageId };
+      } catch (smtpError) {
+        console.error("❌ SMTP fallback also failed:", smtpError.message);
       }
     }
 
@@ -640,7 +646,7 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
     console.log("Database insert result:", created);
 
     // Kirim email status "diajukan" ke pelapor bila ada email (async, tidak memblokir response)
-    if (email) {
+    if (email && (transporter || sendGridAvailable)) {
       setImmediate(async () => {
         try {
           await sendStatusEmail({
@@ -654,6 +660,10 @@ router.post("/", upload.array("photos", 10), async (req, res) => {
           // Continue even if email fails
         }
       });
+    } else if (email) {
+      console.log(
+        "📧 Email service not available, skipping email notification"
+      );
     }
 
     return res.json({ success: true, data: serializeBigInt(created) });
@@ -702,7 +712,7 @@ router.patch("/:id/status", async (req, res) => {
     }
 
     // Kirim email notifikasi (async, tidak memblokir response)
-    if (updated.email) {
+    if (updated.email && (transporter || sendGridAvailable)) {
       setImmediate(async () => {
         try {
           await sendStatusEmail({
@@ -716,6 +726,10 @@ router.patch("/:id/status", async (req, res) => {
           // Continue even if email fails
         }
       });
+    } else if (updated.email) {
+      console.log(
+        "📧 Email service not available, skipping email notification"
+      );
     }
 
     return res.json({ success: true, data: serializeBigInt(updated) });
