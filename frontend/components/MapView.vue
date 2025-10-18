@@ -1232,13 +1232,14 @@ const addRoadsToMap = async (geoJSON) => {
   }
 };
 
-// Load Batas Kabupaten GeoJSON - store data without displaying
+// Load Batas Kabupaten GeoJSON - ONLY for boundary visualization on map
+// NOT for statistics or data analysis - use API for that
 const loadBatasKabupaten = async () => {
   try {
     const response = await fetch("/geojson/Batas Kabupaten Kubu Raya.geojson");
     batasKabupatenGeoJSON = await response.json();
     console.log(
-      `Loaded ${batasKabupatenGeoJSON.features.length} kabupaten boundaries data`
+      `Loaded ${batasKabupatenGeoJSON.features.length} kabupaten boundaries for map visualization`
     );
   } catch (error) {
     console.error("Error loading batas kabupaten:", error);
@@ -1306,13 +1307,14 @@ const displayBatasKabupaten = async () => {
   }
 };
 
-// Load Batas Kecamatan GeoJSON - store data without displaying
+// Load Batas Kecamatan GeoJSON - ONLY for boundary visualization on map
+// NOT for statistics or data analysis - use API for that
 const loadBatasKecamatan = async () => {
   try {
     const response = await fetch("/geojson/Batas Kecamatan Kubu Raya.geojson");
     batasKecamatanGeoJSON = await response.json();
     console.log(
-      `Loaded ${batasKecamatanGeoJSON.features.length} kecamatan boundaries data`
+      `Loaded ${batasKecamatanGeoJSON.features.length} kecamatan boundaries for map visualization`
     );
   } catch (error) {
     console.error("Error loading batas kecamatan:", error);
@@ -1417,7 +1419,7 @@ const filterAndDisplayBatasKecamatan = async (kecamatanName) => {
 
     // Filter features by kecamatan name
     const filteredFeatures = batasKecamatanGeoJSON.features.filter(
-      (feature) => feature.properties.WADMKC === kecamatanName
+      (feature) => feature.properties.nama_kecamatan === kecamatanName
     );
 
     if (filteredFeatures.length === 0) {
@@ -1475,13 +1477,14 @@ const filterAndDisplayBatasKecamatan = async (kecamatanName) => {
   }
 };
 
-// Load Batas Desa GeoJSON - store data without displaying
+// Load Batas Desa GeoJSON - ONLY for boundary visualization on map
+// NOT for statistics or data analysis - use API for that
 const loadBatasDesa = async () => {
   try {
     const response = await fetch("/geojson/Batas Desa Kubu Raya.geojson");
     batasDesaGeoJSON = await response.json();
     console.log(
-      `Loaded ${batasDesaGeoJSON.features.length} desa boundaries data`
+      `Loaded ${batasDesaGeoJSON.features.length} desa boundaries for map visualization`
     );
   } catch (error) {
     console.error("Error loading batas desa:", error);
@@ -1513,7 +1516,7 @@ const filterAndDisplayBatasDesa = async (desaName) => {
 
     // Filter features by desa name
     const filteredFeatures = batasDesaGeoJSON.features.filter(
-      (feature) => feature.properties.WADMKD === desaName
+      (feature) => feature.properties.nama_desa === desaName
     );
 
     if (filteredFeatures.length === 0) {
@@ -1826,7 +1829,8 @@ onMounted(async () => {
 
     console.log("Map loaded successfully");
 
-    // Load boundary GeoJSON data first (before roads)
+    // Load boundary GeoJSON data for map visualization only (NOT for statistics)
+    // Statistics should come from API backend
     await loadBatasKabupaten();
     await loadBatasKecamatan();
     await loadBatasDesa();
